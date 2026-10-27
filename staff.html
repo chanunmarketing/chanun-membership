@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>CHANUN Staff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+  .wrap { max-width: 640px; }
+  .bar-top { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--line); margin-bottom: 18px; }
+  .bar-top img { height: 34px; }
+  .who { font-size: 13px; color: var(--ink-2); text-align: right; }
+  .login { max-width: 360px; margin: 10vh auto 0; }
+  .login img { width: 92px; display: block; margin: 0 auto 18px; }
+  .search { display: flex; gap: 8px; }
+  .search .input { flex: 1; }
+  .result { display: flex; justify-content: space-between; align-items: center; width: 100%; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--white); margin-top: 8px; }
+  .result:hover { border-color: var(--blue); }
+  .mhead { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+  .mname { font-size: 19px; font-weight: 500; line-height: 1.3; }
+  .tier-chip { font-family: 'Jost'; letter-spacing: .18em; font-size: 12px; padding: 5px 12px; border-radius: 999px; color: #fff; white-space: nowrap; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+  .kpi { background: var(--paper); border-radius: 10px; padding: 12px; }
+  .kpi .v { font-family: 'Jost'; font-size: 26px; font-weight: 300; color: var(--blue); line-height: 1.1; }
+  .kpi .v.disc { color: var(--turquoise); }
+  .avail { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--white); margin: 20px 0 14px; }
+  .seg button { flex: 1; border: 0; background: transparent; border-radius: 999px; padding: 9px 0; font-size: 14px; color: var(--ink-2); }
+  .seg button[aria-selected="true"] { background: var(--blue); color: #fff; }
+  .preview { background: var(--paper); border-radius: 10px; padding: 10px 12px; font-size: 14px; margin-bottom: 12px; }
+  .rw { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 0; }
+  .rw + .rw { border-top: 1px solid var(--line); }
+  .rw .n { flex: 1; min-width: 0; }
+  .confirm { border: 1px solid var(--blue); border-radius: 12px; padding: 14px; margin-top: 10px; background: #F4F6FA; }
+  .banner { background: var(--blue); color: #fff; border-radius: 12px; padding: 14px 16px; margin-top: 14px; }
+  .hist { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; }
+  .hist + .hist { border-top: 1px solid var(--line); }
+  .plus { color: var(--ok); } .minus { color: var(--err); }
+  #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-top: 10px; }
+  .demo-flag { position: fixed; bottom: 12px; left: 12px; z-index: 60; }
+</style>
+</head>
+<body>
+<!-- ============ Login ============ -->
+<main id="v-login" class="wrap">
+  <div class="login panel">
+    <img src="logo_blue.png" alt="CHANUN">
+    <div class="eyebrow en" style="text-align:center;margin-bottom:18px">Staff · Membership</div>
+    <form id="login-form">
+      <label class="field"><span>ชื่อพนักงาน (บันทึกในประวัติ)</span><input class="input" id="staff-name" maxlength="40" required></label>
+      <label class="field"><span>PIN</span><input class="input" id="pin" type="password" inputmode="numeric" autocomplete="off" required></label>
+      <p id="login-err" class="small" style="color:var(--err);min-height:1em;margin:0 0 10px"></p>
+      <button class="btn block" type="submit" id="login-btn">เข้าสู่ระบบ</button>
+    </form>
+  </div>
+</main>
+
+<!-- ============ Main ============ -->
+<main id="v-main" class="wrap hidden">
+  <div class="bar-top">
+    <img src="logo_blue.png" alt="CHANUN">
+    <div class="who"><div id="who"></div><button class="btn ghost sm" id="logout" style="margin-top:4px">ออกจากระบบ</button></div>
+  </div>
+
+  <form class="search" id="search-form">
+    <input class="input" id="q" placeholder="รหัสสมาชิก / เบอร์ 4 ตัวท้าย / ชื่อ / HN" autocomplete="off">
+    <button class="btn" type="submit">ค้นหา</button>
+    <button class="btn ghost" type="button" id="scan-btn" aria-label="สแกน QR">สแกน</button>
+  </form>
+  <div id="reader" class="hidden"></div>
+  <div id="results"></div>
+
+  <section id="member" class="hidden" style="margin-top:20px">
+    <div class="panel">
+      <div class="mhead">
+        <div>
+          <div class="mname" id="m-name"></div>
+          <div class="small muted"><span id="m-code"></span> · <span id="m-phone"></span> · HN <span id="m-hn"></span></div>
+        </div>
+        <span class="tier-chip" id="m-tier"></span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="xs muted">ส่วนลดบริการ</div><div class="v disc" id="m-disc"></div></div>
+        <div class="kpi"><div class="xs muted">ดาวคงเหลือ</div><div class="v num" id="m-bal"></div></div>
+        <div class="kpi"><div class="xs muted">ยอด 12 เดือน</div><div class="v num" id="m-roll" style="font-size:20px"></div></div>
+      </div>
+      <div class="avail" id="m-avail"></div>
+      <div class="xs muted" style="margin-top:10px" id="m-next"></div>
+      <div class="xs" style="margin-top:6px;color:var(--warn)" id="m-note"></div>
+    </div>
+    <div id="banner"></div>
+
+    <div class="seg" role="tablist">
+      <button data-p="buy" aria-selected="true">บันทึกยอดซื้อ</button>
+      <button data-p="redeem" aria-selected="false">แลกรางวัล</button>
+      <button data-p="adjust" aria-selected="false">ปรับดาว</button>
+    </div>
+
+    <form id="p-buy" class="panel">
+      <label class="field"><span>ยอดชำระจริงหลังส่วนลด (บาท) — คืนเงินใส่ติดลบ</span><input class="input num" id="amount" inputmode="decimal" autocomplete="off" required></label>
+      <label class="field"><span>เลขใบเสร็จ (จาก APSX)</span><input class="input" id="receipt" autocomplete="off" required maxlength="40"></label>
+      <label class="field"><span>หมายเหตุ <span class="muted">(ห้ามใส่ชื่อหัตถการ/อาการ)</span></span><input class="input" id="note" maxlength="120"></label>
+      <div class="preview hidden" id="buy-preview"></div>
+      <button class="btn block" type="submit" id="buy-btn">บันทึก</button>
+    </form>
+
+    <div id="p-redeem" class="panel hidden">
+      <div id="rw-list"></div>
+      <div id="rw-confirm"></div>
+    </div>
+
+    <form id="p-adjust" class="panel hidden">
+      <p class="small muted" style="margin-top:0">ใช้เฉพาะกรณีพิเศษ เช่น ยกยอดจากระบบเดิม หรือชดเชย — ดาวพิเศษไม่นับเข้าระดับ</p>
+      <label class="field"><span>จำนวนดาว (ติดลบได้)</span><input class="input num" id="adj-stars" inputmode="numeric" required></label>
+      <label class="field"><span>เหตุผล</span><input class="input" id="adj-note" required maxlength="120"></label>
+      <button class="btn block" type="submit" id="adj-btn">บันทึกการปรับดาว</button>
+    </form>
+
+    <div class="section"><div class="eyebrow" style="margin-bottom:8px">ประวัติ</div><div class="panel" id="m-hist" style="padding-top:6px;padding-bottom:6px"></div></div>
+  </section>
+</main>
+<div id="toast" class="toast"></div>
+
+<script src="config.js"></script>
+<script src="demo.js"></script>
+<script>
+(function () {
+  'use strict';
+  var CFG = window.CHANUN_CONFIG || {}, DEMO = !!window.CHANUN_DEMO;
+  var PIN = null, STAFF = '', cur = null, scanner = null;
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('th-TH'); }
+  function d(ymd) { if (!ymd) return ''; var p = ymd.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit', timeZone: 'Asia/Bangkok' }); }
+  function toast(m, err) { var t = $('toast'); t.textContent = m; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(t._h); t._h = setTimeout(function () { t.className = 'toast'; }, 3500); }
+  function isLight(hex) { var h = String(hex || '').replace('#', ''); if (h.length !== 6) return false; return (0.299 * parseInt(h.substr(0, 2), 16) + 0.587 * parseInt(h.substr(2, 2), 16) + 0.114 * parseInt(h.substr(4, 2), 16)) > 170; }
+  function busy(btn, on, label) { btn.disabled = on; if (on) { btn.dataset.l = btn.textContent; btn.textContent = 'กำลังบันทึก…'; } else btn.textContent = label || btn.dataset.l; }
+
+  function api(body) {
+    body.pin = PIN; body.staff = STAFF;
+    if (DEMO) return window.CHANUN_DEMO_API(body);
+    if (!CFG.API_URL || /ใส่/.test(CFG.API_URL)) return Promise.reject(new Error('ยังไม่ได้ตั้งค่า API_URL ใน config.js'));
+    return fetch(CFG.API_URL, { method: 'POST', body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (!j.ok) { var e = new Error(j.message); e.code = j.error; throw e; } return j.data; });
+  }
+  function onErr(e) {
+    toast(e.message || 'เกิดข้อผิดพลาด', true);
+    if (e.code === 'BAD_PIN' || e.code === 'LOCKED') logout();
+  }
+
+  if (DEMO) { document.body.insertAdjacentHTML('beforeend', '<span class="pill warn demo-flag">โหมดทดลอง · PIN 123456</span>'); }
+  try { $('staff-name').value = localStorage.getItem('chanun_staff') || ''; } catch (x) {}
+
+  /* ---------- login ---------- */
+  $('login-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    STAFF = $('staff-name').value.trim(); PIN = $('pin').value.trim();
+    if (!STAFF) { $('login-err').textContent = 'กรุณาใส่ชื่อพนักงาน'; return; }
+    var b = $('login-btn'); b.disabled = true;
+    api({ action: 'staff.login' }).then(function () {
+      try { localStorage.setItem('chanun_staff', STAFF); } catch (x) {}
+      $('pin').value = ''; $('login-err').textContent = '';
+      $('who').textContent = STAFF;
+      $('v-login').classList.add('hidden'); $('v-main').classList.remove('hidden');
+      $('q').focus();
+    }).catch(function (e) { $('login-err').textContent = e.message; PIN = null; }).then(function () { b.disabled = false; });
+  });
+  function logout() { PIN = null; cur = null; stopScan(); $('member').classList.add('hidden'); $('results').innerHTML = ''; $('v-main').classList.add('hidden'); $('v-login').classList.remove('hidden'); }
+  $('logout').addEventListener('click', logout);
+
+  /* ---------- search & scan ---------- */
+  $('search-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var q = $('q').value.trim(); if (!q) return;
+    var code = parseCode(q);
+    if (code) return openMember(code);
+    api({ action: 'staff.find', query: q }).then(function (r) {
+      if (r.results.length === 1) return openMember(r.results[0].code);
+      $('results').innerHTML = r.results.length ? r.results.map(function (m) {
+        return '<button class="result" data-code="' + esc(m.code) + '"><span><b>' + esc(m.name) + '</b>' + (m.nickname ? ' (' + esc(m.nickname) + ')' : '') + '<br><span class="xs muted">' + esc(m.code) + ' · xxx-' + esc(m.phoneLast4) + '</span></span><span class="xs muted">' + esc(m.status) + '</span></button>';
+      }).join('') : '<p class="small muted">ไม่พบสมาชิก</p>';
+    }).catch(onErr);
+  });
+  $('results').addEventListener('click', function (e) { var b = e.target.closest('.result'); if (b) openMember(b.dataset.code); });
+  function parseCode(s) { var m = String(s).toUpperCase().match(/(?:CHANUN-MEMBER:)?([A-Z]{1,4}\d{3,})$/); return m && /^[A-Z]{1,4}\d{3,}$/.test(m[1]) && !/^HN/.test(m[1]) ? m[1] : null; }
+
+  $('scan-btn').addEventListener('click', function () {
+    if (scanner) return stopScan();
+    var go = function () {
+      $('reader').classList.remove('hidden');
+      scanner = new Html5Qrcode('reader');
+      scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: 230 }, function (text) {
+        var code = parseCode(text); if (!code) return;
+        stopScan(); openMember(code);
+      }).catch(function (err) { toast('เปิดกล้องไม่ได้: ' + err, true); stopScan(); });
+    };
+    if (window.Html5Qrcode) return go();
+    var s = document.createElement('script');
+    s.src = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+    s.onload = go; s.onerror = function () { toast('โหลดตัวสแกนไม่สำเร็จ — พิมพ์รหัสแทน', true); };
+    document.head.appendChild(s);
+  });
+  function stopScan() { if (scanner) { var s = scanner; scanner = null; s.stop().catch(function () {}).then(function () { try { s.clear(); } catch (x) {} }); } $('reader').classList.add('hidden'); }
+
+  /* ---------- member ---------- */
+  function openMember(code) {
+    $('results').innerHTML = '';
+    api({ action: 'staff.member', code: code }).then(function (r) { $('banner').innerHTML = ''; render(r.view); }).catch(onErr);
+  }
+
+  function render(v) {
+    cur = v;
+    var t = v.tier;
+    $('member').classList.remove('hidden');
+    $('m-name').textContent = v.member.name + (v.member.nickname ? ' (' + v.member.nickname + ')' : '');
+    $('m-code').textContent = v.member.code;
+    $('m-phone').textContent = v.member.phone || '-';
+    $('m-hn').textContent = v.member.hn || '-';
+    var chip = $('m-tier'); chip.textContent = t.name + (v.overridden ? ' *' : '');
+    chip.style.background = t.color || '#182E56'; chip.style.color = isLight(t.color) ? '#161616' : '#fff';
+    chip.style.border = isLight(t.color) ? '1px solid #D9D3C9' : '0';
+    $('m-disc').textContent = Math.round((t.discount || 0) * 100) + '%';
+    $('m-bal').textContent = fmt(v.stars.balance);
+    $('m-roll').textContent = fmt(v.rolling.baht);
+    var av = [];
+    (v.welcome || []).forEach(function (w) { av.push('<span class="pill ok">Welcome ' + esc(w.tierName) + ': ' + esc(w.gift) + '</span>'); });
+    if (v.birthday && v.birthday.available) av.push('<span class="pill ok">เดือนเกิด: ' + esc(v.birthday.gift) + '</span>');
+    if (v.stars.expiring) av.push('<span class="pill warn">' + v.stars.expiring.stars + ' ดาวหมดอายุหลัง ' + esc(d(v.stars.expiring.lastDay)) + '</span>');
+    if (v.member.status === 'ระงับ') av.push('<span class="pill warn">บัญชีถูกระงับ</span>');
+    $('m-avail').innerHTML = av.join('');
+    $('m-next').textContent = v.next ? ('อีก ' + v.next.starsNeeded + ' ดาว (' + fmt(v.next.bahtNeeded) + ' บาท) ถึง ' + v.next.name + (v.tierUntil ? ' · ประเมินระดับใหม่ ' + d(v.tierUntil) : '')) : 'ระดับสูงสุด';
+    $('m-note').textContent = v.member.note || '';
+    renderRewards();
+    $('m-hist').innerHTML = v.history.length ? v.history.map(function (h) {
+      return '<div class="hist"><span><span class="xs muted">' + esc(d(h.date)) + '</span> ' + esc(h.label) + (h.amount ? ' · <span class="num">' + fmt(h.amount) + '</span>' : '') + '</span>' +
+        (h.stars ? '<span class="num ' + (h.stars > 0 ? 'plus' : 'minus') + '">' + (h.stars > 0 ? '+' : '') + h.stars + '</span>' : '') + '</div>';
+    }).join('') : '<p class="small muted">ยังไม่มีรายการ</p>';
+    updatePreview();
+  }
+
+  function renderRewards() {
+    var v = cur, items = [];
+    (v.welcome || []).forEach(function (w) { items.push({ code: w.code, name: 'Welcome ' + w.tierName + ': ' + w.gift, stars: 0, ok: true }); });
+    if (v.birthday && v.birthday.available) items.push({ code: 'BIRTHDAY', name: 'ของขวัญเดือนเกิด: ' + v.birthday.gift, stars: 0, ok: true });
+    v.rewards.forEach(function (r) { items.push({ code: r.code, name: r.name, stars: r.stars, ok: r.canRedeem, why: !r.tierOk ? 'สำหรับ ' + r.minTier + '+' : 'ดาวไม่พอ' }); });
+    $('rw-list').innerHTML = items.map(function (it) {
+      return '<div class="rw"><div class="n"><div>' + esc(it.name) + '</div><div class="xs muted">' + esc(it.code) + (it.stars ? ' · ' + it.stars + ' ดาว' : ' · ไม่ใช้ดาว') + '</div></div>' +
+        (it.ok ? '<button class="btn sm" data-r="' + esc(it.code) + '" data-n="' + esc(it.name) + '" data-s="' + it.stars + '">แลก</button>' : '<span class="xs muted">' + esc(it.why) + '</span>') + '</div>';
+    }).join('');
+    $('rw-confirm').innerHTML = '';
+  }
+  $('rw-list').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-r]'); if (!b) return;
+    var s = +b.dataset.s;
+    $('rw-confirm').innerHTML = '<div class="confirm"><div style="font-weight:500">ยืนยันการแลก</div><div class="small" style="margin:4px 0 12px">' + esc(b.dataset.n) +
+      (s ? '<br>ใช้ ' + s + ' ดาว · คงเหลือ ' + (cur.stars.balance - s) + ' ดาว' : '') + '</div><div class="row"><button class="btn ghost" data-x="no">ยกเลิก</button><button class="btn" data-x="yes" data-r="' + esc(b.dataset.r) + '">ยืนยัน</button></div></div>';
+    $('rw-confirm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  $('rw-confirm').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-x]'); if (!b) return;
+    if (b.dataset.x === 'no') { $('rw-confirm').innerHTML = ''; return; }
+    busy(b, true);
+    api({ action: 'staff.redeem', code: cur.member.code, rewardCode: b.dataset.r }).then(function (r) {
+      render(r.view); toast('บันทึกการแลกเรียบร้อย');
+    }).catch(function (err) { busy(b, false); onErr(err); });
+  });
+
+  /* ---------- purchase ---------- */
+  function updatePreview() {
+    var p = $('buy-preview'); if (!cur) return;
+    var amt = Number(String($('amount').value).replace(/,/g, ''));
+    if (!amt) { p.classList.add('hidden'); return; }
+    var B = cur.bahtPerStar, rem = (B - cur.stars.toNextStarBaht) % B;
+    var gain = Math.floor((rem + amt) / B);
+    p.classList.remove('hidden');
+    p.innerHTML = amt > 0 ? 'จะได้ <b>' + gain + ' ดาว</b> · หลังบันทึกเหลืออีก ' + fmt(B - ((rem + amt) % B)) + ' บาทถึงดาวถัดไป'
+      : 'คืนเงิน: หักดาว ' + Math.abs(gain) + ' ดาว';
+  }
+  $('amount').addEventListener('input', updatePreview);
+  $('p-buy').addEventListener('submit', function (e) {
+    e.preventDefault(); if (!cur) return;
+    var btn = $('buy-btn'); busy(btn, true);
+    api({ action: 'staff.purchase', code: cur.member.code, amount: $('amount').value, receipt: $('receipt').value.trim(), note: $('note').value.trim() }).then(function (r) {
+      $('amount').value = ''; $('receipt').value = ''; $('note').value = '';
+      render(r.view);
+      var gained = r.view.stars.balance - r.starsBefore;
+      toast('บันทึกแล้ว ' + (gained >= 0 ? '+' : '') + gained + ' ดาว');
+      if (r.tierUp) $('banner').innerHTML = '<div class="banner"><div class="eyebrow" style="color:#fff;opacity:.8">Tier up</div><div style="font-size:17px;margin-top:4px">เลื่อนเป็น <b>' + esc(r.view.tier.name) + '</b> แล้ว — แจ้งสมาชิกและมอบ Welcome: ' + esc(r.view.tier.welcome) + '</div></div>';
+    }).catch(onErr).then(function () { busy(btn, false, 'บันทึก'); });
+  });
+
+  /* ---------- adjust ---------- */
+  $('p-adjust').addEventListener('submit', function (e) {
+    e.preventDefault(); if (!cur) return;
+    var btn = $('adj-btn'); busy(btn, true);
+    api({ action: 'staff.adjust', code: cur.member.code, stars: $('adj-stars').value, note: $('adj-note').value.trim() }).then(function (r) {
+      $('adj-stars').value = ''; $('adj-note').value = ''; render(r.view); toast('ปรับดาวเรียบร้อย');
+    }).catch(onErr).then(function () { busy(btn, false, 'บันทึกการปรับดาว'); });
+  });
+
+  /* ---------- tabs ---------- */
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      ['buy', 'redeem', 'adjust'].forEach(function (k) { $('p-' + k).classList.toggle('hidden', k !== b.dataset.p); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

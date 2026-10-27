@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CHANUN Membership</title>
+<meta name="theme-color" content="#F6F4F0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="common.css">
+<style>
+  .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 14px; }
+  .top img { height: 44px; }
+  .top .eyebrow { text-align: right; }
+
+  /* ---------- Member card ---------- */
+  .card {
+    position: relative; overflow: hidden; border-radius: 18px; aspect-ratio: 1.586; padding: 20px 22px;
+    color: #fff; background: var(--blue); box-shadow: 0 18px 40px -22px rgba(15, 31, 61, .55);
+    display: flex; flex-direction: column; justify-content: space-between; isolation: isolate;
+  }
+  .card.light { color: var(--ink); box-shadow: 0 18px 40px -26px rgba(60, 50, 40, .45); border: 1px solid #E6E1D8; }
+  .card .grain { position: absolute; inset: 0; z-index: -1; background: radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,.14), transparent 55%); }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .card-brand { font-family: 'Jost', sans-serif; letter-spacing: .32em; font-size: 13px; font-weight: 400; }
+  .card-tag { font-size: 10px; letter-spacing: .26em; opacity: .75; }
+  .card-tier { font-family: 'Jost', sans-serif; font-weight: 300; font-size: clamp(30px, 9vw, 40px); letter-spacing: .2em; line-height: 1; margin-top: 4px; }
+  .card-desc { font-size: 12px; opacity: .8; margin-top: 6px; }
+  .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; }
+  .card-name { font-size: 15px; font-weight: 500; line-height: 1.25; }
+  .card-meta { font-size: 11px; opacity: .75; letter-spacing: .04em; }
+  .qr-btn {
+    flex: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 12px;
+    font-size: 12px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); color: inherit; backdrop-filter: blur(4px);
+  }
+  .card.light .qr-btn { background: rgba(255,255,255,.7); border-color: #D9D3C9; }
+
+  /* ---------- Stars ---------- */
+  .stars { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .stars > div { padding: 4px 0; }
+  .stars > div + div { border-left: 1px solid var(--line); padding-left: 18px; }
+  .big { font-family: 'Jost', sans-serif; font-weight: 300; font-size: 46px; line-height: 1; color: var(--blue); }
+  .big small { font-family: var(--font); font-size: 14px; color: var(--ink-2); margin-left: 6px; font-weight: 400; }
+  .bar { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 10px 0 6px; }
+  .bar > i { display: block; height: 100%; background: var(--blue); border-radius: 3px; transition: width .6s ease; }
+  .notice { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #FBF5EC; color: var(--warn); font-size: 13px; }
+
+  /* ---------- Tier ladder ---------- */
+  .ladder { position: relative; margin: 22px 6px 6px; height: 46px; }
+  .ladder .track { position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--line); }
+  .ladder .fill { position: absolute; left: 0; top: 7px; height: 2px; background: var(--blue); }
+  .ladder .stop { position: absolute; top: 0; transform: translateX(-50%); text-align: center; }
+  .ladder .dot { width: 16px; height: 16px; border-radius: 50%; background: var(--white); border: 2px solid var(--line); margin: 0 auto 6px; }
+  .ladder .stop.done .dot { border-color: var(--blue); background: var(--blue); }
+  .ladder .stop.current .dot { border-color: var(--blue); background: var(--white); box-shadow: 0 0 0 4px rgba(24,46,86,.12); }
+  .ladder .lbl { font-size: 10px; letter-spacing: .14em; color: var(--ink-3); white-space: nowrap; }
+  .ladder .stop.current .lbl, .ladder .stop.done .lbl { color: var(--blue); font-weight: 500; }
+  .ladder .stop.first { transform: none; text-align: left; }
+  .ladder .stop.first .dot { margin-left: 0; }
+  .ladder .stop.last { transform: translateX(-100%); text-align: right; }
+  .ladder .stop.last .dot { margin-right: 0; }
+
+  /* ---------- Ready to use ---------- */
+  .ready { border: 1px solid var(--blue); background: var(--white); border-radius: var(--radius); padding: 16px 18px; }
+  .ready-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; }
+  .ready-item + .ready-item { border-top: 1px solid var(--line); }
+  .ready-mark { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--turquoise); margin-top: 8px; }
+
+  /* ---------- Benefits tabs ---------- */
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tab { flex: 1; border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 8px 0; font-size: 12px; letter-spacing: .18em; color: var(--ink-2); }
+  .tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  .benefit { display: flex; gap: 14px; padding: 10px 0; }
+  .benefit + .benefit { border-top: 1px solid var(--line); }
+  .benefit .k { flex: none; width: 92px; font-size: 12px; color: var(--ink-3); padding-top: 2px; }
+  .benefit .v { flex: 1; }
+  .discount-big { font-family: 'Jost', sans-serif; font-size: 40px; font-weight: 300; color: var(--blue); line-height: 1; }
+
+  /* ---------- Rewards ---------- */
+  .reward { display: flex; align-items: center; gap: 12px; padding: 13px 0; }
+  .reward + .reward { border-top: 1px solid var(--line); }
+  .reward .name { flex: 1; min-width: 0; }
+  .reward .cost { flex: none; text-align: right; }
+  .reward .cost b { font-family: 'Jost', sans-serif; font-weight: 400; font-size: 20px; color: var(--blue); }
+  .reward.locked .name, .reward.locked .cost b { color: var(--ink-3); }
+  .star-ico { display: inline-block; width: 12px; height: 12px; vertical-align: -1px; }
+
+  /* ---------- History ---------- */
+  .hist { display: flex; justify-content: space-between; gap: 10px; padding: 10px 0; font-size: 14px; }
+  .hist + .hist { border-top: 1px solid var(--line); }
+  .hist .d { color: var(--ink-3); font-size: 12px; }
+  .plus { color: var(--ok); } .minus { color: var(--err); }
+
+  details.acc { border-top: 1px solid var(--line); }
+  details.acc:last-of-type { border-bottom: 1px solid var(--line); }
+  details.acc summary { list-style: none; cursor: pointer; padding: 16px 0; display: flex; justify-content: space-between; align-items: center; font-weight: 500; }
+  details.acc summary::-webkit-details-marker { display: none; }
+  details.acc summary::after { content: '+'; font-family: 'Jost'; font-size: 22px; font-weight: 300; color: var(--ink-3); }
+  details.acc[open] summary::after { content: '–'; }
+  .acc-body { padding: 0 0 18px; }
+  .tier-row { padding: 12px 0; }
+  .tier-row + .tier-row { border-top: 1px dashed var(--line); }
+  .tier-row h4 { margin: 0 0 4px; font-family: 'Jost'; font-weight: 500; letter-spacing: .18em; font-size: 14px; color: var(--blue); }
+  ol.terms { margin: 0; padding-left: 20px; color: var(--ink-2); font-size: 13px; }
+
+  /* ---------- QR sheet ---------- */
+  .sheet-bg { position: fixed; inset: 0; background: rgba(10, 14, 24, .55); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { background: var(--white); width: 100%; max-width: 460px; border-radius: 22px 22px 0 0; padding: 26px 22px calc(26px + env(safe-area-inset-bottom)); text-align: center; }
+  .sheet #qr { display: inline-block; padding: 14px; background: #fff; border: 1px solid var(--line); border-radius: 14px; margin: 14px 0; }
+  .sheet #qr img, .sheet #qr canvas { width: 220px !important; height: 220px !important; }
+  .code-big { font-family: 'Jost'; font-size: 26px; letter-spacing: .2em; color: var(--blue); }
+
+  /* ---------- Register ---------- */
+  .hero { text-align: center; padding: 26px 0 8px; }
+  .hero img { width: 120px; }
+  .hero h1 { font-family: 'Jost', 'IBM Plex Sans Thai'; font-weight: 300; font-size: 26px; letter-spacing: .04em; margin: 18px 0 6px; color: var(--blue); }
+  .tier-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 18px 0 4px; }
+  .tier-strip div { border-radius: 10px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; font-family: 'Jost'; font-size: 10px; letter-spacing: .16em; color: #fff; }
+  .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink-2); margin: 6px 0 12px; }
+  .consent input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--blue); flex: none; }
+  .consent-box { max-height: 132px; overflow: auto; background: #FAF9F7; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--ink-2); margin-bottom: 10px; }
+  .demo-flag { position: fixed; bottom: 12px; left: 12px; z-index: 60; }
+</style>
+</head>
+<body>
+<div id="loading" class="loader"><img src="logo_blue.png" alt="CHANUN"></div>
+<div id="error" class="wrap hidden"><div class="loader"><div style="text-align:center">
+  <img src="logo_blue.png" alt="" style="width:72px;opacity:.6;animation:none">
+  <p id="error-msg" style="margin:18px 0"></p>
+  <button class="btn ghost" onclick="location.reload()">ลองอีกครั้ง</button>
+</div></div></div>
+
+<!-- ================= Register ================= -->
+<main id="register" class="wrap hidden">
+  <div class="hero">
+    <img src="logo_blue.png" alt="CHANUN">
+    <h1>CHANUN Membership</h1>
+    <p class="muted small" id="reg-sub">สะสมดาวทุก 5,000 บาท แลกของรางวัล และรับสิทธิ์ตามระดับสมาชิก</p>
+    <div class="tier-strip" id="reg-tiers"></div>
+  </div>
+  <form id="reg-form" class="panel" novalidate>
+    <label class="field"><span>ชื่อ-นามสกุล</span><input class="input" name="fullName" autocomplete="name" required maxlength="80"></label>
+    <div class="row">
+      <label class="field"><span>ชื่อเล่น <span class="muted">(ไม่บังคับ)</span></span><input class="input" name="nickname" maxlength="40"></label>
+      <label class="field"><span>เบอร์โทร</span><input class="input" name="phone" inputmode="tel" autocomplete="tel" required placeholder="08x-xxx-xxxx"></label>
+    </div>
+    <div class="field"><span>วันเกิด <span class="muted">(ไม่บังคับ — เพื่อรับของขวัญวันเกิด)</span></span>
+      <div class="row"><select class="input" name="birthDay" id="bday"><option value="">วันที่</option></select><select class="input" name="birthMonth" id="bmonth"><option value="">เดือน</option></select></div>
+    </div>
+    <div class="consent-box" id="pdpa-text">
+      คลินิก CHANUN Aesthetic Wellness &amp; Surgery จะเก็บ ชื่อ เบอร์โทร วันเกิด LINE User ID และยอดชำระค่าบริการของท่าน
+      เพื่อใช้บริหารสิทธิ์สมาชิก (คำนวณดาว ระดับ และของรางวัล) และติดต่อท่านเกี่ยวกับสิทธิ์สมาชิกเท่านั้น
+      ระบบสมาชิกไม่เก็บรายละเอียดหัตถการหรือข้อมูลสุขภาพ ข้อมูลจะไม่ถูกเปิดเผยแก่บุคคลภายนอก
+      และเก็บไว้ตลอดระยะเวลาที่เป็นสมาชิก ท่านขอเข้าถึง แก้ไข ถอนความยินยอม หรือขอลบข้อมูลได้ที่เคาน์เตอร์คลินิกหรือทาง LINE OA
+    </div>
+    <label class="consent"><input type="checkbox" name="consentPdpa"> <span>ข้าพเจ้าได้อ่านและยินยอมให้เก็บและใช้ข้อมูลตามข้างต้น</span></label>
+    <label class="consent"><input type="checkbox" name="consentMarketing"> <span>ยินดีรับข่าวสาร Edition ใหม่และกิจกรรมสมาชิก <span class="muted">(ไม่บังคับ)</span></span></label>
+    <p id="reg-err" class="small" style="color:var(--err);min-height:1em;margin:4px 0 10px"></p>
+    <button class="btn block" id="reg-btn" type="submit">สมัครสมาชิก</button>
+  </form>
+</main>
+
+<!-- ================= Member ================= -->
+<main id="member" class="wrap hidden">
+  <header class="top">
+    <img src="logo_blue.png" alt="CHANUN">
+    <div class="eyebrow en">Membership</div>
+  </header>
+
+  <section class="card" id="card">
+    <div class="grain"></div>
+    <div class="card-top">
+      <div class="card-brand">CHANUN</div>
+      <div class="card-tag">MEMBER</div>
+    </div>
+    <div>
+      <div class="card-tier" id="c-tier"></div>
+      <div class="card-desc" id="c-desc"></div>
+    </div>
+    <div class="card-bottom">
+      <div>
+        <div class="card-name" id="c-name"></div>
+        <div class="card-meta"><span id="c-code"></span> · <span id="c-since"></span></div>
+      </div>
+      <button class="qr-btn" id="qr-open" type="button" aria-label="แสดง QR สมาชิก">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M21 14v7M14 21h3"/></svg>
+        QR
+      </button>
+    </div>
+  </section>
+
+  <section class="section panel">
+    <div class="stars">
+      <div>
+        <div class="eyebrow">ดาวคงเหลือ</div>
+        <div class="big num" style="margin-top:10px"><span id="s-bal">0</span><small>ดาว</small></div>
+      </div>
+      <div>
+        <div class="eyebrow">ดาวดวงถัดไป</div>
+        <div class="bar"><i id="s-bar" style="width:0"></i></div>
+        <div class="small">อีก <b class="num" id="s-next"></b> บาท</div>
+        <div class="xs muted">ทุก <span id="s-per"></span> บาท = 1 ดาว</div>
+      </div>
+    </div>
+    <div id="s-exp" class="notice hidden"></div>
+  </section>
+
+  <section class="section panel">
+    <div class="section-head"><div class="eyebrow">ระดับสมาชิก</div><div class="xs muted" id="t-until"></div></div>
+    <div class="small">ยอด 12 เดือนล่าสุด <b class="num" id="t-roll"></b> บาท</div>
+    <div class="ladder" id="ladder"><div class="track"></div><div class="fill" id="ladder-fill"></div></div>
+    <p class="small" id="t-next" style="margin:14px 0 0"></p>
+  </section>
+
+  <section class="section hidden" id="ready-sec">
+    <div class="section-head"><div class="eyebrow">พร้อมใช้ตอนนี้</div></div>
+    <div class="ready" id="ready"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="eyebrow">สิทธิ์ของคุณ</div><div class="xs muted" id="b-tier"></div></div>
+    <div class="panel">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-tab="save" aria-selected="true">SAVE</button>
+        <button class="tab" role="tab" data-tab="gift" aria-selected="false">GIFT</button>
+        <button class="tab" role="tab" data-tab="access" aria-selected="false">ACCESS</button>
+      </div>
+      <div id="tab-save"></div>
+      <div id="tab-gift" class="hidden"></div>
+      <div id="tab-access" class="hidden"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="eyebrow">ของรางวัล</div><div class="xs muted">แลกที่เคาน์เตอร์ แสดง QR ให้พนักงาน</div></div>
+    <div class="panel" id="rewards" style="padding-top:6px;padding-bottom:6px"></div>
+  </section>
+
+  <section class="section">
+    <div class="section-head"><div class="eyebrow">ประวัติล่าสุด</div></div>
+    <div class="panel" id="history" style="padding-top:6px;padding-bottom:6px"></div>
+  </section>
+
+  <section class="section">
+    <details class="acc"><summary>ระดับสมาชิกทั้งหมด</summary><div class="acc-body" id="all-tiers"></div></details>
+    <details class="acc"><summary>เงื่อนไขสมาชิก</summary><div class="acc-body"><ol class="terms" id="terms"></ol></div></details>
+  </section>
+  <p class="xs muted" style="text-align:center;margin-top:26px" id="foot"></p>
+</main>
+
+<div id="qr-sheet" class="sheet-bg hidden" role="dialog" aria-modal="true" aria-label="QR สมาชิก">
+  <div class="sheet">
+    <div class="eyebrow">แสดงให้พนักงานสแกน</div>
+    <div id="qr"></div>
+    <div class="code-big" id="q-code"></div>
+    <div class="small muted" id="q-name" style="margin:4px 0 18px"></div>
+    <button class="btn ghost block" id="qr-close" type="button">ปิด</button>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="config.js"></script>
+<script src="demo.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var CFG = window.CHANUN_CONFIG || {};
+  var DEMO = !!window.CHANUN_DEMO;
+  var idToken = null, current = null;
+  var $ = function (id) { return document.getElementById(id); };
+  var MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  var STAR = '<svg class="star-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.6 6.6 7 .5-5.4 4.5 1.7 6.9L12 17.3 6.1 21l1.7-6.9L2.4 9.6l7-.5z"/></svg>';
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('th-TH'); }
+  function d(ymd, opt) { if (!ymd) return ''; var p = ymd.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', opt || { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }); }
+  function show(id) { ['loading', 'error', 'register', 'member'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); window.scrollTo(0, 0); }
+  function toast(msg, err) { var t = $('toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(t._h); t._h = setTimeout(function () { t.className = 'toast'; }, 3200); }
+  function fatal(msg) { $('error-msg').textContent = msg; show('error'); }
+  function isLight(hex) { var h = String(hex || '').replace('#', ''); if (h.length !== 6) return false; var r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16); return (0.299 * r + 0.587 * g + 0.114 * b) > 170; }
+
+  function api(body) {
+    if (DEMO) return window.CHANUN_DEMO_API(body);
+    return fetch(CFG.API_URL, { method: 'POST', body: JSON.stringify(body), redirect: 'follow' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (!j.ok) { var e = new Error(j.message || 'เกิดข้อผิดพลาด'); e.code = j.error; throw e; } return j.data; });
+  }
+
+  function start() {
+    if (DEMO) { document.body.insertAdjacentHTML('beforeend', '<span class="pill warn demo-flag">โหมดทดลอง</span>'); return load(); }
+    if (!window.liff) return fatal('โหลด LINE ไม่สำเร็จ กรุณาเปิดจากเมนูใน LINE');
+    if (!CFG.LIFF_ID || /ใส่/.test(CFG.LIFF_ID)) return fatal('ยังไม่ได้ตั้งค่า LIFF_ID ในไฟล์ config.js');
+    liff.init({ liffId: CFG.LIFF_ID }).then(function () {
+      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+      idToken = liff.getIDToken();
+      load();
+    }).catch(function (e) { fatal('เชื่อมต่อ LINE ไม่สำเร็จ: ' + e.message); });
+  }
+
+  function load() {
+    api({ action: 'me', idToken: idToken }).then(function (res) {
+      if (res.registered) renderMember(res.view); else renderRegister(res.publicInfo);
+    }).catch(handleErr);
+  }
+
+  function handleErr(e) {
+    if (e.code === 'AUTH' && window.liff && !DEMO) {
+      var k = 'chanun_relogin';
+      var tried = false; try { tried = sessionStorage.getItem(k) === '1'; sessionStorage.setItem(k, '1'); } catch (x) {}
+      if (!tried) { try { liff.logout(); } catch (x) {} liff.login({ redirectUri: location.href }); return; }
+    }
+    fatal(e.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่');
+  }
+
+  /* ---------------- Register ---------------- */
+  function renderRegister(info) {
+    var strip = $('reg-tiers');
+    strip.innerHTML = (info.tiers || []).map(function (t) {
+      var light = isLight(t.color);
+      return '<div style="background:' + esc(t.color) + ';' + (light ? 'color:#161616;border:1px solid #E6E1D8' : '') + '">' + esc(t.name) + '</div>';
+    }).join('');
+    if (info.bahtPerStar) $('reg-sub').textContent = 'สะสมดาวทุก ' + fmt(info.bahtPerStar) + ' บาท แลกของรางวัล และรับสิทธิ์ตามระดับสมาชิก';
+    var bd = $('bday'), bm = $('bmonth');
+    if (bd.options.length < 2) {
+      for (var i = 1; i <= 31; i++) bd.insertAdjacentHTML('beforeend', '<option value="' + i + '">' + i + '</option>');
+      MONTHS.forEach(function (m, i) { bm.insertAdjacentHTML('beforeend', '<option value="' + (i + 1) + '">' + m + '</option>'); });
+    }
+    show('register');
+  }
+
+  $('reg-form').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var f = ev.target, err = $('reg-err');
+    var body = {
+      action: 'register', idToken: idToken,
+      fullName: f.fullName.value.trim(), nickname: f.nickname.value.trim(), phone: f.phone.value.trim(),
+      birthDay: f.birthDay.value, birthMonth: f.birthMonth.value,
+      consentPdpa: f.consentPdpa.checked, consentMarketing: f.consentMarketing.checked
+    };
+    if (!body.fullName) { err.textContent = 'กรุณากรอกชื่อ-นามสกุล'; f.fullName.focus(); return; }
+    if (!/^0\d{8,9}$/.test(body.phone.replace(/\D/g, ''))) { err.textContent = 'กรุณากรอกเบอร์โทร 9–10 หลัก'; f.phone.focus(); return; }
+    if (!body.consentPdpa) { err.textContent = 'กรุณายืนยันการให้ความยินยอมก่อนสมัคร'; return; }
+    err.textContent = '';
+    var btn = $('reg-btn'); btn.disabled = true; btn.textContent = 'กำลังสมัคร…';
+    api(body).then(function (res) {
+      renderMember(res.view);
+      toast('ยินดีต้อนรับสู่ CHANUN Membership');
+    }).catch(function (e) {
+      err.textContent = e.message; btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
+      if (e.code === 'AUTH') handleErr(e);
+    });
+  });
+
+  /* ---------------- Member ---------------- */
+  function renderMember(v) {
+    current = v;
+    var t = v.tier, light = isLight(t.color);
+    var card = $('card');
+    card.style.background = t.color || '#182E56';
+    card.classList.toggle('light', light);
+    $('c-tier').textContent = t.name;
+    $('c-desc').textContent = t.desc || '';
+    $('c-name').textContent = v.member.name;
+    $('c-code').textContent = v.member.code;
+    $('c-since').textContent = 'สมาชิกตั้งแต่ ' + d(v.member.joinDate, { month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' });
+
+    // stars
+    $('s-bal').textContent = fmt(v.stars.balance);
+    $('s-next').textContent = fmt(v.stars.toNextStarBaht);
+    $('s-per').textContent = fmt(v.bahtPerStar);
+    requestAnimationFrame(function () { $('s-bar').style.width = Math.max(2, (1 - v.stars.toNextStarBaht / v.bahtPerStar) * 100) + '%'; });
+    var exp = v.stars.expiring;
+    $('s-exp').classList.toggle('hidden', !exp);
+    if (exp) $('s-exp').textContent = fmt(exp.stars) + ' ดาวจะหมดอายุหลัง ' + d(exp.lastDay) + ' — แลกก่อนหมดอายุได้ที่คลินิก';
+
+    // tier ladder
+    $('t-roll').textContent = fmt(v.rolling.baht);
+    $('t-until').textContent = v.tierUntil ? ('ประเมินใหม่ ' + d(v.tierUntil)) : '';
+    var tiers = v.tiers, maxS = tiers[tiers.length - 1].minStars || 1;
+    var lad = $('ladder');
+    lad.querySelectorAll('.stop').forEach(function (n) { n.remove(); });
+    var n = tiers.length;
+    tiers.forEach(function (x, i) {
+      var cls = (i < t.level ? 'done' : i === t.level ? 'current' : '') + (i === 0 ? ' first' : '') + (i === n - 1 ? ' last' : '');
+      lad.insertAdjacentHTML('beforeend', '<div class="stop ' + cls + '" style="left:' + (i / (n - 1) * 100) + '%"><div class="dot"></div><div class="lbl">' + esc(x.name) + '</div></div>');
+    });
+    // position fill by rolling stars, piecewise between tier thresholds
+    var s = v.rolling.stars, pos = 1;
+    for (var i = 0; i < n - 1; i++) {
+      var a = tiers[i].minStars, b = tiers[i + 1].minStars;
+      if (s < b) { pos = (i + (s - a) / Math.max(1, b - a)) / (n - 1); break; }
+    }
+    $('ladder-fill').style.width = (Math.max(0, Math.min(1, pos)) * 100) + '%';
+    var tn = $('t-next');
+    if (v.maintain) tn.innerHTML = 'รักษาระดับ <b>' + esc(t.name) + '</b>: ยอดอีก <b class="num">' + fmt(v.maintain.bahtNeeded) + '</b> บาท ภายใน ' + esc(d(v.maintain.by));
+    else if (v.next) tn.innerHTML = 'อีก <b class="num">' + fmt(v.next.starsNeeded) + ' ดาว</b> (' + fmt(v.next.bahtNeeded) + ' บาท ภายใน 12 เดือน) สู่ระดับ <b>' + esc(v.next.name) + '</b>';
+    else tn.textContent = 'คุณอยู่ในระดับสูงสุดของ CHANUN Membership';
+
+    // ready now
+    var ready = [];
+    (v.welcome || []).forEach(function (w) { ready.push({ t: 'Welcome ' + w.tierName, g: w.gift, s: 'ใช้ได้ถึง ' + d(w.until) }); });
+    if (v.birthday && v.birthday.available) ready.push({ t: 'ของขวัญเดือนเกิด', g: v.birthday.gift, s: 'ใช้ได้ภายในเดือนนี้' });
+    $('ready-sec').classList.toggle('hidden', !ready.length);
+    $('ready').innerHTML = ready.map(function (r) {
+      return '<div class="ready-item"><span class="ready-mark"></span><div><div style="font-weight:500">' + esc(r.t) + '</div><div class="small">' + esc(r.g) + '</div><div class="xs muted">' + esc(r.s) + ' · แจ้งพนักงานพร้อมแสดง QR</div></div></div>';
+    }).join('');
+
+    // benefits
+    $('b-tier').textContent = t.name;
+    $('tab-save').innerHTML = '<div class="benefit"><div class="k">ส่วนลดบริการ</div><div class="v">' +
+      (t.discount > 0 ? '<div class="discount-big">' + Math.round(t.discount * 100) + '%</div><div class="xs muted" style="margin-top:6px">ใช้ได้ทุกครั้งที่ใช้บริการ ไม่รวมกับโปรโมชันอื่น</div>'
+        : '<div>สะสมดาวเพื่อแลกของรางวัล</div><div class="xs muted">ส่วนลดสมาชิกเริ่มที่ระดับ ' + esc((tiers[1] || {}).name || '') + '</div>') + '</div></div>' +
+      '<div class="benefit"><div class="k">ดาว</div><div class="v">ทุก ' + fmt(v.bahtPerStar) + ' บาท ได้ 1 ดาว</div></div>';
+    $('tab-gift').innerHTML =
+      (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div></div></div>' : '') +
+      (t.birthday ? '<div class="benefit"><div class="k">เดือนเกิด</div><div class="v">' + esc(t.birthday) + (v.member.birthMonth ? '<div class="xs muted">เดือน' + esc(MONTHS[v.member.birthMonth - 1]) + '</div>' : '<div class="xs muted">แจ้งวันเกิดที่คลินิกเพื่อรับสิทธิ์</div>') + '</div></div>' : '');
+    $('tab-access').innerHTML = (t.access || []).map(function (a) { return '<div class="benefit"><div class="k">—</div><div class="v">' + esc(a) + '</div></div>'; }).join('') || '<p class="muted small">—</p>';
+
+    // rewards
+    $('rewards').innerHTML = v.rewards.map(function (r) {
+      var state;
+      if (!r.tierOk) state = '<span class="pill">สำหรับ ' + esc(r.minTier) + ' ขึ้นไป</span>';
+      else if (r.canRedeem) state = '<span class="pill ok">แลกได้</span>';
+      else state = '<span class="xs muted">อีก ' + fmt(r.stars - v.stars.balance) + ' ดาว</span>';
+      return '<div class="reward' + (r.tierOk ? '' : ' locked') + '"><div class="name"><div>' + esc(r.name) + '</div><div style="margin-top:4px">' + state + '</div></div>' +
+        '<div class="cost"><b class="num">' + fmt(r.stars) + '</b> <span class="xs muted">ดาว</span></div></div>';
+    }).join('') || '<p class="muted small">ยังไม่มีรายการของรางวัล</p>';
+
+    // history
+    $('history').innerHTML = v.history.length ? v.history.map(function (h) {
+      var st = h.stars ? '<span class="' + (h.stars > 0 ? 'plus' : 'minus') + ' num">' + (h.stars > 0 ? '+' : '') + h.stars + ' ' + STAR + '</span>' : '';
+      var amt = h.amount ? '<div class="xs muted num">' + fmt(h.amount) + ' บาท</div>' : '';
+      return '<div class="hist"><div><div>' + esc(h.label) + '</div><div class="d">' + esc(d(h.date)) + '</div></div><div style="text-align:right">' + st + amt + '</div></div>';
+    }).join('') : '<p class="muted small">ยังไม่มีรายการ</p>';
+
+    // all tiers + terms
+    $('all-tiers').innerHTML = tiers.map(function (x) {
+      return '<div class="tier-row"><h4>' + esc(x.name) + '</h4><div class="xs muted">' +
+        (x.minStars ? 'ยอด 12 เดือน ' + fmt(x.minStars * v.bahtPerStar) + ' บาทขึ้นไป (' + x.minStars + ' ดาว)' : 'เมื่อสมัครสมาชิก') + '</div>' +
+        '<div class="small" style="margin-top:6px">' + (x.discount ? 'ส่วนลดบริการ ' + Math.round(x.discount * 100) + '% · ' : '') + (x.welcome ? 'Welcome: ' + esc(x.welcome) : '') + '</div>' +
+        (x.access && x.access.length ? '<div class="xs muted" style="margin-top:4px">' + x.access.map(esc).join(' · ') + '</div>' : '') + '</div>';
+    }).join('');
+    $('terms').innerHTML = String(v.terms || '').split('\n').filter(Boolean).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
+    $('foot').textContent = v.clinic || 'CHANUN';
+    show('member');
+  }
+
+  // tabs
+  document.querySelectorAll('.tab').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.tab').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      ['save', 'gift', 'access'].forEach(function (k) { $('tab-' + k).classList.toggle('hidden', k !== b.dataset.tab); });
+    });
+  });
+
+  // QR sheet
+  $('qr-open').addEventListener('click', function () {
+    if (!current) return;
+    var box = $('qr'); box.innerHTML = '';
+    var text = 'CHANUN-MEMBER:' + current.member.code;
+    if (window.QRCode) new QRCode(box, { text: text, width: 440, height: 440, colorDark: '#161616', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    else box.textContent = current.member.code;
+    $('q-code').textContent = current.member.code;
+    $('q-name').textContent = current.member.name + ' · ' + current.tier.name;
+    $('qr-sheet').classList.remove('hidden');
+  });
+  $('qr-close').addEventListener('click', function () { $('qr-sheet').classList.add('hidden'); });
+  $('qr-sheet').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
+
+  start();
+})();
+</script>
+</body>
+</html>
