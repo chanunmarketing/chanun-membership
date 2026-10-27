@@ -6,5 +6,5 @@
  */
 window.CHANUN_CONFIG = {
   LIFF_ID: '2012246583-gTIDAHa2',
-  API_URL: '1TzT34ImL1MCTg9eys9fFvDGIkDyk-gcCLaCCp3F2S_2-JOi69rwVpHj3/exec'
+  API_URL: 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnRlXgYh4Abdlk1Uq3TNRi7c60YV6FgEUwjACAHQQFN5jR6vCdEjRHRI80ToWT9n4lERKSi7fvXAzbuR92r-0qwRGIS69gVf1rGA2Tmq_vsjMbW4k65AAadK0M_2HLOVHjsjLE4T7AHY8J9dMar4-cnL1T_DBvJYmazYo1hFuD5lCRDIzg3uHjvYGlppjBOwu2sxh8NBJ9ZzT-qAgifOoGMDDZFUV4OMYTgnmOF_pu65zdjrojPgfpLaUf1MypK98A_Qs5rXNdqoF4BvWME82_Ji_o3mDA&lib=Ms8Kmq80JM7RRw9rrx1NXW_VrGH4D3t65/exec'
 };
