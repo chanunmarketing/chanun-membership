@@ -5,6 +5,6 @@
  * ทดลองดูหน้าตาก่อนติดตั้ง: เปิด index.html?demo=1 หรือ staff.html?demo=1
  */
 window.CHANUN_CONFIG = {
-  LIFF_ID: 'ใส่-LIFF-ID-ตรงนี้',
-  API_URL: 'ใส่-URL-Apps-Script-ตรงนี้'
+  LIFF_ID: '2012246583-gTIDAHa2',
+  API_URL: 'https://liff.line.me/2012246583-gTIDAHa2'
 };
