@@ -6,5 +6,5 @@
  */
 window.CHANUN_CONFIG = {
   LIFF_ID: '2012246583-gTIDAHa2',
-  API_URL: 'https://liff.line.me/2012246583-gTIDAHa2'
+  API_URL: '1TzT34ImL1MCTg9eys9fFvDGIkDyk-gcCLaCCp3F2S_2-JOi69rwVpHj3/exec'
 };
