@@ -230,6 +230,7 @@
     var av = [];
     (v.welcome || []).forEach(function (w) { av.push('<span class="pill ok">Welcome ' + esc(w.tierName) + ': ' + esc(w.gift) + '</span>'); });
     if (v.birthday && v.birthday.available) av.push('<span class="pill ok">เดือนเกิด: ' + esc(v.birthday.gift) + '</span>');
+    (v.annual || []).forEach(function (a) { if (a.available) av.push('<span class="pill ok">ประจำปี: ' + esc(a.gift) + '</span>'); });
     if (v.stars.expiring) av.push('<span class="pill warn">' + v.stars.expiring.stars + ' ดาวหมดอายุหลัง ' + esc(d(v.stars.expiring.lastDay)) + '</span>');
     if (v.member.status === 'ระงับ') av.push('<span class="pill warn">บัญชีถูกระงับ</span>');
     $('m-avail').innerHTML = av.join('');
@@ -247,6 +248,7 @@
     var v = cur, items = [];
     (v.welcome || []).forEach(function (w) { items.push({ code: w.code, name: 'Welcome ' + w.tierName + ': ' + w.gift, stars: 0, ok: true }); });
     if (v.birthday && v.birthday.available) items.push({ code: 'BIRTHDAY', name: 'ของขวัญเดือนเกิด: ' + v.birthday.gift, stars: 0, ok: true });
+    (v.annual || []).forEach(function (a) { if (a.available) items.push({ code: a.code, name: 'สิทธิ์ประจำปี: ' + a.gift, stars: 0, ok: true }); });
     v.rewards.forEach(function (r) { items.push({ code: r.code, name: r.name, stars: r.stars, ok: r.canRedeem, why: !r.tierOk ? 'สำหรับ ' + r.minTier + '+' : 'ดาวไม่พอ' }); });
     $('rw-list').innerHTML = items.map(function (it) {
       return '<div class="rw"><div class="n"><div>' + esc(it.name) + '</div><div class="xs muted">' + esc(it.code) + (it.stars ? ' · ' + it.stars + ' ดาว' : ' · ไม่ใช้ดาว') + '</div></div>' +

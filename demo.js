@@ -4,23 +4,23 @@
   if (!params.has('demo')) return;
   var B = 5000;
   var TIERS = [
-    { level: 0, name: 'ATELIER', minStars: 0, discount: 0, welcome: 'Hydrating Mask 1 ครั้ง', birthday: 'บัตรกำนัล 300 บาท', access: ['สะสมดาวทุก 5,000 บาท', 'แลกของรางวัลได้ทันทีที่มีดาว'], desc: 'ก้าวแรกในสตูดิโอแห่งผิว', color: '#F5F2EC' },
-    { level: 1, name: 'MAISON', minStars: 10, discount: 0.03, welcome: 'IV Drip 1 ครั้ง', birthday: 'บัตรกำนัล 1,000 บาท', access: ['รู้ Edition ใหม่ก่อนใคร 24 ชั่วโมง', 'จองคิวล่วงหน้าก่อนสมาชิกทั่วไป'], desc: 'บ้านของผู้หลงใหลในการดูแลตัวเองอย่างประณีต', color: '#9B918D' },
-    { level: 2, name: 'COUTURE', minStars: 20, discount: 0.05, welcome: 'Vera Skin 1 ครั้ง', birthday: 'บัตรกำนัล 2,000 บาท', access: ['Priority booking', 'วางแผนผิวรายปีกับแพทย์ ปีละ 2 ครั้ง', 'เชิญร่วม Member Workshop ปีละ 2 ครั้ง'], desc: 'ความงามที่ถูกตัดเย็บเฉพาะคุณ', color: '#182E56' },
-    { level: 3, name: 'PRIVATE', minStars: 40, discount: 0.07, welcome: 'Program Skin Trio 1 ครั้ง', birthday: 'บัตรกำนัล 3,000 บาท', access: ['Priority consult กับหมอปิงปอง', 'Personal concierge ทาง LINE', 'นัดนอกเวลาทำการได้', 'ทดลองหัตถการใหม่ก่อนใคร', 'ของขวัญปีใหม่ และ Private event'], desc: 'ห้องส่วนตัวสำหรับสมาชิกชั้นใน', color: '#141414' }
+    { level: 0, name: 'CLASSIC', minStars: 0, discount: 0, welcome: 'Hydrating Mask 1 ครั้ง', birthday: 'บัตรกำนัล 300 บาท', access: ['สะสมดาวทุก 5,000 บาท', 'แลกของรางวัลได้ทันทีที่มีดาว', 'วัคซีนไข้หวัดใหญ่ราคาสมาชิก 490 บาท'], desc: 'จุดเริ่มต้นของผิวที่ได้รับการดูแลอย่างใส่ใจ', color: '#F5F2EC' },
+    { level: 1, name: 'SIGNATURE', minStars: 5, discount: 0.03, welcome: 'IV Drip 1 ครั้ง', birthday: 'บัตรกำนัล 1,000 บาท', access: ['รู้ Edition ใหม่ก่อนใคร 24 ชั่วโมง', 'จองคิวล่วงหน้าก่อนสมาชิกทั่วไป', 'แลกวัคซีนไข้หวัดใหญ่ด้วย 2 ดาว (Seasonal Wellness)'], desc: 'ความงามที่เป็นเอกลักษณ์ในแบบของคุณ', color: '#9B918D' },
+    { level: 2, name: 'PRESTIGE', minStars: 10, discount: 0.05, welcome: 'Vera Skin 1 ครั้ง', birthday: 'บัตรกำนัล 2,000 บาท', access: ['Priority booking', 'วางแผนผิวรายปีกับแพทย์ ปีละ 2 ครั้ง', 'เชิญร่วม Member Workshop ปีละ 2 ครั้ง'], desc: 'การดูแลที่ออกแบบมาเพื่อคุณโดยเฉพาะ', color: '#182E56', annual: ['Seasonal Wellness: วัคซีนไข้หวัดใหญ่ 1 เข็ม', 'Wellness Check: ตรวจระดับวิตามินดี (ฉีดวิตามินดีราคาสมาชิก 1,900 บาท เมื่อผลต่ำ)'] },
+    { level: 3, name: 'PRIVATE', minStars: 20, discount: 0.07, welcome: 'Program Skin Trio 1 ครั้ง', birthday: 'บัตรกำนัล 3,000 บาท', access: ['Priority consult กับหมอปิงปอง', 'Personal concierge ทาง LINE', 'นัดนอกเวลาทำการได้', 'ทดลองหัตถการใหม่ก่อนใคร', 'ของขวัญปีใหม่ และ Private event'], desc: 'ความใส่ใจระดับส่วนตัว จากแพทย์ถึงคุณ', color: '#141414', annual: ['Seasonal Wellness: วัคซีนไข้หวัดใหญ่ 1 เข็ม + ครอบครัว 1 ท่านในราคาทุน', 'Wellness Check: ตรวจระดับวิตามินดี + ฉีดวิตามินดี 1 เข็ม เมื่อผลต่ำ'] }
   ];
   var REWARDS = [
     ['R01', 'บัตรกำนัลสินค้า Skincare 500 บาท', 'บัตรกำนัล', 1, 0], ['R02', 'บัตรกำนัลบริการ 1,000 บาท', 'บัตรกำนัล', 2, 0],
     ['R03', 'Hydrating Mask / LED 1 ครั้ง', 'บริการ', 3, 0], ['R04', 'IV Drip 1 ครั้ง', 'บริการ', 5, 0],
     ['R05', 'Vera Skin 1 ครั้ง', 'บริการ', 10, 0], ['R06', 'Elite Face Laser 1 ครั้ง', 'บริการ', 13, 0],
     ['R07', 'บัตรกำนัลบริการ 5,000 บาท', 'บัตรกำนัล', 10, 1], ['R08', 'Program Skin Trio 1 ครั้ง', 'บริการ', 20, 2],
-    ['R09', 'Private Skin Planning กับหมอปิงปอง 60 นาที', 'บริการ', 6, 2]
+    ['R09', 'Private Skin Planning กับหมอปิงปอง 60 นาที', 'บริการ', 6, 2], ['R10', 'Seasonal Wellness 1 ครั้ง', 'บริการ', 2, 1]
   ];
   var TERMS = 'สมาชิกภาพเป็นสิทธิ์เฉพาะบุคคล โอนไม่ได้\nดาวคิดจากยอดชำระจริงหลังหักส่วนลด ทุก 5,000 บาท ได้ 1 ดาว เศษยอดสะสมต่อรอบถัดไป\nดาวมีอายุ 24 เดือนนับจากวันที่ได้รับ\nระดับสมาชิกคิดจากยอดชำระ 12 เดือนล่าสุด และคงระดับอย่างน้อย 12 เดือน\nส่วนลดสมาชิกใช้ได้ครั้งละ 1 สิทธิ์ ไม่รวมกับโปรโมชันอื่น\nการแลกของรางวัลทำที่เคาน์เตอร์คลินิก ไม่สามารถแลกเป็นเงินสด';
 
   function ymd(offsetDays) { var d = new Date(Date.now() + offsetDays * 864e5); return d.toISOString().slice(0, 10); }
   var tierParam = parseInt(params.get('tier') || '1', 10);
-  var spendByTier = [18500, 72000, 136000, 248000];
+  var spendByTier = [14500, 36000, 68000, 124000];
   var state = {
     registered: params.get('demoState') !== 'new',
     member: { code: 'CH0007', name: 'ชนิดา ศรีสวัสดิ์', nickname: 'มิ้นท์', joinDate: ymd(-210), birthMonth: new Date().getMonth() + 1, phone: '0891234567', hn: 'HN002201', status: 'ใช้งาน', note: '' },
@@ -29,7 +29,7 @@
   // สร้างประวัติตัวอย่าง
   var total = spendByTier[Math.min(3, Math.max(0, tierParam))], parts = [0.18, 0.27, 0.12, 0.25, 0.18];
   parts.forEach(function (p, i) { state.txs.push({ date: ymd(-200 + i * 45), amount: Math.round(total * p / 100) * 100, receipt: 'INV-' + (2401 + i) }); });
-  if (total >= 50000) state.rds.push({ date: ymd(-40), code: 'R04', name: 'IV Drip 1 ครั้ง', stars: 5 });
+  if (total >= 25000) state.rds.push({ date: ymd(-40), code: 'R04', name: 'IV Drip 1 ครั้ง', stars: 5 });
 
   function view(forStaff) {
     var cum = 0, earnedList = [];
@@ -57,6 +57,7 @@
       rolling: { baht: rolling, stars: s12 },
       welcome: welcome,
       birthday: { month: state.member.birthMonth, gift: t.birthday, available: claimed.indexOf('BIRTHDAY') < 0, usedThisYear: claimed.indexOf('BIRTHDAY') >= 0 },
+      annual: (t.annual || []).map(function (g, i) { var c = 'ANNUAL-' + (i + 1); return { code: c, slot: i + 1, gift: g, available: claimed.indexOf(c) < 0, usedThisYear: claimed.indexOf(c) >= 0 }; }),
       rewards: REWARDS.map(function (r) { return { code: r[0], name: r[1], type: r[2], stars: r[3], minTier: r[4] ? TIERS[r[4]].name : null, tierOk: r[4] <= level, canRedeem: r[4] <= level && balance >= r[3] }; }),
       tiers: TIERS, history: history.slice(0, 15), terms: TERMS
     };
@@ -86,7 +87,7 @@
             case 'staff.redeem':
               before = view(true);
               var code = b.rewardCode;
-              if (code.indexOf('WELCOME-') === 0 || code === 'BIRTHDAY') { state.rds.push({ date: ymd(0), code: code, name: code === 'BIRTHDAY' ? 'ของขวัญวันเกิด' : 'Welcome', stars: 0 }); }
+              if (code.indexOf('WELCOME-') === 0 || code === 'BIRTHDAY' || code.indexOf('ANNUAL-') === 0) { state.rds.push({ date: ymd(0), code: code, name: code === 'BIRTHDAY' ? 'ของขวัญวันเกิด' : code.indexOf('ANNUAL-') === 0 ? 'สิทธิ์ประจำปี ' + code.slice(7) : 'Welcome', stars: 0 }); }
               else { var rw = before.rewards.filter(function (r) { return r.code === code; })[0]; if (!rw || !rw.canRedeem) fail('NOT_ENOUGH', 'ดาวไม่พอ'); state.rds.push({ date: ymd(0), code: code, name: rw.name, stars: rw.stars }); }
               return resolve({ view: view(true), tierUp: false, starsBefore: before.stars.balance });
             case 'staff.adjust':
