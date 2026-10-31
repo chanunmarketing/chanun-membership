@@ -84,7 +84,7 @@
         <span class="tier-chip" id="m-tier"></span>
       </div>
       <div class="kpis">
-        <div class="kpi"><div class="xs muted">ส่วนลดบริการ</div><div class="v disc" id="m-disc"></div></div>
+        <div class="kpi"><div class="xs muted">ราคาสมาชิก เครื่อง / ยาฉีด</div><div class="v disc" id="m-disc"></div></div>
         <div class="kpi"><div class="xs muted">ดาวคงเหลือ</div><div class="v num" id="m-bal"></div></div>
         <div class="kpi"><div class="xs muted">ยอด 12 เดือน</div><div class="v num" id="m-roll" style="font-size:20px"></div></div>
       </div>
@@ -224,13 +224,14 @@
     var chip = $('m-tier'); chip.textContent = t.name + (v.overridden ? ' *' : '');
     chip.style.background = t.color || '#182E56'; chip.style.color = isLight(t.color) ? '#161616' : '#fff';
     chip.style.border = isLight(t.color) ? '1px solid #D9D3C9' : '0';
-    $('m-disc').textContent = Math.round((t.discount || 0) * 100) + '%';
+    $('m-disc').textContent = Math.round((t.discount || 0) * 100) + '%' + (t.discount2 ? ' / ' + Math.round(t.discount2 * 100) + '%' : '');
     $('m-bal').textContent = fmt(v.stars.balance);
     $('m-roll').textContent = fmt(v.rolling.baht);
     var av = [];
     (v.welcome || []).forEach(function (w) { av.push('<span class="pill ok">Welcome ' + esc(w.tierName) + ': ' + esc(w.gift) + '</span>'); });
     if (v.birthday && v.birthday.available) av.push('<span class="pill ok">เดือนเกิด: ' + esc(v.birthday.gift) + '</span>');
     (v.annual || []).forEach(function (a) { if (a.available) av.push('<span class="pill ok">ประจำปี: ' + esc(a.gift) + '</span>'); });
+    if (v.promoPass && v.promoPass.available) av.push('<span class="pill ok">Promo Pass เหลือ ' + v.promoPass.remaining + ' ครั้ง</span>');
     if (v.stars.expiring) av.push('<span class="pill warn">' + v.stars.expiring.stars + ' ดาวหมดอายุหลัง ' + esc(d(v.stars.expiring.lastDay)) + '</span>');
     if (v.member.status === 'ระงับ') av.push('<span class="pill warn">บัญชีถูกระงับ</span>');
     $('m-avail').innerHTML = av.join('');
@@ -249,6 +250,7 @@
     (v.welcome || []).forEach(function (w) { items.push({ code: w.code, name: 'Welcome ' + w.tierName + ': ' + w.gift, stars: 0, ok: true }); });
     if (v.birthday && v.birthday.available) items.push({ code: 'BIRTHDAY', name: 'ของขวัญเดือนเกิด: ' + v.birthday.gift, stars: 0, ok: true });
     (v.annual || []).forEach(function (a) { if (a.available) items.push({ code: a.code, name: 'สิทธิ์ประจำปี: ' + a.gift, stars: 0, ok: true }); });
+    if (v.promoPass) items.push({ code: 'PROMOPASS', name: 'Promo Pass: ราคาโปรที่จบไม่เกิน 60 วัน (เหลือ ' + v.promoPass.remaining + '/' + v.promoPass.quota + ')', stars: 0, ok: v.promoPass.available, why: 'ใช้ครบแล้วปีนี้' });
     v.rewards.forEach(function (r) { items.push({ code: r.code, name: r.name, stars: r.stars, ok: r.canRedeem, why: !r.tierOk ? 'สำหรับ ' + r.minTier + '+' : 'ดาวไม่พอ' }); });
     $('rw-list').innerHTML = items.map(function (it) {
       return '<div class="rw"><div class="n"><div>' + esc(it.name) + '</div><div class="xs muted">' + esc(it.code) + (it.stars ? ' · ' + it.stars + ' ดาว' : ' · ไม่ใช้ดาว') + '</div></div>' +

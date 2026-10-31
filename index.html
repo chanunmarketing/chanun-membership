@@ -411,9 +411,14 @@
 
     // benefits
     $('b-tier').textContent = t.name;
-    $('tab-save').innerHTML = '<div class="benefit"><div class="k">ส่วนลดบริการ</div><div class="v">' +
-      (t.discount > 0 ? '<div class="discount-big">' + Math.round(t.discount * 100) + '%</div><div class="xs muted" style="margin-top:6px">ใช้ได้ทุกครั้งที่ใช้บริการ ไม่รวมกับโปรโมชันอื่น</div>'
-        : '<div>สะสมดาวเพื่อแลกของรางวัล</div><div class="xs muted">ส่วนลดสมาชิกเริ่มที่ระดับ ' + esc((tiers[1] || {}).name || '') + '</div>') + '</div></div>' +
+    var pp = v.promoPass;
+    $('tab-save').innerHTML = '<div class="benefit"><div class="k">ราคาสมาชิก</div><div class="v">' +
+      (t.discount > 0 || t.discount2 > 0
+        ? '<div class="discount-big">' + Math.round(t.discount * 100) + '%</div><div class="small" style="margin-top:4px">เครื่อง / IV / เลเซอร์ / พลาสม่า</div>' +
+          (t.discount2 > 0 ? '<div style="margin-top:10px"><span class="num" style="font-size:22px;color:var(--blue)">' + Math.round(t.discount2 * 100) + '%</span> <span class="small">ยาฉีด / สินค้า</span></div>' : '') +
+          '<div class="xs muted" style="margin-top:6px">ใช้กับราคาปกติรายครั้ง เลือกราคาสมาชิกหรือราคาโปรอย่างใดอย่างหนึ่ง</div>'
+        : '<div>สะสมดาวเพื่อแลกของรางวัล</div><div class="xs muted">ราคาสมาชิกเริ่มที่ระดับ ' + esc((tiers[1] || {}).name || '') + '</div>') + '</div></div>' +
+      (pp ? '<div class="benefit"><div class="k">Promo Pass</div><div class="v">ซื้อราคาโปรที่จบไปไม่เกิน 60 วัน<div class="xs muted">ใช้ได้อีก ' + pp.remaining + ' จาก ' + pp.quota + ' ครั้งในปีนี้</div></div></div>' : '') +
       '<div class="benefit"><div class="k">ดาว</div><div class="v">ทุก ' + fmt(v.bahtPerStar) + ' บาท ได้ 1 ดาว</div></div>';
     $('tab-gift').innerHTML =
       (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div></div></div>' : '') +
@@ -442,7 +447,7 @@
     $('all-tiers').innerHTML = tiers.map(function (x) {
       return '<div class="tier-row"><h4>' + esc(x.name) + '</h4><div class="xs muted">' +
         (x.minStars ? 'ยอด 12 เดือน ' + fmt(x.minStars * v.bahtPerStar) + ' บาทขึ้นไป (' + x.minStars + ' ดาว)' : 'เมื่อสมัครสมาชิก') + '</div>' +
-        '<div class="small" style="margin-top:6px">' + (x.discount ? 'ส่วนลดบริการ ' + Math.round(x.discount * 100) + '% · ' : '') + (x.welcome ? 'Welcome: ' + esc(x.welcome) : '') + '</div>' +
+        '<div class="small" style="margin-top:6px">' + (x.discount ? 'ราคาสมาชิก ลด ' + Math.round(x.discount * 100) + '%' + (x.discount2 ? ' / ยาฉีด ' + Math.round(x.discount2 * 100) + '%' : '') + ' · ' : '') + (x.welcome ? 'Welcome: ' + esc(x.welcome) : '') + '</div>' +
         (x.access && x.access.length ? '<div class="xs muted" style="margin-top:4px">' + x.access.map(esc).join(' · ') + '</div>' : '') + '</div>';
     }).join('');
     $('terms').innerHTML = String(v.terms || '').split('\n').filter(Boolean).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
