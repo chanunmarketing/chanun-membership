@@ -4,10 +4,10 @@
   if (!params.has('demo')) return;
   var B = 5000;
   var TIERS = [
-    { level: 0, name: 'CLASSIC', minStars: 0, discount: 0, discount2: 0, promoPass: 0, welcome: 'IV The Restorative 1 ครั้ง', birthday: 'IV The Restorative หรือเลเซอร์รักแร้ 1 ครั้ง', access: ['สะสมดาวทุก 5,000 บาท', 'แลกของรางวัลได้ทันทีที่มีดาว', 'วัคซีนไข้หวัดใหญ่ราคาสมาชิก 490 บาท'], desc: 'จุดเริ่มต้นของผิวที่ได้รับการดูแลอย่างใส่ใจ', color: '#F5F2EC', annual: [] },
-    { level: 1, name: 'SIGNATURE', minStars: 10, maintStars: 8, discount: 0.10, discount2: 0.05, promoPass: 0, welcome: 'Mono-RF 1 ส่วนของหน้า', birthday: 'IV The Clarity หรือ The Fortitude 1 ครั้ง', access: ['ราคาสมาชิก: เครื่อง / IV / เลเซอร์ / พลาสม่า ลด 10% · ยาฉีด / สินค้า ลด 5%', 'รู้โปรใหม่ก่อน 24 ชั่วโมง และจองคิวก่อนสมาชิกทั่วไป', 'แลกวัคซีนไข้หวัดใหญ่ด้วย 2 ดาว (Seasonal Wellness)'], desc: 'ความงามที่เป็นเอกลักษณ์ในแบบของคุณ', color: '#9B918D', annual: [] },
-    { level: 2, name: 'PRESTIGE', minStars: 20, maintStars: 16, discount: 0.20, discount2: 0.10, promoPass: 2, welcome: 'The Duo — RF + HIFU 100 shots', birthday: 'Plasma Acne Clear หรือ HIFU 100 shots 1 ครั้ง', access: ['ราคาสมาชิก: เครื่อง / IV / เลเซอร์ / พลาสม่า ลด 20% · ยาฉีด / สินค้า ลด 10%', 'คอร์สเครื่อง / IV ลดเพิ่ม 5% · เดือนเกิดลดคอร์ส 10% 1 ครั้ง', 'Promo Pass ปีละ 2 ครั้ง · รู้โปรใหม่ก่อน 24 ชั่วโมง', 'Priority booking · วางแผนผิวรายปีกับแพทย์ ปีละ 2 ครั้ง'], desc: 'การดูแลที่ออกแบบมาเพื่อคุณโดยเฉพาะ', color: '#182E56', annual: ['Seasonal Wellness: วัคซีนไข้หวัดใหญ่ 1 เข็ม', 'Wellness Check: ตรวจระดับวิตามินดี (ฉีดวิตามินดีราคาสมาชิก 1,900 บาท เมื่อผลต่ำ)'] },
-    { level: 3, name: 'PRIVATE', minStars: 30, maintStars: 24, discount: 0.30, discount2: 0.15, promoPass: 4, welcome: 'The Duo + IV The Formulary Signature', birthday: 'Mono-RF ทั่วหน้า + คอ 1 ครั้ง', access: ['ราคาสมาชิก: เครื่อง / IV / เลเซอร์ / พลาสม่า ลด 30% · ยาฉีด / สินค้า ลด 15%', 'คอร์สเครื่อง / IV ลดเพิ่ม 10% · เดือนเกิดลดคอร์ส 15% 1 ครั้ง', 'Promo Pass ปีละ 4 ครั้ง · รู้โปรใหม่ก่อน 48 ชั่วโมงและกันโควตาโปรไลฟ์', 'Price Protection 14 วัน (คืนส่วนต่างเป็นดาว)', 'Priority consult กับหมอปิงปอง · Personal concierge ทาง LINE · นัดนอกเวลาทำการได้'], desc: 'ความใส่ใจระดับส่วนตัว จากแพทย์ถึงคุณ', color: '#141414', annual: ['Seasonal Wellness: วัคซีนไข้หวัดใหญ่ 1 เข็ม + ครอบครัว 1 ท่านในราคาทุน', 'Wellness Check: ตรวจระดับวิตามินดี + ฉีดวิตามินดี 1 เข็ม เมื่อผลต่ำ'] }
+    { level: 0, name: 'CLASSIC', minStars: 0, discount: 0, discount2: 0, promoPass: 0, welcome: 'IV The Restorative 1 ครั้ง', birthday: 'IV The Restorative หรือเลเซอร์รักแร้ 1 ครั้ง', access: ['สะสมดาวทุก 5,000 บาท', 'แลกของรางวัลได้ทันทีที่มีดาว', 'วัคซีนไข้หวัดใหญ่ราคาสมาชิก 490 บาท'], desc: 'จุดเริ่มต้นของผิวที่ได้รับการดูแลอย่างใส่ใจ', color: '#F5F2EC', annual: [], welcomeCond: 'สำหรับสมาชิกที่มียอดใช้บริการภายใน 3 เดือน', birthdayCond: 'ใช้กับราคาปกติ ยอดขั้นต่ำ [__] บาท' },
+    { level: 1, name: 'SIGNATURE', minStars: 10, maintStars: 8, discount: 0.10, discount2: 0.05, promoPass: 0, welcome: 'Mono-RF 1 ส่วนของหน้า', birthday: 'IV The Clarity หรือ The Fortitude 1 ครั้ง', access: ['ราคาสมาชิก: เครื่อง / IV / เลเซอร์ / พลาสม่า ลด 10% · ยาฉีด / สินค้า ลด 5%', 'รู้โปรใหม่ก่อน 24 ชั่วโมง และจองคิวก่อนสมาชิกทั่วไป', 'แลกวัคซีนไข้หวัดใหญ่ด้วย 2 ดาว (Seasonal Wellness)'], desc: 'ความงามที่เป็นเอกลักษณ์ในแบบของคุณ', color: '#9B918D', annual: [], birthdayCond: 'ใช้กับราคาปกติ ยอดขั้นต่ำ [__] บาท' },
+    { level: 2, name: 'PRESTIGE', minStars: 20, maintStars: 16, discount: 0.20, discount2: 0.10, promoPass: 2, welcome: 'The Duo — RF + HIFU 100 shots', birthday: 'Plasma Acne Clear หรือ HIFU 100 shots 1 ครั้ง', access: ['ราคาสมาชิก: เครื่อง / IV / เลเซอร์ / พลาสม่า ลด 20% · ยาฉีด / สินค้า ลด 10%', 'คอร์สเครื่อง / IV ลดเพิ่ม 5% · เดือนเกิดลดคอร์ส 10% 1 ครั้ง', 'Promo Pass ปีละ 2 ครั้ง · รู้โปรใหม่ก่อน 24 ชั่วโมง', 'Priority booking · วางแผนผิวรายปีกับแพทย์ ปีละ 2 ครั้ง'], desc: 'การดูแลที่ออกแบบมาเพื่อคุณโดยเฉพาะ', color: '#182E56', annual: ['Seasonal Wellness: วัคซีนไข้หวัดใหญ่ 1 เข็ม', 'Wellness Check: ตรวจระดับวิตามินดี (ฉีดวิตามินดีราคาสมาชิก 1,900 บาท เมื่อผลต่ำ)'], birthdayCond: 'ใช้กับราคาปกติ ยอดขั้นต่ำ [__] บาท' },
+    { level: 3, name: 'PRIVATE', minStars: 30, maintStars: 24, discount: 0.30, discount2: 0.15, promoPass: 4, welcome: 'The Duo + IV The Formulary Signature', birthday: 'Mono-RF ทั่วหน้า + คอ 1 ครั้ง', access: ['ราคาสมาชิก: เครื่อง / IV / เลเซอร์ / พลาสม่า ลด 30% · ยาฉีด / สินค้า ลด 15%', 'คอร์สเครื่อง / IV ลดเพิ่ม 10% · เดือนเกิดลดคอร์ส 15% 1 ครั้ง', 'Promo Pass ปีละ 4 ครั้ง · รู้โปรใหม่ก่อน 48 ชั่วโมงและกันโควตาโปรไลฟ์', 'Price Protection 14 วัน (คืนส่วนต่างเป็นดาว)', 'Priority consult กับหมอปิงปอง · Personal concierge ทาง LINE · นัดนอกเวลาทำการได้'], desc: 'ความใส่ใจระดับส่วนตัว จากแพทย์ถึงคุณ', color: '#141414', annual: ['Seasonal Wellness: วัคซีนไข้หวัดใหญ่ 1 เข็ม + ครอบครัว 1 ท่านในราคาทุน', 'Wellness Check: ตรวจระดับวิตามินดี + ฉีดวิตามินดี 1 เข็ม เมื่อผลต่ำ'], birthdayCond: 'ใช้กับราคาปกติ ยอดขั้นต่ำ [__] บาท' }
   ];
   var REWARDS = [
     ['R01', 'Booster Top-Up สูตรใดก็ได้ (เพิ่มใน IV ที่ซื้อ)', 'บริการ', 1, 0], ['R02', 'เลเซอร์ขน รักแร้ / แก้ม / หนวด 1 ครั้ง', 'บริการ', 2, 0],
@@ -44,9 +44,9 @@
     TIERS.forEach(function (t, i) { if (s12 >= t.minStars) level = i; });
     var t = TIERS[level], next = TIERS[level + 1];
     var claimed = state.rds.map(function (r) { return r.code; });
-    var welcome = claimed.indexOf('WELCOME-' + t.name) < 0 && level > 0 ? [{ code: 'WELCOME-' + t.name, tierName: t.name, gift: t.welcome, until: ymd(60) }] : [];
+    var welcome = claimed.indexOf('WELCOME-' + t.name) < 0 && level > 0 ? [{ code: 'WELCOME-' + t.name, tierName: t.name, gift: t.welcome, until: ymd(60), cond: t.welcomeCond || '', locked: false }] : [];
     var history = [];
-    state.txs.forEach(function (x) { history.push({ date: x.date, kind: x.amount > 0 ? 'purchase' : 'refund', label: x.amount > 0 ? 'ใช้บริการ' : 'คืนเงิน', amount: x.amount, stars: x.earned }); });
+    state.txs.forEach(function (x) { history.push({ date: x.date, kind: x.amount > 0 ? 'purchase' : 'refund', label: x.amount > 0 ? 'ใช้บริการ' : 'คืนเงิน', amount: x.amount, stars: x.earned, receipt: x.receipt }); });
     state.rds.forEach(function (r) { history.push({ date: r.date, kind: 'redeem', label: r.name, amount: null, stars: -r.stars }); });
     if (state.adjust) history.push({ date: ymd(0), kind: 'adjust', label: 'ดาวพิเศษ', amount: null, stars: state.adjust });
     history.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -59,11 +59,11 @@
       stars: { balance: balance, toNextStarBaht: B - (cum % B), expiring: balance > 2 ? { stars: 2, lastDay: ymd(41) } : null },
       rolling: { baht: rolling, stars: s12 },
       welcome: welcome,
-      birthday: { month: state.member.birthMonth, gift: t.birthday, available: claimed.indexOf('BIRTHDAY') < 0, usedThisYear: claimed.indexOf('BIRTHDAY') >= 0 },
+      birthday: { month: state.member.birthMonth, gift: t.birthday, cond: t.birthdayCond || '', available: claimed.indexOf('BIRTHDAY') < 0, usedThisYear: claimed.indexOf('BIRTHDAY') >= 0 },
       promoPass: t.promoPass ? { quota: t.promoPass, used: claimed.filter(function (c) { return c === 'PROMOPASS'; }).length, remaining: Math.max(0, t.promoPass - claimed.filter(function (c) { return c === 'PROMOPASS'; }).length), available: claimed.filter(function (c) { return c === 'PROMOPASS'; }).length < t.promoPass } : null,
       annual: (t.annual || []).map(function (g, i) { var c = 'ANNUAL-' + (i + 1); return { code: c, slot: i + 1, gift: g, available: claimed.indexOf(c) < 0, usedThisYear: claimed.indexOf(c) >= 0 }; }),
       rewards: REWARDS.map(function (r) { return { code: r[0], name: r[1], type: r[2], stars: r[3], minTier: r[4] ? TIERS[r[4]].name : null, tierOk: r[4] <= level, canRedeem: r[4] <= level && balance >= r[3] }; }),
-      tiers: TIERS, history: history.slice(0, 15), terms: TERMS
+      tiers: TIERS, history: history.slice(0, 40), terms: TERMS
     };
     if (forStaff) { v.member.phone = state.member.phone; v.member.hn = state.member.hn; v.member.status = 'ใช้งาน'; v.member.note = ''; }
     return v;

@@ -214,7 +214,7 @@
   </section>
 
   <section class="section hidden" id="ready-sec">
-    <div class="section-head"><div class="eyebrow">พร้อมใช้ตอนนี้</div></div>
+    <div class="section-head"><div class="eyebrow">สิทธิ์ของคุณตอนนี้</div></div>
     <div class="ready" id="ready"></div>
   </section>
 
@@ -401,12 +401,12 @@
 
     // ready now
     var ready = [];
-    (v.welcome || []).forEach(function (w) { ready.push({ t: 'Welcome ' + w.tierName, g: w.gift, s: 'ใช้ได้ถึง ' + d(w.until) }); });
-    if (v.birthday && v.birthday.available) ready.push({ t: 'ของขวัญเดือนเกิด', g: v.birthday.gift, s: 'ใช้ได้ภายในเดือนนี้' });
+    (v.welcome || []).forEach(function (w) { ready.push({ t: 'Welcome ' + w.tierName, g: w.gift, c: w.cond, s: w.locked ? w.lockReason + ' · ภายใน ' + d(w.until) : 'ใช้ได้ถึง ' + d(w.until), lock: w.locked }); });
+    if (v.birthday && v.birthday.available) ready.push({ t: 'ของขวัญเดือนเกิด', g: v.birthday.gift, c: v.birthday.cond, s: 'ใช้ได้ภายในเดือนนี้' });
     (v.annual || []).forEach(function (a) { if (a.available) ready.push({ t: 'สิทธิ์ประจำปี', g: a.gift, s: 'ใช้ได้ 1 ครั้งภายในปีนี้' }); });
     $('ready-sec').classList.toggle('hidden', !ready.length);
     $('ready').innerHTML = ready.map(function (r) {
-      return '<div class="ready-item"><span class="ready-mark"></span><div><div style="font-weight:500">' + esc(r.t) + '</div><div class="small">' + esc(r.g) + '</div><div class="xs muted">' + esc(r.s) + ' · แจ้งพนักงานพร้อมแสดง QR</div></div></div>';
+      return '<div class="ready-item"><span class="ready-mark"></span><div><div style="font-weight:500">' + esc(r.t) + '</div><div class="small">' + esc(r.g) + '</div>' + (r.c ? '<div class="xs muted" style="white-space:pre-line">' + esc(r.c) + '</div>' : '') + '<div class="xs muted">' + esc(r.s) + (r.lock ? '' : ' · แจ้งพนักงานพร้อมแสดง QR') + '</div></div></div>';
     }).join('');
 
     // benefits
@@ -421,8 +421,8 @@
       (pp ? '<div class="benefit"><div class="k">Promo Pass</div><div class="v">ซื้อราคาโปรที่จบไปไม่เกิน 60 วัน<div class="xs muted">ใช้ได้อีก ' + pp.remaining + ' จาก ' + pp.quota + ' ครั้งในปีนี้</div></div></div>' : '') +
       '<div class="benefit"><div class="k">ดาว</div><div class="v">ทุก ' + fmt(v.bahtPerStar) + ' บาท ได้ 1 ดาว</div></div>';
     $('tab-gift').innerHTML =
-      (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div></div></div>' : '') +
-      (t.birthday ? '<div class="benefit"><div class="k">เดือนเกิด</div><div class="v">' + esc(t.birthday) + (v.member.birthMonth ? '<div class="xs muted">เดือน' + esc(MONTHS[v.member.birthMonth - 1]) + '</div>' : '<div class="xs muted">แจ้งวันเกิดที่คลินิกเพื่อรับสิทธิ์</div>') + '</div></div>' : '') +
+      (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div>' + (t.welcomeCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.welcomeCond) + '</div>' : '') + '</div></div>' : '') +
+      (t.birthday ? '<div class="benefit"><div class="k">เดือนเกิด</div><div class="v">' + esc(t.birthday) + (v.member.birthMonth ? '<div class="xs muted">เดือน' + esc(MONTHS[v.member.birthMonth - 1]) + '</div>' : '<div class="xs muted">แจ้งวันเกิดที่คลินิกเพื่อรับสิทธิ์</div>') + (t.birthdayCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.birthdayCond) + '</div>' : '') + '</div></div>' : '') +
       (t.annual || []).map(function (a) { return '<div class="benefit"><div class="k">ประจำปี</div><div class="v">' + esc(a) + '<div class="xs muted">ปีละ 1 ครั้ง</div></div></div>'; }).join('');
     $('tab-access').innerHTML = (t.access || []).map(function (a) { return '<div class="benefit"><div class="k">—</div><div class="v">' + esc(a) + '</div></div>'; }).join('') || '<p class="muted small">—</p>';
 
@@ -440,7 +440,7 @@
     $('history').innerHTML = v.history.length ? v.history.map(function (h) {
       var st = h.stars ? '<span class="' + (h.stars > 0 ? 'plus' : 'minus') + ' num">' + (h.stars > 0 ? '+' : '') + h.stars + ' ' + STAR + '</span>' : '';
       var amt = h.amount ? '<div class="xs muted num">' + fmt(h.amount) + ' บาท</div>' : '';
-      return '<div class="hist"><div><div>' + esc(h.label) + '</div><div class="d">' + esc(d(h.date)) + '</div></div><div style="text-align:right">' + st + amt + '</div></div>';
+      return '<div class="hist"><div><div>' + esc(h.label) + '</div><div class="d">' + esc(d(h.date)) + (h.receipt ? ' · ใบเสร็จ ' + esc(h.receipt) : '') + '</div></div><div style="text-align:right">' + st + amt + '</div></div>';
     }).join('') : '<p class="muted small">ยังไม่มีรายการ</p>';
 
     // all tiers + terms
