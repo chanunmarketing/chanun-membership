@@ -90,17 +90,45 @@
   .ap { position: absolute; left: 3px; right: 3px; border-radius: 8px; padding: 3px 7px; font-size: 12px; line-height: 1.3; overflow: hidden; cursor: pointer; z-index: 1;
         background: #E9EEF6; border-left: 3px solid var(--blue); color: var(--ink); }
   .ap b { font-weight: 500; }
-  .ap.nonmember { background: #F3EFE6; border-left-color: #9B918D; }
-  .ap.st-done { background: #E6F2EC; border-left-color: #2E7D5B; }
-  .ap.st-noshow { background: #F8E9E7; border-left-color: #C0392B; opacity: .8; }
-  .ap.st-cancel { background: #F4F4F4; border-left-color: #BBB; color: #999; text-decoration: line-through; }
+  .ap .id { color: var(--ink-2); font-family: 'Jost', inherit; letter-spacing: .01em; }
+  .ap .nt { color: var(--ink-2); }
+  /* สีตามประเภทคนไข้: สมาชิก (มี CN) / มี HN ยังไม่สมัคร / คนไข้ใหม่ */
+  .cat-member { background: #E6ECF7 !important; border-left-color: #1F3A68 !important; }
+  .cat-hn { background: #FBF0D9 !important; border-left-color: #B8860B !important; }
+  .cat-new { background: #F7E6EC !important; border-left-color: #B0517A !important; }
+  .ap.st-done, .wk-item.st-done { opacity: .62; }
+  .ap.st-noshow, .wk-item.st-noshow { outline: 2px dashed #C0392B; outline-offset: -2px; }
+  .ap.st-cancel, .wk-item.st-cancel { background: #F4F4F4 !important; border-left-color: #BBB !important; color: #999; text-decoration: line-through; }
+  .tier { display: inline-block; font-size: 10px; letter-spacing: .06em; padding: 0 5px; border-radius: 4px; background: #1F3A68; color: #fff; vertical-align: 1px; }
+  .tier.t-CLASSIC { background: #EDEBE6; color: #4A4744; } .tier.t-SIGNATURE { background: #C9A85C; color: #fff; } .tier.t-PRESTIGE { background: #5A6382; } .tier.t-PRIVATE { background: #1B2236; }
+  .cal-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: 12px; color: var(--ink-2); margin: -4px 0 10px; }
+  .cal-legend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border-left: 3px solid; vertical-align: -3px; margin-right: 5px; }
+  #print-area { display: none; }
+  @media print {
+    @page { size: A4 landscape; margin: 9mm; }
+    body { background: #fff !important; }
+    body > :not(#print-area) { display: none !important; }
+    #print-area { display: block !important; font-size: 13px; color: #000; }
+    .pr-page { page-break-after: always; break-after: page; }
+    .pr-page:last-child { page-break-after: auto; break-after: auto; }
+    .pr-page h2 { font-size: 16px; margin: 0 0 2px; font-weight: 600; }
+    .pr-page .sub { font-size: 11px; margin-bottom: 8px; }
+    .pr-page table { width: 100%; border-collapse: collapse; }
+    .pr-page th, .pr-page td { border: 1px solid #999; padding: 4px 5px; vertical-align: top; text-align: left; }
+    .pr-page th { background: #EEE !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; font-weight: 600; white-space: nowrap; }
+    .pr-page tr { break-inside: avoid; }
+    .pr-page .c { width: 18px; text-align: center; }
+    .pr-page .nw { white-space: nowrap; }
+    .pr-foot { margin-top: 8px; font-size: 10px; color: #444; }
+  }
   .week-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 6px; overflow-x: auto; }
   .wk-col { border: 1px solid var(--line); border-radius: 10px; background: var(--white); min-height: 180px; }
   .wk-col.closed { background: #FBF8F2; }
   .wk-col.today { border-color: var(--blue); }
   .wk-h { padding: 8px; border-bottom: 1px solid var(--line); font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; }
   .wk-item { display: block; width: calc(100% - 8px); margin: 4px; text-align: left; border: 0; border-radius: 6px; padding: 4px 6px; font: inherit; font-size: 12px; cursor: pointer; background: #E9EEF6; }
-  .wk-item.nonmember { background: #F3EFE6; } .wk-item.st-done { background: #E6F2EC; } .wk-item.st-cancel { color: #999; text-decoration: line-through; background: #F4F4F4; } .wk-item.st-noshow { background: #F8E9E7; }
+  .wk-item { border-left: 3px solid transparent; }
+  .mo-cell .mo-it { border-left: 3px solid transparent; padding-left: 3px; border-radius: 3px; margin-top: 2px; }
   .mo-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   .mo-dow { font-size: 12px; color: var(--ink-2); text-align: center; padding: 4px 0; }
   .mo-cell { border: 1px solid var(--line); border-radius: 8px; background: var(--white); min-height: 92px; padding: 4px 6px; cursor: pointer; font-size: 12px; }
@@ -177,7 +205,13 @@
         <button type="button" data-m="week" aria-selected="false">สัปดาห์</button>
         <button type="button" data-m="month" aria-selected="false">เดือน</button>
       </div>
-      <button class="btn sm" type="button" id="cal-new">+ ลงนัด</button>
+      <div style="display:flex;gap:6px"><button class="btn ghost sm" type="button" id="cal-print">พิมพ์ตาราง</button><button class="btn sm" type="button" id="cal-new">+ ลงนัด</button></div>
+    </div>
+    <div class="cal-legend" aria-label="ความหมายของสี">
+      <span><span class="sw cat-member"></span>สมาชิกแล้ว (มี CN)</span>
+      <span><span class="sw cat-hn"></span>คนไข้เก่า มี HN ยังไม่สมัคร — ชวนสมัครสมาชิก</span>
+      <span><span class="sw cat-new"></span>คนไข้ใหม่ ยังไม่มี HN — เปิดประวัติใน APSX</span>
+      <span>· จาง = มาแล้ว · ขอบประแดง = ไม่มา · ขีดฆ่า = ยกเลิก</span>
     </div>
     <div id="cal-body"></div>
     <p class="xs muted" style="margin-top:8px">แตะช่องว่างในมุมมองรายวันเพื่อลงนัดเวลานั้น · แตะนัดเพื่อดูรายละเอียด แก้ไข หรือเปลี่ยนสถานะ</p>
@@ -270,9 +304,12 @@
         <div id="ap-chosen" class="hidden"></div>
         <div id="ap-search"><input class="input" id="ap-q" placeholder="ค้นหา รหัส / เบอร์ 4 ตัวท้าย / ชื่อ" autocomplete="off"><div class="ap-res" id="ap-res"></div></div>
       </div>
-      <div id="ap-guest" class="hidden row2">
-        <label class="field"><span>ชื่อคนไข้</span><input class="input" id="ap-name" maxlength="60"></label>
-        <label class="field"><span>เบอร์โทร</span><input class="input" id="ap-phone" inputmode="tel" maxlength="20"></label>
+      <div id="ap-guest" class="hidden">
+        <div class="row2">
+          <label class="field"><span>ชื่อ-นามสกุล</span><input class="input" id="ap-name" maxlength="60"></label>
+          <label class="field"><span>เบอร์โทร</span><input class="input" id="ap-phone" inputmode="tel" maxlength="20"></label>
+        </div>
+        <label class="field"><span>HN <span class="muted">(ถ้าเคยมาแล้ว — ไม่มีให้เว้นว่าง)</span></span><input class="input" id="ap-hn" maxlength="12" placeholder="HN002345" autocapitalize="characters"></label>
       </div>
       <div class="row2" style="margin-top:10px">
         <label class="field"><span>วันที่</span><input class="input" type="date" id="ap-date"></label>
@@ -297,6 +334,18 @@
     </div>
   </div>
 </div>
+<div class="modal hidden" id="pr-modal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <h3>พิมพ์ตารางนัด</h3>
+    <label class="field"><span>วันที่</span><input class="input" type="date" id="pr-date"></label>
+    <div class="field"><span>พิมพ์ให้ (แยกหน้าละคน)</span><div id="pr-provs" style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px"></div></div>
+    <label class="small" style="display:flex;gap:8px;align-items:center;margin:4px 0 6px"><input type="checkbox" id="pr-phone" checked> แสดงเบอร์โทร</label>
+    <label class="small" style="display:flex;gap:8px;align-items:center;margin:0 0 12px"><input type="checkbox" id="pr-cancel"> รวมนัดที่ยกเลิก</label>
+    <p class="xs muted" style="margin:0 0 12px">เอกสารมีข้อมูลส่วนบุคคล ใช้ในคลินิกเท่านั้นและทำลายเมื่อจบวัน · ในหน้าพิมพ์เลือก "บันทึกเป็น PDF" ได้</p>
+    <div class="row2"><button class="btn ghost" type="button" id="pr-close">ปิด</button><button class="btn" type="button" id="pr-go">พิมพ์</button></div>
+  </div>
+</div>
+<div id="print-area"></div>
 <script>
 (function () {
   'use strict';
@@ -650,7 +699,13 @@
   function dLong(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }); }
   function dShort(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', timeZone: 'Asia/Bangkok' }); }
   function monthLabel(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, 15)).toLocaleDateString('th-TH', { month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }); }
-  function stCls(a) { return (a.member ? '' : ' nonmember') + ({ 'มาแล้ว': ' st-done', 'ไม่มา': ' st-noshow', 'ยกเลิก': ' st-cancel' }[a.status] || ''); }
+  function catOf(a) { return a.cat || (a.member ? 'member' : (a.hn ? 'hn' : 'new')); }
+  function stCls(a) { return ' cat-' + catOf(a) + ({ 'มาแล้ว': ' st-done', 'ไม่มา': ' st-noshow', 'ยกเลิก': ' st-cancel' }[a.status] || ''); }
+  function fullWho(a) { var n = a.fullName || a.who || ''; return n + (a.nick && a.nick !== n ? ' (' + a.nick + ')' : ''); }
+  function fmtPhone(p) { var x = String(p || '').replace(/\D/g, ''); return x.length === 10 ? x.slice(0, 3) + '-' + x.slice(3, 6) + '-' + x.slice(6) : (p || ''); }
+  function tierTag(t) { return t ? '<span class="tier t-' + esc(String(t).toUpperCase()) + '">' + esc(t) + '</span>' : ''; }
+  function idLine(a) { return [a.hn ? esc(a.hn) : '', a.code ? esc(a.code) : ''].filter(Boolean).join(' · ') + (a.tier ? ' ' + tierTag(a.tier) : ''); }
+  function apTitle(a) { return [a.time + '–' + a.end, fullWho(a), a.hn, a.code, a.tier, fmtPhone(a.phone), a.typeName, a.note, a.status].filter(Boolean).join('\n'); }
   function weekStart(s) { var w = dow(s); return addDay(s, -((w + 6) % 7)); }
   function calRange() {
     if (cal.mode === 'day') return [cal.date, cal.date];
@@ -687,7 +742,7 @@
       var provs = D.providers, items = D.list.filter(function (a) { return a.date === cal.date; });
       var closed = closedOf(cal.date);
       var html = closed ? '<div class="cal-closed">' + esc(closed) + ' — ลงนัดได้ แต่ระบบจะเตือนก่อนบันทึก</div>' : '';
-      html += '<div class="day-wrap"><div class="day-grid" style="grid-template-columns:52px repeat(' + provs.length + ',minmax(140px,1fr))">';
+      html += '<div class="day-wrap"><div class="day-grid" style="grid-template-columns:52px repeat(' + provs.length + ',minmax(190px,1fr))">';
       html += '<div class="day-h"></div>' + provs.map(function (p) { var hh = provHrs(p, cal.date); return '<div class="day-h">' + esc(p.name) + (hh.start ? '<div class="xs muted">' + hh.start + '–' + hh.end + '</div>' : '') + '</div>'; }).join('');
       var times = '';
       for (var t = open; t <= close; t += 30) times += '<span style="top:' + ((t - open) / slot * ROW) + 'px">' + m2hm(t) + '</span>';
@@ -702,8 +757,12 @@
         if (nowM >= open && nowM <= close) col += '<div class="now" style="top:' + ((nowM - open) / slot * ROW) + 'px"></div>';
         items.filter(function (a) { return a.provider === p.code; }).forEach(function (a) {
           var top = Math.max(0, (hm2m(a.time) - open) / slot * ROW), h = Math.max(ROW - 2, a.minutes / slot * ROW - 2);
-          col += '<div class="ap' + stCls(a) + '" data-id="' + esc(a.id) + '" style="top:' + top + 'px;height:' + h + 'px"><b>' + a.time + '</b> ' + esc(a.who) +
-            '<div class="xs">' + esc(a.typeName) + (a.status !== 'นัดแล้ว' ? ' · ' + esc(a.status) : '') + '</div></div>';
+          var idl = idLine(a);
+          col += '<div class="ap' + stCls(a) + '" data-id="' + esc(a.id) + '" title="' + esc(apTitle(a)) + '" style="top:' + top + 'px;height:' + h + 'px"><b>' + a.time + '</b> ' + esc(fullWho(a)) +
+            (a.status !== 'นัดแล้ว' ? ' <span class="xs">· ' + esc(a.status) + '</span>' : '') +
+            (idl ? '<div class="xs id">' + idl + '</div>' : '') +
+            (a.phone ? '<div class="xs">' + esc(fmtPhone(a.phone)) + '</div>' : '') +
+            '<div class="xs nt">' + esc(a.typeName) + (a.note ? ' · ' + esc(a.note) : '') + '</div></div>';
         });
         html += col + '</div>';
       });
@@ -720,7 +779,7 @@
       for (var i = 0; i < 7; i++) {
         var day = addDay(a0, i), cl = closedOf(day), its = D.list.filter(function (a) { return a.date === day; });
         out += '<div class="wk-col' + (cl ? ' closed' : '') + (day === bkkToday() ? ' today' : '') + '"><div class="wk-h" data-day="' + day + '"><span>' + dShort(day) + '</span><span class="xs muted">' + (cl ? 'ปิด' : its.filter(function (a) { return a.status !== 'ยกเลิก'; }).length + ' นัด') + '</span></div>' +
-          its.map(function (a) { return '<button type="button" class="wk-item' + stCls(a) + '" data-id="' + esc(a.id) + '"><b>' + a.time + '</b> ' + esc(a.who) + '<div class="xs muted">' + esc(a.providerName) + '</div></button>'; }).join('') + '</div>';
+          its.map(function (a) { return '<button type="button" class="wk-item' + stCls(a) + '" data-id="' + esc(a.id) + '" title="' + esc(apTitle(a)) + '"><b>' + a.time + '</b> ' + esc(fullWho(a)) + '<div class="xs muted">' + (a.hn || a.code ? esc([a.hn, a.code].filter(Boolean).join(' · ')) + ' · ' : '') + esc(a.providerName) + '</div></button>'; }).join('') + '</div>';
       }
       $('cal-body').innerHTML = out + '</div>';
     } else {
@@ -728,7 +787,7 @@
       for (var k = 0; k < 42; k++) {
         var dd = addDay(r[0], k), cls = closedOf(dd), list = D.list.filter(function (a) { return a.date === dd && a.status !== 'ยกเลิก'; });
         html2 += '<div class="mo-cell' + (dd.slice(0, 7) !== mo ? ' other' : '') + (cls ? ' closed' : '') + (dd === bkkToday() ? ' today' : '') + '" data-day="' + dd + '"><div class="n">' + (+dd.slice(8)) + (cls ? ' <span class="xs muted">ปิด</span>' : '') + '</div>' +
-          list.slice(0, 3).map(function (a) { return '<div class="mo-it">' + a.time + ' ' + esc(a.who) + '</div>'; }).join('') + (list.length > 3 ? '<div class="mo-it">+' + (list.length - 3) + ' นัด</div>' : '') + '</div>';
+          list.slice(0, 3).map(function (a) { return '<div class="mo-it' + stCls(a) + '">' + a.time + ' ' + esc(a.who) + '</div>'; }).join('') + (list.length > 3 ? '<div class="mo-it">+' + (list.length - 3) + ' นัด</div>' : '') + '</div>';
       }
       $('cal-body').innerHTML = html2 + '</div>';
     }
@@ -752,6 +811,42 @@
     }
   });
   $('cal-new').addEventListener('click', function () { bookForm({ date: cal.date || bkkToday() }); });
+
+  /* ----- พิมพ์ตารางนัด (แยกหน้าตามคุณหมอ / ผู้ช่วย) ----- */
+  $('cal-print').addEventListener('click', function () {
+    if (!cal.meta) return;
+    $('pr-date').value = cal.date || bkkToday();
+    $('pr-provs').innerHTML = cal.meta.providers.map(function (p) { return '<label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" value="' + esc(p.code) + '" checked> ' + esc(p.name) + '</label>'; }).join('');
+    $('pr-modal').classList.remove('hidden');
+  });
+  $('pr-close').addEventListener('click', function () { $('pr-modal').classList.add('hidden'); });
+  $('pr-modal').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
+  $('pr-go').addEventListener('click', function () {
+    var b = this, day = $('pr-date').value || cal.date, phone = $('pr-phone').checked, withCancel = $('pr-cancel').checked;
+    var picked = Array.prototype.filter.call($('pr-provs').querySelectorAll('input'), function (x) { return x.checked; }).map(function (x) { return x.value; });
+    if (!picked.length) return toast('เลือกอย่างน้อย 1 คน', true);
+    busy(b, true);
+    api({ action: 'staff.appts', from: day, to: day }).then(function (D) {
+      busy(b, false, 'พิมพ์');
+      var mark = { member: '●', hn: '◐', 'new': '○' };
+      var pages = D.providers.filter(function (p) { return picked.indexOf(p.code) >= 0; }).map(function (p) {
+        var list = D.list.filter(function (a) { return a.date === day && a.provider === p.code && (withCancel || a.status !== 'ยกเลิก'); });
+        var hh = provHrs(p, day), cl = (D.closed || []).filter(function (x) { return x.date === day; })[0];
+        var rows = list.map(function (a) {
+          return '<tr><td class="c">☐</td><td class="nw"><b>' + a.time + '</b>–' + a.end + '</td><td class="c">' + mark[catOf(a)] + '</td><td>' + esc(fullWho(a)) + '</td><td class="nw">' + esc(a.hn || '') + '</td><td class="nw">' + esc(a.code || '') + '</td><td class="nw">' + esc(a.tier || '') + '</td>' +
+            (phone ? '<td class="nw">' + esc(fmtPhone(a.phone)) + '</td>' : '') + '<td>' + esc(a.typeName) + '</td><td>' + esc(a.note || '') + '</td><td class="nw">' + (a.status === 'นัดแล้ว' ? '' : esc(a.status)) + '</td></tr>';
+        }).join('');
+        return '<section class="pr-page"><h2>ตารางนัด · ' + esc(p.name) + '</h2><div class="sub">' + esc(dLong(day)) + (hh.start ? ' · เวลาทำงาน ' + hh.start + '–' + hh.end : '') + ' · ' + list.length + ' นัด' + (cl ? ' · ⚠ ' + esc(cl.closed) : '') + '</div>' +
+          '<table><thead><tr><th class="c">✓</th><th>เวลา</th><th class="c"></th><th>ชื่อ-นามสกุล</th><th>HN</th><th>CN</th><th>ระดับ</th>' + (phone ? '<th>เบอร์โทร</th>' : '') + '<th>ประเภทนัด</th><th>หมายเหตุ</th><th>สถานะ</th></tr></thead><tbody>' +
+          (rows || '<tr><td colspan="' + (phone ? 11 : 10) + '">ไม่มีนัด</td></tr>') + '</tbody></table>' +
+          '<div class="pr-foot">● สมาชิกแล้ว (มี CN) &nbsp; ◐ มี HN ยังไม่สมัคร &nbsp; ○ คนไข้ใหม่ ยังไม่มี HN &nbsp;·&nbsp; พิมพ์ ' + new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) + ' &nbsp;·&nbsp; เอกสารภายใน มีข้อมูลส่วนบุคคล ทำลายเมื่อจบวัน</div></section>';
+      });
+      $('print-area').innerHTML = pages.join('');
+      $('pr-modal').classList.add('hidden');
+      setTimeout(function () { window.print(); }, 50);
+    }).catch(function (err) { busy(b, false, 'พิมพ์'); onErr(err); });
+  });
+  window.addEventListener('afterprint', function () { $('print-area').innerHTML = ''; });
 
   /* ----- ฟอร์มลงนัด ----- */
   var ap = { who: 'member', member: null, id: null, editing: null };
@@ -815,7 +910,7 @@
       if ($('ap-date').value === bkkToday()) { var n = new Date(Date.now() + 7 * 3600e3), nm = n.getUTCHours() * 60 + n.getUTCMinutes(); st = Math.max(st, Math.ceil(nm / slot) * slot); }
       if (st < hm2m(cal.meta.hours.close)) $('ap-time').value = m2hm(st);
     }
-    $('ap-note').value = o.note || ''; $('ap-name').value = o.name || ''; $('ap-phone').value = o.phone || '';
+    $('ap-note').value = o.note || ''; $('ap-name').value = o.name || ''; $('ap-phone').value = o.phone || ''; $('ap-hn').value = o.hn || '';
     $('ap-q').value = ''; $('ap-res').innerHTML = ''; $('ap-warn').innerHTML = ''; $('ap-save').textContent = 'บันทึกนัด';
     if (o.code) { setWho('member'); setMember({ code: o.code, name: o.memberName || o.code }); }
     else if (o.name) { setWho('guest'); setMember(null); }
@@ -829,7 +924,7 @@
     var body = { action: 'staff.apptSave', date: $('ap-date').value, time: $('ap-time').value, minutes: +$('ap-min').value, provider: $('ap-prov').value, type: $('ap-type').value, note: $('ap-note').value.trim() };
     if (ap.id) body.id = ap.id;
     if (ap.who === 'member') { if (!ap.member) return toast('เลือกสมาชิกก่อน หรือสลับเป็น "ไม่ใช่สมาชิก"', true); body.code = ap.member.code; }
-    else { body.name = $('ap-name').value.trim(); body.phone = $('ap-phone').value.trim(); }
+    else { body.name = $('ap-name').value.trim(); body.phone = $('ap-phone').value.trim(); body.hn = $('ap-hn').value.trim(); }
     if (confirmIt) body.confirm = true;
     busy(b, true);
     api(body).then(function () {
@@ -858,8 +953,11 @@
     var a = findAppt(id); if (!a) return;
     ap.view = a;
     $('ap-v-title').textContent = a.time + '–' + a.end + ' · ' + dLong(a.date);
-    $('ap-v-body').innerHTML = '<div><span class="k">คนไข้</span>' + esc(a.fullName || a.who) + (a.code ? ' <span class="xs muted">' + esc(a.code) + '</span>' : ' <span class="xs muted">(ไม่ใช่สมาชิก)</span>') + '</div>' +
-      '<div><span class="k">เบอร์โทร</span>' + esc(a.phone || '-') + '</div>' +
+    var catTxt = { member: 'สมาชิกแล้ว', hn: 'มี HN ยังไม่สมัครสมาชิก', 'new': 'คนไข้ใหม่ ยังไม่มี HN' }[catOf(a)];
+    $('ap-v-body').innerHTML = '<div><span class="k">คนไข้</span>' + esc(fullWho(a)) + ' <span class="xs muted">(' + catTxt + (a.linked ? ' · จับคู่จาก HN' : '') + ')</span></div>' +
+      '<div><span class="k">HN</span>' + esc(a.hn || '-') + '</div>' +
+      '<div><span class="k">CN</span>' + esc(a.code || '-') + (a.tier ? ' ' + tierTag(a.tier) : '') + '</div>' +
+      '<div><span class="k">เบอร์โทร</span>' + esc(fmtPhone(a.phone) || '-') + '</div>' +
       '<div><span class="k">ประเภทนัด</span>' + esc(a.typeName) + ' · ' + a.minutes + ' นาที</div>' +
       '<div><span class="k">ผู้ให้บริการ</span>' + esc(a.providerName) + '</div>' +
       (a.note ? '<div><span class="k">หมายเหตุ</span>' + esc(a.note) + '</div>' : '') +
@@ -885,7 +983,7 @@
   });
   $('ap-v-edit').addEventListener('click', function () {
     var a = ap.view; if (!a) return;
-    bookForm({ id: a.id, date: a.date, time: a.time, minutes: a.minutes, provider: a.provider, type: a.type, note: a.note, code: a.code, memberName: a.fullName, name: a.code ? '' : a.who, phone: a.code ? '' : a.phone });
+    bookForm({ id: a.id, date: a.date, time: a.time, minutes: a.minutes, provider: a.provider, type: a.type, note: a.note, code: a.code, memberName: a.fullName, name: a.code ? '' : a.who, phone: a.code ? '' : a.phone, hn: a.code ? '' : a.hn });
   });
 
   /* ----- นัดในหน้าสมาชิก ----- */
