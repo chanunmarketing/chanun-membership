@@ -678,6 +678,7 @@
     $('cal-body').innerHTML = '<p class="small muted">กำลังโหลด…</p>';
     api({ action: 'staff.appts', from: r[0], to: r[1] }).then(function (res) { cal.data = res; cal.meta = res; renderCal(); }).catch(onErr);
   }
+  function provHrs(p, day) { var we = ((cal.data || cal.meta).weekendLike || []).indexOf(day) >= 0; return { start: (we && p.startWe) || p.start, end: (we && p.endWe) || p.end }; }
   function closedOf(day) { var c = (cal.data.closed || []).filter(function (x) { return x.date === day; })[0]; return c ? c.closed : ''; }
   function renderCal() {
     var D = cal.data;
@@ -687,7 +688,7 @@
       var closed = closedOf(cal.date);
       var html = closed ? '<div class="cal-closed">' + esc(closed) + ' — ลงนัดได้ แต่ระบบจะเตือนก่อนบันทึก</div>' : '';
       html += '<div class="day-wrap"><div class="day-grid" style="grid-template-columns:52px repeat(' + provs.length + ',minmax(140px,1fr))">';
-      html += '<div class="day-h"></div>' + provs.map(function (p) { return '<div class="day-h">' + esc(p.name) + (p.start ? '<div class="xs muted">' + p.start + '–' + p.end + '</div>' : '') + '</div>'; }).join('');
+      html += '<div class="day-h"></div>' + provs.map(function (p) { var hh = provHrs(p, cal.date); return '<div class="day-h">' + esc(p.name) + (hh.start ? '<div class="xs muted">' + hh.start + '–' + hh.end + '</div>' : '') + '</div>'; }).join('');
       var times = '';
       for (var t = open; t <= close; t += 30) times += '<span style="top:' + ((t - open) / slot * ROW) + 'px">' + m2hm(t) + '</span>';
       html += '<div class="day-times" style="height:' + H + 'px">' + times + '</div>';
@@ -695,8 +696,9 @@
       provs.forEach(function (p) {
         var col = '<div class="day-col" data-prov="' + esc(p.code) + '" style="height:' + H + 'px">';
         for (var i = 0; i < rows; i++) col += '<div class="line' + (((open + i * slot) % 60) === 0 ? ' hr' : '') + '" style="top:' + (i * ROW) + 'px"></div>';
-        if (p.start && hm2m(p.start) > open) col += '<div class="off" style="top:0;height:' + ((hm2m(p.start) - open) / slot * ROW) + 'px"></div>';
-        if (p.end && hm2m(p.end) < close) col += '<div class="off" style="top:' + ((hm2m(p.end) - open) / slot * ROW) + 'px;bottom:0"></div>';
+        var hh = provHrs(p, cal.date);
+        if (hh.start && hm2m(hh.start) > open) col += '<div class="off" style="top:0;height:' + ((hm2m(hh.start) - open) / slot * ROW) + 'px"></div>';
+        if (hh.end && hm2m(hh.end) < close) col += '<div class="off" style="top:' + ((hm2m(hh.end) - open) / slot * ROW) + 'px;bottom:0"></div>';
         if (nowM >= open && nowM <= close) col += '<div class="now" style="top:' + ((nowM - open) / slot * ROW) + 'px"></div>';
         items.filter(function (a) { return a.provider === p.code; }).forEach(function (a) {
           var top = Math.max(0, (hm2m(a.time) - open) / slot * ROW), h = Math.max(ROW - 2, a.minutes / slot * ROW - 2);
@@ -809,7 +811,7 @@
     $('ap-prov').value = o.provider || provFor(t && t.kind);
     if (!o.time) {  // ค่าเริ่ม: เวลาเริ่มงานของคุณหมอ/ผู้ช่วย หรือช่วงถัดไปของวันนี้
       var pv = cal.meta.providers.filter(function (x) { return x.code === $('ap-prov').value; })[0], slot = cal.meta.hours.slot;
-      var st = Math.max(hm2m(cal.meta.hours.open), pv && pv.start ? hm2m(pv.start) : 0);
+      var ph = pv ? provHrs(pv, $('ap-date').value) : {}, st = Math.max(hm2m(cal.meta.hours.open), ph.start ? hm2m(ph.start) : 0);
       if ($('ap-date').value === bkkToday()) { var n = new Date(Date.now() + 7 * 3600e3), nm = n.getUTCHours() * 60 + n.getUTCMinutes(); st = Math.max(st, Math.ceil(nm / slot) * slot); }
       if (st < hm2m(cal.meta.hours.close)) $('ap-time').value = m2hm(st);
     }

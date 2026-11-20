@@ -73,10 +73,11 @@
     if (!pr.isPackage) pr.items.forEach(function (it) { care.logs.push({ date: ymd(0), plan: pl.id, item: it.name, use: 1 }); });
   }
   // ปฏิทินนัด (ตัวอย่าง)
-  var APROV = [{ code: 'DR1', name: 'หมอปิงปอง', kind: 'แพทย์', start: '13:00', end: '20:00' }, { code: 'TH1', name: 'ผู้ช่วย 1', kind: 'ผู้ช่วย', start: '11:00', end: '20:00' }, { code: 'TH2', name: 'ผู้ช่วย 2', kind: 'ผู้ช่วย', start: '11:00', end: '20:00' }];
-  var ATYPES = [{ code: 'CONSULT', name: 'ปรึกษาแพทย์', minutes: 30, kind: 'แพทย์' }, { code: 'FOLLOWUP', name: 'ติดตามผล', minutes: 15, kind: 'แพทย์' },
-    { code: 'INJECT', name: 'หัตถการฉีด (Botox / Filler / Skin booster / PN)', minutes: 30, kind: 'แพทย์' }, { code: 'HIFU', name: 'HIFU', minutes: 60, kind: 'แพทย์' },
-    { code: 'RF', name: 'Exilis Mono-RF', minutes: 45, kind: 'ผู้ช่วย' }, { code: 'IV', name: 'IV Drip', minutes: 60, kind: 'ผู้ช่วย' }, { code: 'OTHER', name: 'อื่นๆ', minutes: 30, kind: '' }];
+  var APROV = [{ code: 'DR1', name: 'หมอปิงปอง', kind: 'แพทย์', start: '13:00', end: '19:30', startWe: '12:00', endWe: '19:30' }, { code: 'TH1', name: 'ผู้ช่วย 1', kind: 'ผู้ช่วย', start: '11:00', end: '20:00' }, { code: 'TH2', name: 'ผู้ช่วย 2', kind: 'ผู้ช่วย', start: '11:00', end: '20:00' }];
+  var ATYPES = [{ code: 'CONSULT', name: 'ปรึกษาแพทย์', minutes: 60, kind: 'แพทย์' }, { code: 'FOLLOWUP', name: 'ติดตามผล', minutes: 30, kind: 'แพทย์' },
+    { code: 'INJECT', name: 'หัตถการฉีด (Botox / Skin booster / PN)', minutes: 60, kind: 'แพทย์' }, { code: 'FILLER', name: 'Filler', minutes: 90, kind: 'แพทย์', group: 'Filler', max: 3, gap: 60 },
+    { code: 'HIFU', name: 'HIFU', minutes: 90, kind: 'แพทย์' }, { code: 'RF', name: 'Exilis Elite Mono-RF', minutes: 60, kind: 'ผู้ช่วย', group: 'Elite', max: 3, gap: 60 },
+    { code: 'IV', name: 'IV Drip', minutes: 90, kind: 'ผู้ช่วย' }, { code: 'OTHER', name: 'อื่นๆ', minutes: 60, kind: '' }];
   var appts = [
     { id: 'AP000001', date: ymd(0), time: '14:00', minutes: 30, provider: 'DR1', type: 'CONSULT', code: '', name: 'คุณเอ', phone: '0812345678', note: 'นัดผ่าน LINE', status: 'นัดแล้ว' },
     { id: 'AP000002', date: ymd(0), time: '15:30', minutes: 60, provider: 'DR1', type: 'HIFU', code: 'CH0007', name: '', phone: '', note: '', status: 'นัดแล้ว' },
@@ -85,7 +86,8 @@
   ];
   function hm(s) { var p = s.split(':'); return (+p[0]) * 60 + (+p[1]); }
   function mhm(n) { return ('0' + Math.floor(n / 60)).slice(-2) + ':' + ('0' + (n % 60)).slice(-2); }
-  function closedDemo(day) { var p = day.split('-'), dt = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])), w = dt.getUTCDay(); if (w === 2) return 'คลินิกปิดทุกวันอังคาร'; if (w === 3 && Math.ceil(+p[2] / 7) === 3) return 'คลินิกปิดวันพุธที่ 3 ของเดือน'; return ''; }
+  function closedDemo(day) { var p = day.split('-'), dt = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])), w = dt.getUTCDay(); if (w === 2) return 'คลินิกปิดทุกวันอังคาร'; return ''; }
+  function weDemo(day) { var p = day.split('-'), w = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay(); return w === 0 || w === 6; }
   function apPub(a, forStaff) {
     var v = { id: a.id, date: a.date, time: a.time, minutes: a.minutes, end: mhm(hm(a.time) + a.minutes), status: a.status };
     if (!forStaff) return v;
@@ -203,8 +205,9 @@
             }
             case 'staff.appts': {
               var from = b.from || ymd(0), to = b.to || from, closed = [], dd = from;
-              while (dd <= to) { var c = closedDemo(dd); if (c) closed.push({ date: dd, closed: c }); var q = dd.split('-'); dd = new Date(Date.UTC(+q[0], +q[1] - 1, +q[2] + 1)).toISOString().slice(0, 10); }
-              return resolve({ installed: true, today: ymd(0), hours: { open: '11:00', close: '20:00', slot: 15 }, closed: closed, providers: APROV, types: ATYPES,
+              var wel = [];
+              while (dd <= to) { var c = closedDemo(dd); if (c) closed.push({ date: dd, closed: c }); if (weDemo(dd)) wel.push(dd); var q = dd.split('-'); dd = new Date(Date.UTC(+q[0], +q[1] - 1, +q[2] + 1)).toISOString().slice(0, 10); }
+              return resolve({ installed: true, today: ymd(0), hours: { open: '11:00', close: '20:00', slot: 15 }, closed: closed, weekendLike: wel, providers: APROV, types: ATYPES,
                 list: appts.filter(function (a) { return a.date >= from && a.date <= to; }).sort(function (x, y) { return (x.date + x.time) < (y.date + y.time) ? -1 : 1; }).map(function (a) { return apPub(a, true); }) });
             }
             case 'staff.apptSave': {
@@ -213,7 +216,14 @@
               var w = [], s0 = hm(b.time), e0 = s0 + (+b.minutes), pv = APROV.filter(function (x) { return x.code === b.provider; })[0];
               var cl = closedDemo(b.date); if (cl) w.push(cl);
               if (s0 < 660 || e0 > 1200) w.push('นอกเวลาคลินิก (11:00–20:00)');
-              if (pv && (s0 < hm(pv.start) || e0 > hm(pv.end))) w.push('นอกเวลาของ' + pv.name + ' (' + pv.start + '–' + pv.end + ')');
+              var we0 = weDemo(b.date), ps = (we0 && pv && pv.startWe) || (pv && pv.start), pe = (we0 && pv && pv.endWe) || (pv && pv.end);
+              if (pv && (s0 < hm(ps) || e0 > hm(pe))) w.push('นอกเวลาของ' + pv.name + ' (' + ps + '–' + pe + ')');
+              var ty = ATYPES.filter(function (x) { return x.code === b.type; })[0];
+              if (ty && ty.group) {
+                var same = appts.filter(function (o) { var ot = ATYPES.filter(function (x) { return x.code === o.type; })[0]; return o.id !== b.id && o.status !== 'ยกเลิก' && o.date === b.date && ot && ot.group === ty.group; });
+                if (same.length >= ty.max) w.push('เคส ' + ty.group + ' วันนี้ครบ ' + ty.max + ' เคสแล้ว');
+                same.forEach(function (o) { if (Math.abs(hm(o.time) - s0) < ty.gap) w.push('ห่างจากเคส ' + ty.group + ' เวลา ' + o.time + ' ไม่ถึง ' + ty.gap + ' นาที'); });
+              }
               appts.forEach(function (o) { if (o.id === b.id || o.status === 'ยกเลิก' || o.date !== b.date || o.provider !== b.provider) return; var os = hm(o.time), oe = os + o.minutes; if (s0 < oe && os < e0) w.push('ชนกับนัด ' + o.time + '–' + mhm(oe) + ' ' + (apPub(o, true).who || '') + ' ของ' + (pv ? pv.name : '')); });
               if (w.length && b.confirm !== true) fail('CONFIRM_APPT', w.join('\n'));
               var rec = b.id ? appts.filter(function (x) { return x.id === b.id; })[0] : null;
