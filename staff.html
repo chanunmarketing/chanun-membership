@@ -102,9 +102,10 @@
 
     <form id="p-buy" class="panel">
       <label class="field"><span>ยอดชำระจริงหลังส่วนลด (บาท) — คืนเงินใส่ติดลบ</span><input class="input num" id="amount" inputmode="decimal" autocomplete="off" required></label>
-      <label class="field"><span>เลขใบเสร็จ (จาก APSX)</span><input class="input" id="receipt" autocomplete="off" required maxlength="40"></label>
+      <label class="field"><span>เลขใบเสร็จ (จาก APSX เช่น RE202611190001)</span><input class="input" id="receipt" autocomplete="off" autocapitalize="characters" spellcheck="false" required maxlength="40" style="text-transform:uppercase"></label>
       <label class="field"><span>หมายเหตุ <span class="muted">(ห้ามใส่ชื่อหัตถการ/อาการ)</span></span><input class="input" id="note" maxlength="120"></label>
       <div class="preview hidden" id="buy-preview"></div>
+      <div id="buy-warn"></div>
       <button class="btn block" type="submit" id="buy-btn">บันทึก</button>
     </form>
 
@@ -210,7 +211,7 @@
   /* ---------- member ---------- */
   function openMember(code) {
     $('results').innerHTML = '';
-    api({ action: 'staff.member', code: code }).then(function (r) { $('banner').innerHTML = ''; render(r.view); }).catch(onErr);
+    api({ action: 'staff.member', code: code }).then(function (r) { $('banner').innerHTML = ''; clearWarn(); render(r.view); }).catch(onErr);
   }
 
   function render(v) {
@@ -285,17 +286,39 @@
     p.innerHTML = amt > 0 ? 'จะได้ <b>' + gain + ' ดาว</b> · หลังบันทึกเหลืออีก ' + fmt(B - ((rem + amt) % B)) + ' บาทถึงดาวถัดไป'
       : 'คืนเงิน: หักดาว ' + Math.abs(gain) + ' ดาว';
   }
-  $('amount').addEventListener('input', updatePreview);
-  $('p-buy').addEventListener('submit', function (e) {
-    e.preventDefault(); if (!cur) return;
-    var btn = $('buy-btn'); busy(btn, true);
-    api({ action: 'staff.purchase', code: cur.member.code, amount: $('amount').value, receipt: $('receipt').value.trim(), note: $('note').value.trim() }).then(function (r) {
-      $('amount').value = ''; $('receipt').value = ''; $('note').value = '';
+  function normReceipt(s) { return String(s || '').toUpperCase().replace(/\s+/g, ''); }
+  function clearWarn() { $('buy-warn').innerHTML = ''; $('buy-btn').classList.remove('hidden'); }
+  $('amount').addEventListener('input', function () { updatePreview(); clearWarn(); });
+  $('receipt').addEventListener('input', clearWarn);
+  $('receipt').addEventListener('blur', function () { $('receipt').value = normReceipt($('receipt').value); });
+  function submitPurchase(confirmDup) {
+    if (!cur) return;
+    var btn = confirmDup ? $('buy-warn').querySelector('[data-x="yes"]') : $('buy-btn');
+    busy(btn, true);
+    var body = { action: 'staff.purchase', code: cur.member.code, amount: $('amount').value, receipt: normReceipt($('receipt').value), note: $('note').value.trim() };
+    if (confirmDup) body.confirmDup = true;
+    api(body).then(function (r) {
+      $('amount').value = ''; $('receipt').value = ''; $('note').value = ''; clearWarn();
       render(r.view);
       var gained = r.view.stars.balance - r.starsBefore;
       toast('บันทึกแล้ว ' + (gained >= 0 ? '+' : '') + gained + ' ดาว');
       if (r.tierUp) $('banner').innerHTML = '<div class="banner"><div class="eyebrow" style="color:#fff;opacity:.8">Tier up</div><div style="font-size:17px;margin-top:4px">เลื่อนเป็น <b>' + esc(r.view.tier.name) + '</b> แล้ว — แจ้งสมาชิกและมอบ Welcome: ' + esc(r.view.tier.welcome) + '</div></div>';
-    }).catch(onErr).then(function () { busy(btn, false, 'บันทึก'); });
+    }).catch(function (err) {
+      if (err.code === 'CONFIRM_DUPLICATE' && !confirmDup) {
+        $('buy-warn').innerHTML = '<div class="confirm" style="margin:0 0 12px"><div style="font-weight:500">อาจเป็นบิลซ้ำ</div><div class="small" style="margin:4px 0 12px">' + esc(err.message) +
+          '</div><div class="row"><button class="btn ghost" type="button" data-x="no">ยกเลิก</button><button class="btn" type="button" data-x="yes">ยืนยัน เป็นบิลใหม่</button></div></div>';
+        $('buy-btn').classList.add('hidden');
+        $('buy-warn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+      onErr(err);
+    }).then(function () { if (btn && document.body.contains(btn)) busy(btn, false, confirmDup ? 'ยืนยัน เป็นบิลใหม่' : 'บันทึก'); });
+  }
+  $('p-buy').addEventListener('submit', function (e) { e.preventDefault(); submitPurchase(false); });
+  $('buy-warn').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-x]'); if (!b) return;
+    if (b.dataset.x === 'no') { clearWarn(); return; }
+    submitPurchase(true);
   });
 
   /* ---------- adjust ---------- */

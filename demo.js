@@ -31,7 +31,7 @@
   };
   // สร้างประวัติตัวอย่าง
   var total = spendByTier[Math.min(3, Math.max(0, tierParam))], parts = [0.18, 0.27, 0.12, 0.25, 0.18];
-  parts.forEach(function (p, i) { state.txs.push({ date: ymd(-200 + i * 45), amount: Math.round(total * p / 100) * 100, receipt: 'INV-' + (2401 + i) }); });
+  parts.forEach(function (p, i) { var dt = ymd(-200 + i * 45); state.txs.push({ date: dt, amount: Math.round(total * p / 100) * 100, receipt: 'RE' + dt.replace(/-/g, '') + (2401 + i) }); });
   if (total >= 50000) state.rds.push({ date: ymd(-40), code: 'R09', name: 'HIFU U-One 100 shots', stars: 8 });
 
   function view(forStaff) {
@@ -85,8 +85,17 @@
             case 'staff.purchase':
               before = view(true);
               var amt = Number(String(b.amount).replace(/,/g, '')); if (!amt) fail('VALIDATION', 'กรุณากรอกยอดชำระ');
-              if (!b.receipt) fail('VALIDATION', 'กรุณากรอกเลขใบเสร็จ');
-              state.txs.push({ date: ymd(0), amount: amt, receipt: b.receipt });
+              var rc = String(b.receipt || '').toUpperCase().replace(/\s+/g, '');
+              if (!rc) fail('VALIDATION', 'กรุณากรอกเลขใบเสร็จ');
+              if (amt > 0) {
+                var rm = /^RE(\d{4})(\d{2})(\d{2})\d{4}(-\d{1,2})?$/.exec(rc);
+                if (!rm) fail('VALIDATION', 'เลขใบเสร็จไม่ตรงรูปแบบ APSX (RE ตามด้วยตัวเลข 12 หลัก เช่น RE202611190001) กรุณาตรวจสอบ');
+                if (rm[1] + '-' + rm[2] + '-' + rm[3] > ymd(1)) fail('VALIDATION', 'เลขใบเสร็จเป็นวันที่ในอนาคต กรุณาตรวจสอบ');
+                if (state.txs.some(function (t) { return t.amount > 0 && t.receipt === rc; })) fail('DUPLICATE', 'เลขใบเสร็จ ' + rc + ' ถูกบันทึกไปแล้ว');
+                var near = state.txs.filter(function (t) { return t.amount === amt && t.date >= ymd(-7); })[0];
+                if (near && b.confirmDup !== true) fail('CONFIRM_DUPLICATE', 'สมาชิกนี้มียอด ' + amt.toLocaleString('en-US') + ' บาท เมื่อ ' + near.date + ' (ใบเสร็จ ' + near.receipt + ') บันทึกไว้แล้ว ถ้าเป็นบิลใหม่จริงให้กดยืนยัน');
+              }
+              state.txs.push({ date: ymd(0), amount: amt, receipt: rc });
               var after = view(true); return resolve({ view: after, tierUp: after.tier.level > before.tier.level, starsBefore: before.stars.balance });
             case 'staff.redeem':
               before = view(true);
