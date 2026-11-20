@@ -99,6 +99,8 @@
   .ap.st-done, .wk-item.st-done { opacity: .62; }
   .ap.st-noshow, .wk-item.st-noshow { outline: 2px dashed #C0392B; outline-offset: -2px; }
   .ap.st-cancel, .wk-item.st-cancel { background: #F4F4F4 !important; border-left-color: #BBB !important; color: #999; text-decoration: line-through; }
+  .ap.is-task, .wk-item.is-task, .mo-it.is-task { background: #fff !important; border: 1px dashed #8A8580 !important; border-left: 3px dashed #8A8580 !important; color: var(--ink-2); }
+  .task-tag { display: inline-block; font-size: 10px; padding: 0 5px; border-radius: 4px; background: #EDEBE6; color: #4A4744; vertical-align: 1px; }
   .tier { display: inline-block; font-size: 10px; letter-spacing: .06em; padding: 0 5px; border-radius: 4px; background: #1F3A68; color: #fff; vertical-align: 1px; }
   .tier.t-CLASSIC { background: #EDEBE6; color: #4A4744; } .tier.t-SIGNATURE { background: #C9A85C; color: #fff; } .tier.t-PRESTIGE { background: #5A6382; } .tier.t-PRIVATE { background: #1B2236; }
   .cal-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; font-size: 12px; color: var(--ink-2); margin: -4px 0 10px; }
@@ -211,6 +213,7 @@
       <span><span class="sw cat-member"></span>สมาชิกแล้ว (มี CN)</span>
       <span><span class="sw cat-hn"></span>คนไข้เก่า มี HN ยังไม่สมัคร — ชวนสมัครสมาชิก</span>
       <span><span class="sw cat-new"></span>คนไข้ใหม่ ยังไม่มี HN — เปิดประวัติใน APSX</span>
+      <span><span class="sw is-task" style="border:1px dashed #8A8580;border-left:3px dashed #8A8580"></span>งานพนักงาน เช่น ชำระมัดจำ (ไม่แจ้งคนไข้)</span>
       <span>· จาง = มาแล้ว · ขอบประแดง = ไม่มา · ขีดฆ่า = ยกเลิก</span>
     </div>
     <div id="cal-body"></div>
@@ -338,9 +341,13 @@
   <div class="modal-box">
     <h3>พิมพ์ตารางนัด</h3>
     <label class="field"><span>วันที่</span><input class="input" type="date" id="pr-date"></label>
-    <div class="field"><span>พิมพ์ให้ (แยกหน้าละคน)</span><div id="pr-provs" style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px"></div></div>
+    <div class="field"><span>รูปแบบ</span>
+      <div class="pick" id="pr-mode" style="margin-top:6px"><button class="btn sm" type="button" data-pm="split">แยกหน้าละคน</button><button class="btn ghost sm" type="button" data-pm="all">รวมทุกคนชุดเดียว</button></div>
+    </div>
+    <div class="field"><span>คุณหมอ / ผู้ช่วย ที่จะพิมพ์</span><div id="pr-provs" style="display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:6px"></div></div>
     <label class="small" style="display:flex;gap:8px;align-items:center;margin:4px 0 6px"><input type="checkbox" id="pr-phone" checked> แสดงเบอร์โทร</label>
-    <label class="small" style="display:flex;gap:8px;align-items:center;margin:0 0 12px"><input type="checkbox" id="pr-cancel"> รวมนัดที่ยกเลิก</label>
+    <label class="small" style="display:flex;gap:8px;align-items:center;margin:0 0 6px"><input type="checkbox" id="pr-cancel"> รวมนัดที่ยกเลิก</label>
+    <label class="small" style="display:flex;gap:8px;align-items:center;margin:0 0 12px"><input type="checkbox" id="pr-task"> รวมงานพนักงาน (เช่น ชำระมัดจำ)</label>
     <p class="xs muted" style="margin:0 0 12px">เอกสารมีข้อมูลส่วนบุคคล ใช้ในคลินิกเท่านั้นและทำลายเมื่อจบวัน · ในหน้าพิมพ์เลือก "บันทึกเป็น PDF" ได้</p>
     <div class="row2"><button class="btn ghost" type="button" id="pr-close">ปิด</button><button class="btn" type="button" id="pr-go">พิมพ์</button></div>
   </div>
@@ -700,7 +707,7 @@
   function dShort(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', timeZone: 'Asia/Bangkok' }); }
   function monthLabel(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, 15)).toLocaleDateString('th-TH', { month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }); }
   function catOf(a) { return a.cat || (a.member ? 'member' : (a.hn ? 'hn' : 'new')); }
-  function stCls(a) { return ' cat-' + catOf(a) + ({ 'มาแล้ว': ' st-done', 'ไม่มา': ' st-noshow', 'ยกเลิก': ' st-cancel' }[a.status] || ''); }
+  function stCls(a) { return ' cat-' + catOf(a) + (a.task ? ' is-task' : '') + ({ 'มาแล้ว': ' st-done', 'ไม่มา': ' st-noshow', 'ยกเลิก': ' st-cancel' }[a.status] || ''); }
   function fullWho(a) { var n = a.fullName || a.who || ''; return n + (a.nick && a.nick !== n ? ' (' + a.nick + ')' : ''); }
   function fmtPhone(p) { var x = String(p || '').replace(/\D/g, ''); return x.length === 10 ? x.slice(0, 3) + '-' + x.slice(3, 6) + '-' + x.slice(6) : (p || ''); }
   function tierTag(t) { return t ? '<span class="tier t-' + esc(String(t).toUpperCase()) + '">' + esc(t) + '</span>' : ''; }
@@ -758,7 +765,7 @@
         items.filter(function (a) { return a.provider === p.code; }).forEach(function (a) {
           var top = Math.max(0, (hm2m(a.time) - open) / slot * ROW), h = Math.max(ROW - 2, a.minutes / slot * ROW - 2);
           var idl = idLine(a);
-          col += '<div class="ap' + stCls(a) + '" data-id="' + esc(a.id) + '" title="' + esc(apTitle(a)) + '" style="top:' + top + 'px;height:' + h + 'px"><b>' + a.time + '</b> ' + esc(fullWho(a)) +
+          col += '<div class="ap' + stCls(a) + '" data-id="' + esc(a.id) + '" title="' + esc(apTitle(a)) + '" style="top:' + top + 'px;height:' + h + 'px"><b>' + a.time + '</b> ' + (a.task ? '<span class="task-tag">' + esc(a.typeName) + '</span> ' : '') + esc(fullWho(a)) +
             (a.status !== 'นัดแล้ว' ? ' <span class="xs">· ' + esc(a.status) + '</span>' : '') +
             (idl ? '<div class="xs id">' + idl + '</div>' : '') +
             (a.phone ? '<div class="xs">' + esc(fmtPhone(a.phone)) + '</div>' : '') +
@@ -778,7 +785,7 @@
       var a0 = weekStart(cal.date), out = '<div class="week-grid">';
       for (var i = 0; i < 7; i++) {
         var day = addDay(a0, i), cl = closedOf(day), its = D.list.filter(function (a) { return a.date === day; });
-        out += '<div class="wk-col' + (cl ? ' closed' : '') + (day === bkkToday() ? ' today' : '') + '"><div class="wk-h" data-day="' + day + '"><span>' + dShort(day) + '</span><span class="xs muted">' + (cl ? 'ปิด' : its.filter(function (a) { return a.status !== 'ยกเลิก'; }).length + ' นัด') + '</span></div>' +
+        out += '<div class="wk-col' + (cl ? ' closed' : '') + (day === bkkToday() ? ' today' : '') + '"><div class="wk-h" data-day="' + day + '"><span>' + dShort(day) + '</span><span class="xs muted">' + (cl ? 'ปิด' : its.filter(function (a) { return a.status !== 'ยกเลิก' && !a.task; }).length + ' นัด') + '</span></div>' +
           its.map(function (a) { return '<button type="button" class="wk-item' + stCls(a) + '" data-id="' + esc(a.id) + '" title="' + esc(apTitle(a)) + '"><b>' + a.time + '</b> ' + esc(fullWho(a)) + '<div class="xs muted">' + (a.hn || a.code ? esc([a.hn, a.code].filter(Boolean).join(' · ')) + ' · ' : '') + esc(a.providerName) + '</div></button>'; }).join('') + '</div>';
       }
       $('cal-body').innerHTML = out + '</div>';
@@ -815,32 +822,55 @@
   /* ----- พิมพ์ตารางนัด (แยกหน้าตามคุณหมอ / ผู้ช่วย) ----- */
   $('cal-print').addEventListener('click', function () {
     if (!cal.meta) return;
-    $('pr-date').value = cal.date || bkkToday();
+    $('pr-date').value = cal.date || bkkToday(); setPrMode('split');
     $('pr-provs').innerHTML = cal.meta.providers.map(function (p) { return '<label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" value="' + esc(p.code) + '" checked> ' + esc(p.name) + '</label>'; }).join('');
     $('pr-modal').classList.remove('hidden');
   });
+  var prMode = 'split';
+  function setPrMode(m) { prMode = m; Array.prototype.forEach.call($('pr-mode').querySelectorAll('button'), function (b) { b.classList.toggle('ghost', b.dataset.pm !== m); }); }
+  $('pr-mode').addEventListener('click', function (e) { var b = e.target.closest('button[data-pm]'); if (b) setPrMode(b.dataset.pm); });
   $('pr-close').addEventListener('click', function () { $('pr-modal').classList.add('hidden'); });
   $('pr-modal').addEventListener('click', function (e) { if (e.target === this) this.classList.add('hidden'); });
   $('pr-go').addEventListener('click', function () {
-    var b = this, day = $('pr-date').value || cal.date, phone = $('pr-phone').checked, withCancel = $('pr-cancel').checked;
+    var b = this, day = $('pr-date').value || cal.date, phone = $('pr-phone').checked, withCancel = $('pr-cancel').checked, withTask = $('pr-task').checked;
     var picked = Array.prototype.filter.call($('pr-provs').querySelectorAll('input'), function (x) { return x.checked; }).map(function (x) { return x.value; });
     if (!picked.length) return toast('เลือกอย่างน้อย 1 คน', true);
     busy(b, true);
     api({ action: 'staff.appts', from: day, to: day }).then(function (D) {
       busy(b, false, 'พิมพ์');
-      var mark = { member: '●', hn: '◐', 'new': '○' };
-      var pages = D.providers.filter(function (p) { return picked.indexOf(p.code) >= 0; }).map(function (p) {
-        var list = D.list.filter(function (a) { return a.date === day && a.provider === p.code && (withCancel || a.status !== 'ยกเลิก'); });
-        var hh = provHrs(p, day), cl = (D.closed || []).filter(function (x) { return x.date === day; })[0];
+      var mark = { member: 'สมาชิก', hn: 'HN', 'new': 'ใหม่' }, SYM = ['◆', '▲', '■', '✚', '★'];
+      var provs = D.providers.filter(function (p) { return picked.indexOf(p.code) >= 0; });
+      var sym = {}; D.providers.forEach(function (p, i) { sym[p.code] = SYM[i % SYM.length]; });
+      var cl = (D.closed || []).filter(function (x) { return x.date === day; })[0];
+      function keep(a) { return a.date === day && (withCancel || a.status !== 'ยกเลิก') && (withTask || !a.task); }
+      function table(list, showProv) {
+        var cols = 10 + (phone ? 1 : 0) + (showProv ? 1 : 0);
         var rows = list.map(function (a) {
-          return '<tr><td class="c">☐</td><td class="nw"><b>' + a.time + '</b>–' + a.end + '</td><td class="c">' + mark[catOf(a)] + '</td><td>' + esc(fullWho(a)) + '</td><td class="nw">' + esc(a.hn || '') + '</td><td class="nw">' + esc(a.code || '') + '</td><td class="nw">' + esc(a.tier || '') + '</td>' +
-            (phone ? '<td class="nw">' + esc(fmtPhone(a.phone)) + '</td>' : '') + '<td>' + esc(a.typeName) + '</td><td>' + esc(a.note || '') + '</td><td class="nw">' + (a.status === 'นัดแล้ว' ? '' : esc(a.status)) + '</td></tr>';
+          return '<tr><td class="c">☐</td><td class="nw"><b>' + a.time + '</b>–' + a.end + '</td>' +
+            (showProv ? '<td class="nw"><b>' + sym[a.provider] + '</b> ' + esc(a.providerName) + '</td>' : '') +
+            '<td class="nw">' + mark[catOf(a)] + '</td><td>' + esc(fullWho(a)) + '</td><td class="nw">' + esc(a.hn || '') + '</td><td class="nw">' + esc(a.code || '') + '</td><td class="nw">' + esc(a.tier || '') + '</td>' +
+            (phone ? '<td class="nw">' + esc(fmtPhone(a.phone)) + '</td>' : '') + '<td>' + (a.task ? '[งาน] ' : '') + esc(a.typeName) + '</td><td>' + esc(a.note || '') + '</td><td class="nw">' + (a.status === 'นัดแล้ว' ? '' : esc(a.status)) + '</td></tr>';
         }).join('');
-        return '<section class="pr-page"><h2>ตารางนัด · ' + esc(p.name) + '</h2><div class="sub">' + esc(dLong(day)) + (hh.start ? ' · เวลาทำงาน ' + hh.start + '–' + hh.end : '') + ' · ' + list.length + ' นัด' + (cl ? ' · ⚠ ' + esc(cl.closed) : '') + '</div>' +
-          '<table><thead><tr><th class="c">✓</th><th>เวลา</th><th class="c"></th><th>ชื่อ-นามสกุล</th><th>HN</th><th>CN</th><th>ระดับ</th>' + (phone ? '<th>เบอร์โทร</th>' : '') + '<th>ประเภทนัด</th><th>หมายเหตุ</th><th>สถานะ</th></tr></thead><tbody>' +
-          (rows || '<tr><td colspan="' + (phone ? 11 : 10) + '">ไม่มีนัด</td></tr>') + '</tbody></table>' +
-          '<div class="pr-foot">● สมาชิกแล้ว (มี CN) &nbsp; ◐ มี HN ยังไม่สมัคร &nbsp; ○ คนไข้ใหม่ ยังไม่มี HN &nbsp;·&nbsp; พิมพ์ ' + new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) + ' &nbsp;·&nbsp; เอกสารภายใน มีข้อมูลส่วนบุคคล ทำลายเมื่อจบวัน</div></section>';
-      });
+        return '<table><thead><tr><th class="c">✓</th><th>เวลา</th>' + (showProv ? '<th>ผู้ดูแล</th>' : '') + '<th>คนไข้</th><th>ชื่อ-นามสกุล</th><th>HN</th><th>CN</th><th>ระดับ</th>' + (phone ? '<th>เบอร์โทร</th>' : '') + '<th>ประเภทนัด</th><th>หมายเหตุ</th><th>สถานะ</th></tr></thead><tbody>' +
+          (rows || '<tr><td colspan="' + cols + '">ไม่มีนัด</td></tr>') + '</tbody></table>';
+      }
+      function foot(showProv) {
+        return '<div class="pr-foot">' + (showProv ? provs.map(function (p) { return sym[p.code] + ' ' + esc(p.name); }).join(' &nbsp; ') + ' &nbsp;·&nbsp; ' : '') +
+          'คนไข้: สมาชิก = มี CN &nbsp; HN = มี HN ยังไม่สมัคร &nbsp; ใหม่ = ยังไม่มี HN &nbsp;·&nbsp; [งาน] = งานพนักงาน ไม่แจ้งคนไข้ &nbsp;·&nbsp; พิมพ์ ' + new Date().toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) + ' &nbsp;·&nbsp; เอกสารภายใน มีข้อมูลส่วนบุคคล ทำลายเมื่อจบวัน</div>';
+      }
+      var pages;
+      if (prMode === 'all') {
+        var all = D.list.filter(function (a) { return keep(a) && picked.indexOf(a.provider) >= 0; })
+          .sort(function (x, y) { return x.time === y.time ? (D.providers.findIndex(function (p) { return p.code === x.provider; }) - D.providers.findIndex(function (p) { return p.code === y.provider; })) : (x.time < y.time ? -1 : 1); });
+        var counts = provs.map(function (p) { return sym[p.code] + ' ' + esc(p.name) + ' ' + all.filter(function (a) { return a.provider === p.code && !a.task; }).length; }).join(' · ');
+        pages = ['<section class="pr-page"><h2>ตารางนัดรวม · ' + esc(dLong(day)) + '</h2><div class="sub">' + counts + ' นัด' + (cl ? ' · ⚠ ' + esc(cl.closed) : '') + '</div>' + table(all, true) + foot(true) + '</section>'];
+      } else {
+        pages = provs.map(function (p) {
+          var list = D.list.filter(function (a) { return keep(a) && a.provider === p.code; });
+          var hh = provHrs(p, day);
+          return '<section class="pr-page"><h2>ตารางนัด · ' + esc(p.name) + '</h2><div class="sub">' + esc(dLong(day)) + (hh.start ? ' · เวลาทำงาน ' + hh.start + '–' + hh.end : '') + ' · ' + list.filter(function (a) { return !a.task; }).length + ' นัด' + (cl ? ' · ⚠ ' + esc(cl.closed) : '') + '</div>' + table(list, false) + foot(false) + '</section>';
+        });
+      }
       $('print-area').innerHTML = pages.join('');
       $('pr-modal').classList.add('hidden');
       setTimeout(function () { window.print(); }, 50);
