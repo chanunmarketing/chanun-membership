@@ -209,6 +209,11 @@
     <button class="btn block" type="button" id="care-ok">รับทราบและยอมรับ</button>
   </section>
 
+  <section class="section panel hidden" id="next-appt" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+    <div><div class="eyebrow">นัดครั้งถัดไป</div><div id="next-appt-text" style="font-size:16px;color:var(--blue);margin-top:4px"></div></div>
+    <div class="xs muted" style="text-align:right">เปลี่ยนเวลา<br>ทักแชทได้เลย</div>
+  </section>
+
   <section class="section panel">
     <div class="stars">
       <div>
@@ -411,9 +416,19 @@
       .catch(function (e) { toast(e.message || 'บันทึกไม่สำเร็จ', true); }).then(function () { b.disabled = false; });
   });
 
+  function renderNextAppt(v) {
+    var a = (v.appointments || [])[0];
+    $('next-appt').classList.toggle('hidden', !a);
+    if (!a) return;
+    var p = a.date.split('-');
+    var day = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' });
+    $('next-appt-text').textContent = day + ' · ' + a.time + ' น.' + (v.appointments.length > 1 ? '  (+' + (v.appointments.length - 1) + ' นัด)' : '');
+  }
+
   function renderMember(v) {
     current = v;
     renderCare(v);
+    renderNextAppt(v);
     var t = v.tier, light = isLight(t.color);
     var card = $('card');
     card.style.background = t.color || '#182E56';

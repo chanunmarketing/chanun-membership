@@ -59,6 +59,68 @@
   .plan-f { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
   .due-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; font-size: 14px; }
   .due-row + .due-row { border-top: 1px solid var(--line); }
+
+  /* ---------- ปฏิทินนัด ---------- */
+  body.cal-mode .wrap { max-width: 1180px; }
+  body.cal-mode #search-form, body.cal-mode #reader, body.cal-mode #results, body.cal-mode #due, body.cal-mode #member { display: none !important; }
+  #v-cal { display: none; }
+  body.cal-mode #v-cal { display: block; }
+  .main-tabs { margin-bottom: 16px; }
+  .cal-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-nav { display: flex; gap: 6px; align-items: center; }
+  .cal-nav .btn { padding: 8px 12px; }
+  .cal-nav input[type=date] { width: 150px; padding: 7px 10px; }
+  .cal-title { font-weight: 500; font-size: 16px; color: var(--blue); flex: 1; min-width: 160px; text-align: center; }
+  .cal-modes { display: flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; }
+  .cal-modes button { border: 0; background: var(--white); padding: 7px 14px; font: inherit; font-size: 13px; cursor: pointer; color: var(--ink-2); }
+  .cal-modes button[aria-selected=true] { background: var(--blue); color: #fff; }
+  .cal-closed { background: #FBF3E4; color: var(--warn); border-radius: 10px; padding: 8px 12px; font-size: 13px; margin-bottom: 10px; }
+  .day-wrap { border: 1px solid var(--line); border-radius: 12px; background: var(--white); overflow: auto; max-height: 72vh; }
+  .day-grid { display: grid; min-width: 520px; }
+  .day-h { position: sticky; top: 0; z-index: 3; background: var(--white); border-bottom: 1px solid var(--line); padding: 8px 6px; font-size: 13px; font-weight: 500; text-align: center; }
+  .day-h .xs { font-weight: 400; }
+  .day-times { position: relative; border-right: 1px solid var(--line); }
+  .day-times span { position: absolute; right: 6px; font-size: 11px; color: var(--ink-2); transform: translateY(-50%); font-family: 'Jost'; }
+  .day-col { position: relative; border-right: 1px solid var(--line); cursor: copy; }
+  .day-col:last-child { border-right: 0; }
+  .day-col .line { position: absolute; left: 0; right: 0; border-top: 1px solid #F0EEEA; }
+  .day-col .line.hr { border-top-color: #E4E1DB; }
+  .day-col .off { position: absolute; left: 0; right: 0; background: repeating-linear-gradient(135deg, #F7F5F1 0 6px, #EFECE6 6px 12px); }
+  .day-col .now { position: absolute; left: 0; right: 0; border-top: 2px solid #C0392B; z-index: 2; }
+  .ap { position: absolute; left: 3px; right: 3px; border-radius: 8px; padding: 3px 7px; font-size: 12px; line-height: 1.3; overflow: hidden; cursor: pointer; z-index: 1;
+        background: #E9EEF6; border-left: 3px solid var(--blue); color: var(--ink); }
+  .ap b { font-weight: 500; }
+  .ap.nonmember { background: #F3EFE6; border-left-color: #9B918D; }
+  .ap.st-done { background: #E6F2EC; border-left-color: #2E7D5B; }
+  .ap.st-noshow { background: #F8E9E7; border-left-color: #C0392B; opacity: .8; }
+  .ap.st-cancel { background: #F4F4F4; border-left-color: #BBB; color: #999; text-decoration: line-through; }
+  .week-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 6px; overflow-x: auto; }
+  .wk-col { border: 1px solid var(--line); border-radius: 10px; background: var(--white); min-height: 180px; }
+  .wk-col.closed { background: #FBF8F2; }
+  .wk-col.today { border-color: var(--blue); }
+  .wk-h { padding: 8px; border-bottom: 1px solid var(--line); font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; }
+  .wk-item { display: block; width: calc(100% - 8px); margin: 4px; text-align: left; border: 0; border-radius: 6px; padding: 4px 6px; font: inherit; font-size: 12px; cursor: pointer; background: #E9EEF6; }
+  .wk-item.nonmember { background: #F3EFE6; } .wk-item.st-done { background: #E6F2EC; } .wk-item.st-cancel { color: #999; text-decoration: line-through; background: #F4F4F4; } .wk-item.st-noshow { background: #F8E9E7; }
+  .mo-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .mo-dow { font-size: 12px; color: var(--ink-2); text-align: center; padding: 4px 0; }
+  .mo-cell { border: 1px solid var(--line); border-radius: 8px; background: var(--white); min-height: 92px; padding: 4px 6px; cursor: pointer; font-size: 12px; }
+  .mo-cell.other { opacity: .45; } .mo-cell.closed { background: #FBF8F2; } .mo-cell.today { border-color: var(--blue); }
+  .mo-cell .n { font-family: 'Jost'; font-size: 14px; }
+  .mo-cell .mo-it { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-2); }
+  .modal { position: fixed; inset: 0; background: rgba(20,20,20,.35); z-index: 70; display: flex; align-items: flex-start; justify-content: center; padding: 6vh 16px; overflow: auto; }
+  .modal.hidden { display: none; }
+  .modal-box { background: var(--white); border-radius: 14px; width: 100%; max-width: 520px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+  .modal-box h3 { margin: 0 0 12px; font-weight: 500; font-size: 17px; color: var(--blue); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pick { display: flex; gap: 6px; margin-bottom: 10px; }
+  .pick button { flex: 1; }
+  .ap-res button { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 8px 10px; margin-top: 6px; font: inherit; font-size: 13px; cursor: pointer; }
+  .ap-chip { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--blue); border-radius: 10px; padding: 8px 12px; background: #F4F6FA; font-size: 14px; }
+  .ap-warn { background: #FBF3E4; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: var(--warn); margin: 6px 0 12px; white-space: pre-line; }
+  .ap-detail { font-size: 14px; } .ap-detail div { padding: 4px 0; }
+  .ap-detail .k { color: var(--ink-2); display: inline-block; width: 92px; }
+  .m-appt { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; font-size: 13px; }
+  .m-appt + .m-appt { border-top: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -83,6 +145,11 @@
     <div class="who"><div id="who"></div><button class="btn ghost sm" id="logout" style="margin-top:4px">ออกจากระบบ</button></div>
   </div>
 
+  <div class="cal-modes main-tabs hidden" id="main-tabs" role="tablist" style="display:inline-flex">
+    <button type="button" data-v="members" aria-selected="true">สมาชิก</button>
+    <button type="button" data-v="cal" aria-selected="false">ปฏิทินนัด</button>
+  </div>
+
   <form class="search" id="search-form">
     <input class="input" id="q" placeholder="รหัสสมาชิก / เบอร์ 4 ตัวท้าย / ชื่อ / HN" autocomplete="off">
     <button class="btn" type="submit">ค้นหา</button>
@@ -94,6 +161,26 @@
   <section id="due" class="hidden" style="margin-top:20px">
     <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="eyebrow">ครบรอบดูแลภายใน 7 วัน</div><button class="btn ghost sm" type="button" id="due-refresh">รีเฟรช</button></div>
     <div class="panel" id="due-list" style="padding-top:4px;padding-bottom:4px"></div>
+  </section>
+
+  <section id="v-cal">
+    <div class="cal-bar">
+      <div class="cal-nav">
+        <button class="btn ghost" type="button" id="cal-prev" aria-label="ก่อนหน้า">‹</button>
+        <button class="btn ghost" type="button" id="cal-today">วันนี้</button>
+        <button class="btn ghost" type="button" id="cal-next" aria-label="ถัดไป">›</button>
+        <input class="input" type="date" id="cal-date">
+      </div>
+      <div class="cal-title" id="cal-title"></div>
+      <div class="cal-modes" id="cal-mode" role="tablist">
+        <button type="button" data-m="day" aria-selected="true">วัน</button>
+        <button type="button" data-m="week" aria-selected="false">สัปดาห์</button>
+        <button type="button" data-m="month" aria-selected="false">เดือน</button>
+      </div>
+      <button class="btn sm" type="button" id="cal-new">+ ลงนัด</button>
+    </div>
+    <div id="cal-body"></div>
+    <p class="xs muted" style="margin-top:8px">แตะช่องว่างในมุมมองรายวันเพื่อลงนัดเวลานั้น · แตะนัดเพื่อดูรายละเอียด แก้ไข หรือเปลี่ยนสถานะ</p>
   </section>
 
   <section id="member" class="hidden" style="margin-top:20px">
@@ -115,6 +202,10 @@
       <div class="xs" style="margin-top:6px;color:var(--warn)" id="m-note"></div>
     </div>
     <div id="banner"></div>
+    <div class="panel hidden" id="m-appts-box" style="margin-top:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><div class="eyebrow">นัดหมาย</div><button class="btn ghost sm" type="button" id="m-book">+ ลงนัด</button></div>
+      <div id="m-appts"></div>
+    </div>
 
     <div class="seg" role="tablist">
       <button data-p="buy" aria-selected="true">บันทึกยอดซื้อ</button>
@@ -167,6 +258,45 @@
 
 <script src="config.js"></script>
 <script src="demo.js"></script>
+<div class="modal hidden" id="ap-modal" role="dialog" aria-modal="true">
+  <div class="modal-box">
+    <div id="ap-form-box">
+      <h3 id="ap-title">ลงนัด</h3>
+      <div class="pick" id="ap-who-pick">
+        <button class="btn sm" type="button" data-w="member">สมาชิก</button>
+        <button class="btn ghost sm" type="button" data-w="guest">ไม่ใช่สมาชิก</button>
+      </div>
+      <div id="ap-member">
+        <div id="ap-chosen" class="hidden"></div>
+        <div id="ap-search"><input class="input" id="ap-q" placeholder="ค้นหา รหัส / เบอร์ 4 ตัวท้าย / ชื่อ" autocomplete="off"><div class="ap-res" id="ap-res"></div></div>
+      </div>
+      <div id="ap-guest" class="hidden row2">
+        <label class="field"><span>ชื่อคนไข้</span><input class="input" id="ap-name" maxlength="60"></label>
+        <label class="field"><span>เบอร์โทร</span><input class="input" id="ap-phone" inputmode="tel" maxlength="20"></label>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <label class="field"><span>วันที่</span><input class="input" type="date" id="ap-date"></label>
+        <label class="field"><span>เวลา</span><select class="input" id="ap-time"></select></label>
+      </div>
+      <div class="row2">
+        <label class="field"><span>ประเภทนัด</span><select class="input" id="ap-type"></select></label>
+        <label class="field"><span>คุณหมอ / ผู้ช่วย</span><select class="input" id="ap-prov"></select></label>
+      </div>
+      <div class="row2">
+        <label class="field"><span>ระยะเวลา (นาที)</span><input class="input num" id="ap-min" inputmode="numeric"></label>
+        <label class="field"><span>หมายเหตุ <span class="muted">(ห้ามใส่อาการ)</span></span><input class="input" id="ap-note" maxlength="120"></label>
+      </div>
+      <div id="ap-warn"></div>
+      <div class="row2"><button class="btn ghost" type="button" id="ap-cancel">ปิด</button><button class="btn" type="button" id="ap-save">บันทึกนัด</button></div>
+    </div>
+    <div id="ap-view-box" class="hidden">
+      <h3 id="ap-v-title"></h3>
+      <div class="ap-detail" id="ap-v-body"></div>
+      <div class="act" style="margin-top:14px" id="ap-v-acts"></div>
+      <div class="row2" style="margin-top:12px"><button class="btn ghost" type="button" id="ap-v-close">ปิด</button><button class="btn" type="button" id="ap-v-edit">แก้ไข / เลื่อนนัด</button></div>
+    </div>
+  </div>
+</div>
 <script>
 (function () {
   'use strict';
@@ -209,9 +339,10 @@
       $('v-login').classList.add('hidden'); $('v-main').classList.remove('hidden');
       $('q').focus();
       loadDue();
+      initCal();
     }).catch(function (e) { $('login-err').textContent = e.message; PIN = null; }).then(function () { b.disabled = false; });
   });
-  function logout() { PIN = null; cur = null; stopScan(); $('member').classList.add('hidden'); $('due').classList.add('hidden'); $('results').innerHTML = ''; $('v-main').classList.add('hidden'); $('v-login').classList.remove('hidden'); }
+  function logout() { PIN = null; cur = null; stopScan(); document.body.classList.remove('cal-mode'); $('main-tabs').classList.add('hidden'); $('member').classList.add('hidden'); $('due').classList.add('hidden'); $('results').innerHTML = ''; $('v-main').classList.add('hidden'); $('v-login').classList.remove('hidden'); }
   $('logout').addEventListener('click', logout);
 
   /* ---------- search & scan ---------- */
@@ -280,6 +411,7 @@
     $('m-note').textContent = v.member.note || '';
     renderRewards();
     renderCare();
+    renderMemberAppts(v);
     $('m-hist').innerHTML = v.history.length ? v.history.map(function (h) {
       return '<div class="hist"><span><span class="xs muted">' + esc(d(h.date)) + '</span> ' + esc(h.label) + (h.amount ? ' · <span class="num">' + fmt(h.amount) + '</span>' : '') + (h.receipt ? ' <span class="xs muted">' + esc(h.receipt) + '</span>' : '') + '</span>' +
         (h.stars ? '<span class="num ' + (h.stars > 0 ? 'plus' : 'minus') + '">' + (h.stars > 0 ? '+' : '') + h.stars + '</span>' : '') + '</div>';
@@ -345,7 +477,8 @@
       render(r.view);
       var gained = r.view.stars.balance - r.starsBefore;
       toast('บันทึกแล้ว ' + (gained >= 0 ? '+' : '') + gained + ' ดาว' + (progs.length ? ' · ตั้งเตือน ' + progs.length + ' โปรแกรม' : ''));
-      if (r.tierUp) $('banner').innerHTML = '<div class="banner"><div class="eyebrow" style="color:#fff;opacity:.8">Tier up</div><div style="font-size:17px;margin-top:4px">เลื่อนเป็น <b>' + esc(r.view.tier.name) + '</b> แล้ว — แจ้งสมาชิกและมอบ Welcome: ' + esc(r.view.tier.welcome) + '</div></div>';
+      if (cal.meta) $('banner').insertAdjacentHTML('beforeend', '<div class="panel" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="small">ลงนัดครั้งถัดไปเลยไหม? มีนัดแล้วระบบจะหยุดเตือนรอบจนถึงวันนัด</span><button class="btn sm" type="button" id="book-next">ลงนัดครั้งถัดไป</button></div>');
+      if (r.tierUp) $('banner').insertAdjacentHTML('afterbegin', '<div class="banner"><div class="eyebrow" style="color:#fff;opacity:.8">Tier up</div><div style="font-size:17px;margin-top:4px">เลื่อนเป็น <b>' + esc(r.view.tier.name) + '</b> แล้ว — แจ้งสมาชิกและมอบ Welcome: ' + esc(r.view.tier.welcome) + '</div></div>');
     }).catch(function (err) {
       if (err.code === 'CONFIRM_DUPLICATE' && !confirmDup) {
         $('buy-warn').innerHTML = '<div class="confirm" style="margin:0 0 12px"><div style="font-weight:500">อาจเป็นบิลซ้ำ</div><div class="small" style="margin:4px 0 12px">' + esc(err.message) +
@@ -505,6 +638,269 @@
   }
   $('due-refresh').addEventListener('click', loadDue);
   $('due-list').addEventListener('click', function (e) { var b = e.target.closest('button[data-code]'); if (b) { openMember(b.dataset.code); $('member').scrollIntoView({ behavior: 'smooth' }); } });
+
+  /* ---------- ปฏิทินนัด ---------- */
+  var cal = { mode: 'day', date: null, data: null, meta: null };
+  var ROW = 22;
+  function bkkToday() { return new Date(Date.now() + 7 * 3600e3).toISOString().slice(0, 10); }
+  function addDay(s, n) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]) + n * 864e5).toISOString().slice(0, 10); }
+  function dow(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay(); }
+  function hm2m(s) { var p = String(s).split(':'); return (+p[0]) * 60 + (+p[1]); }
+  function m2hm(n) { return ('0' + Math.floor(n / 60)).slice(-2) + ':' + ('0' + (n % 60)).slice(-2); }
+  function dLong(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }); }
+  function dShort(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', timeZone: 'Asia/Bangkok' }); }
+  function monthLabel(s) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, 15)).toLocaleDateString('th-TH', { month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }); }
+  function stCls(a) { return (a.member ? '' : ' nonmember') + ({ 'มาแล้ว': ' st-done', 'ไม่มา': ' st-noshow', 'ยกเลิก': ' st-cancel' }[a.status] || ''); }
+  function weekStart(s) { var w = dow(s); return addDay(s, -((w + 6) % 7)); }
+  function calRange() {
+    if (cal.mode === 'day') return [cal.date, cal.date];
+    if (cal.mode === 'week') { var a = weekStart(cal.date); return [a, addDay(a, 6)]; }
+    var first = cal.date.slice(0, 8) + '01', start = weekStart(first);
+    return [start, addDay(start, 41)];
+  }
+  function initCal() {
+    api({ action: 'staff.appts', from: bkkToday(), to: bkkToday() }).then(function (r) {
+      if (!r.installed) return;
+      cal.meta = r; $('main-tabs').classList.remove('hidden');
+    }).catch(function () {});
+  }
+  $('main-tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-v]'); if (!b) return;
+    Array.prototype.forEach.call(this.querySelectorAll('button'), function (x) { x.setAttribute('aria-selected', x === b); });
+    document.body.classList.toggle('cal-mode', b.dataset.v === 'cal');
+    if (b.dataset.v === 'cal') { if (!cal.date) cal.date = bkkToday(); loadCal(); }
+  });
+  function loadCal() {
+    var r = calRange();
+    $('cal-date').value = cal.date;
+    Array.prototype.forEach.call($('cal-mode').querySelectorAll('button'), function (x) { x.setAttribute('aria-selected', x.dataset.m === cal.mode); });
+    $('cal-title').textContent = cal.mode === 'day' ? dLong(cal.date) : cal.mode === 'week' ? d(r[0]) + ' – ' + d(r[1]) : monthLabel(cal.date);
+    $('cal-body').innerHTML = '<p class="small muted">กำลังโหลด…</p>';
+    api({ action: 'staff.appts', from: r[0], to: r[1] }).then(function (res) { cal.data = res; cal.meta = res; renderCal(); }).catch(onErr);
+  }
+  function closedOf(day) { var c = (cal.data.closed || []).filter(function (x) { return x.date === day; })[0]; return c ? c.closed : ''; }
+  function renderCal() {
+    var D = cal.data;
+    if (cal.mode === 'day') {
+      var open = hm2m(D.hours.open), close = hm2m(D.hours.close), slot = D.hours.slot, rows = Math.ceil((close - open) / slot), H = rows * ROW;
+      var provs = D.providers, items = D.list.filter(function (a) { return a.date === cal.date; });
+      var closed = closedOf(cal.date);
+      var html = closed ? '<div class="cal-closed">' + esc(closed) + ' — ลงนัดได้ แต่ระบบจะเตือนก่อนบันทึก</div>' : '';
+      html += '<div class="day-wrap"><div class="day-grid" style="grid-template-columns:52px repeat(' + provs.length + ',minmax(140px,1fr))">';
+      html += '<div class="day-h"></div>' + provs.map(function (p) { return '<div class="day-h">' + esc(p.name) + (p.start ? '<div class="xs muted">' + p.start + '–' + p.end + '</div>' : '') + '</div>'; }).join('');
+      var times = '';
+      for (var t = open; t <= close; t += 30) times += '<span style="top:' + ((t - open) / slot * ROW) + 'px">' + m2hm(t) + '</span>';
+      html += '<div class="day-times" style="height:' + H + 'px">' + times + '</div>';
+      var nowM = cal.date === bkkToday() ? (function () { var n = new Date(Date.now() + 7 * 3600e3); return n.getUTCHours() * 60 + n.getUTCMinutes(); })() : -1;
+      provs.forEach(function (p) {
+        var col = '<div class="day-col" data-prov="' + esc(p.code) + '" style="height:' + H + 'px">';
+        for (var i = 0; i < rows; i++) col += '<div class="line' + (((open + i * slot) % 60) === 0 ? ' hr' : '') + '" style="top:' + (i * ROW) + 'px"></div>';
+        if (p.start && hm2m(p.start) > open) col += '<div class="off" style="top:0;height:' + ((hm2m(p.start) - open) / slot * ROW) + 'px"></div>';
+        if (p.end && hm2m(p.end) < close) col += '<div class="off" style="top:' + ((hm2m(p.end) - open) / slot * ROW) + 'px;bottom:0"></div>';
+        if (nowM >= open && nowM <= close) col += '<div class="now" style="top:' + ((nowM - open) / slot * ROW) + 'px"></div>';
+        items.filter(function (a) { return a.provider === p.code; }).forEach(function (a) {
+          var top = Math.max(0, (hm2m(a.time) - open) / slot * ROW), h = Math.max(ROW - 2, a.minutes / slot * ROW - 2);
+          col += '<div class="ap' + stCls(a) + '" data-id="' + esc(a.id) + '" style="top:' + top + 'px;height:' + h + 'px"><b>' + a.time + '</b> ' + esc(a.who) +
+            '<div class="xs">' + esc(a.typeName) + (a.status !== 'นัดแล้ว' ? ' · ' + esc(a.status) : '') + '</div></div>';
+        });
+        html += col + '</div>';
+      });
+      html += '</div></div>';
+      var orphan = items.filter(function (a) { return !provs.some(function (p) { return p.code === a.provider; }); });
+      if (orphan.length) html += '<p class="xs" style="color:var(--warn)">มีนัดของผู้ให้บริการที่ปิดใช้แล้ว ' + orphan.length + ' รายการ: ' + orphan.map(function (a) { return a.time + ' ' + esc(a.who); }).join(', ') + '</p>';
+      $('cal-body').innerHTML = html;
+      var wrap = $('cal-body').querySelector('.day-wrap');
+      var first = items.filter(function (a) { return a.status === 'นัดแล้ว'; })[0];
+      var scrollTo = first ? hm2m(first.time) : (nowM > open ? nowM : open);
+      wrap.scrollTop = Math.max(0, (scrollTo - open) / slot * ROW - 60);
+    } else if (cal.mode === 'week') {
+      var a0 = weekStart(cal.date), out = '<div class="week-grid">';
+      for (var i = 0; i < 7; i++) {
+        var day = addDay(a0, i), cl = closedOf(day), its = D.list.filter(function (a) { return a.date === day; });
+        out += '<div class="wk-col' + (cl ? ' closed' : '') + (day === bkkToday() ? ' today' : '') + '"><div class="wk-h" data-day="' + day + '"><span>' + dShort(day) + '</span><span class="xs muted">' + (cl ? 'ปิด' : its.filter(function (a) { return a.status !== 'ยกเลิก'; }).length + ' นัด') + '</span></div>' +
+          its.map(function (a) { return '<button type="button" class="wk-item' + stCls(a) + '" data-id="' + esc(a.id) + '"><b>' + a.time + '</b> ' + esc(a.who) + '<div class="xs muted">' + esc(a.providerName) + '</div></button>'; }).join('') + '</div>';
+      }
+      $('cal-body').innerHTML = out + '</div>';
+    } else {
+      var r = calRange(), mo = cal.date.slice(0, 7), html2 = '<div class="mo-grid">' + ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'].map(function (x) { return '<div class="mo-dow">' + x + '</div>'; }).join('');
+      for (var k = 0; k < 42; k++) {
+        var dd = addDay(r[0], k), cls = closedOf(dd), list = D.list.filter(function (a) { return a.date === dd && a.status !== 'ยกเลิก'; });
+        html2 += '<div class="mo-cell' + (dd.slice(0, 7) !== mo ? ' other' : '') + (cls ? ' closed' : '') + (dd === bkkToday() ? ' today' : '') + '" data-day="' + dd + '"><div class="n">' + (+dd.slice(8)) + (cls ? ' <span class="xs muted">ปิด</span>' : '') + '</div>' +
+          list.slice(0, 3).map(function (a) { return '<div class="mo-it">' + a.time + ' ' + esc(a.who) + '</div>'; }).join('') + (list.length > 3 ? '<div class="mo-it">+' + (list.length - 3) + ' นัด</div>' : '') + '</div>';
+      }
+      $('cal-body').innerHTML = html2 + '</div>';
+    }
+  }
+  $('cal-mode').addEventListener('click', function (e) { var b = e.target.closest('button[data-m]'); if (b) { cal.mode = b.dataset.m; loadCal(); } });
+  $('cal-prev').addEventListener('click', function () { cal.date = cal.mode === 'day' ? addDay(cal.date, -1) : cal.mode === 'week' ? addDay(cal.date, -7) : shiftMonth(cal.date, -1); loadCal(); });
+  $('cal-next').addEventListener('click', function () { cal.date = cal.mode === 'day' ? addDay(cal.date, 1) : cal.mode === 'week' ? addDay(cal.date, 7) : shiftMonth(cal.date, 1); loadCal(); });
+  $('cal-today').addEventListener('click', function () { cal.date = bkkToday(); loadCal(); });
+  $('cal-date').addEventListener('change', function () { if (this.value) { cal.date = this.value; loadCal(); } });
+  function shiftMonth(s, n) { var p = s.split('-'), dt = new Date(Date.UTC(+p[0], +p[1] - 1 + n, 1)); return dt.toISOString().slice(0, 10); }
+  $('cal-body').addEventListener('click', function (e) {
+    var it = e.target.closest('[data-id]');
+    if (it) { openAppt(it.dataset.id); return; }
+    var day = e.target.closest('[data-day]');
+    if (day) { cal.date = day.dataset.day; cal.mode = 'day'; loadCal(); return; }
+    var col = e.target.closest('.day-col');
+    if (col) {
+      var y = e.clientY - col.getBoundingClientRect().top, D = cal.data;
+      var t = hm2m(D.hours.open) + Math.floor(y / ROW) * D.hours.slot;
+      bookForm({ date: cal.date, time: m2hm(t), provider: col.dataset.prov });
+    }
+  });
+  $('cal-new').addEventListener('click', function () { bookForm({ date: cal.date || bkkToday() }); });
+
+  /* ----- ฟอร์มลงนัด ----- */
+  var ap = { who: 'member', member: null, id: null, editing: null };
+  function showModal(which) { $('ap-modal').classList.remove('hidden'); $('ap-form-box').classList.toggle('hidden', which !== 'form'); $('ap-view-box').classList.toggle('hidden', which !== 'view'); }
+  function hideModal() { $('ap-modal').classList.add('hidden'); }
+  $('ap-cancel').addEventListener('click', hideModal); $('ap-v-close').addEventListener('click', hideModal);
+  $('ap-modal').addEventListener('click', function (e) { if (e.target === this) hideModal(); });
+  function setWho(w) {
+    ap.who = w;
+    Array.prototype.forEach.call($('ap-who-pick').querySelectorAll('button'), function (b) { b.classList.toggle('ghost', b.dataset.w !== w); });
+    $('ap-member').classList.toggle('hidden', w !== 'member'); $('ap-guest').classList.toggle('hidden', w !== 'guest');
+  }
+  $('ap-who-pick').addEventListener('click', function (e) { var b = e.target.closest('button[data-w]'); if (b) setWho(b.dataset.w); });
+  function setMember(m) {
+    ap.member = m;
+    $('ap-chosen').classList.toggle('hidden', !m); $('ap-search').classList.toggle('hidden', !!m);
+    $('ap-chosen').innerHTML = m ? '<div class="ap-chip"><span><b>' + esc(m.name) + '</b> <span class="xs muted">' + esc(m.code) + '</span></span><button class="btn ghost sm" type="button" id="ap-unpick">เปลี่ยน</button></div>' : '';
+    if (m) $('ap-unpick').addEventListener('click', function () { setMember(null); $('ap-q').focus(); });
+  }
+  var apQT;
+  $('ap-q').addEventListener('input', function () {
+    var q = this.value.trim(); clearTimeout(apQT);
+    if (q.length < 2) { $('ap-res').innerHTML = ''; return; }
+    apQT = setTimeout(function () {
+      api({ action: 'staff.find', query: q }).then(function (r) {
+        $('ap-res').innerHTML = r.results.length ? r.results.map(function (m) {
+          return '<button type="button" data-code="' + esc(m.code) + '" data-name="' + esc(m.name + (m.nickname ? ' (' + m.nickname + ')' : '')) + '">' + esc(m.name) + (m.nickname ? ' (' + esc(m.nickname) + ')' : '') + ' <span class="xs muted">' + esc(m.code) + ' · xxx-' + esc(m.phoneLast4) + '</span></button>';
+        }).join('') : '<p class="xs muted">ไม่พบสมาชิก — ลงแบบ "ไม่ใช่สมาชิก" ได้</p>';
+      }).catch(function () {});
+    }, 300);
+  });
+  $('ap-res').addEventListener('click', function (e) { var b = e.target.closest('button[data-code]'); if (b) setMember({ code: b.dataset.code, name: b.dataset.name }); });
+  function fillTimes(sel) {
+    var M = cal.meta, open = hm2m(M.hours.open), close = hm2m(M.hours.close), opts = '';
+    for (var t = open; t < close; t += M.hours.slot) opts += '<option>' + m2hm(t) + '</option>';
+    if (sel && opts.indexOf('>' + sel + '<') < 0) opts = '<option>' + sel + '</option>' + opts;
+    $('ap-time').innerHTML = opts; if (sel) $('ap-time').value = sel;
+  }
+  function provFor(kind) { var p = cal.meta.providers.filter(function (x) { return kind && x.kind === kind; })[0]; return p ? p.code : (cal.meta.providers[0] || {}).code; }
+  $('ap-type').addEventListener('change', function () {
+    var t = cal.meta.types.filter(function (x) { return x.code === $('ap-type').value; })[0]; if (!t) return;
+    $('ap-min').value = t.minutes;
+    if (!ap.provLocked) $('ap-prov').value = provFor(t.kind);
+  });
+  $('ap-prov').addEventListener('change', function () { ap.provLocked = true; });
+  function bookForm(o) {
+    if (!cal.meta) return toast('ยังไม่ได้ติดตั้งปฏิทินนัด', true);
+    o = o || {};
+    ap.id = o.id || null; ap.provLocked = !!o.provider;
+    $('ap-title').textContent = o.id ? 'แก้ไข / เลื่อนนัด' : 'ลงนัด';
+    $('ap-type').innerHTML = cal.meta.types.map(function (t) { return '<option value="' + esc(t.code) + '">' + esc(t.name) + ' · ' + t.minutes + ' นาที</option>'; }).join('');
+    $('ap-prov').innerHTML = cal.meta.providers.map(function (p) { return '<option value="' + esc(p.code) + '">' + esc(p.name) + '</option>'; }).join('');
+    $('ap-date').value = o.date || bkkToday(); fillTimes(o.time || null);
+    $('ap-type').value = o.type || cal.meta.types[0].code;
+    var t = cal.meta.types.filter(function (x) { return x.code === $('ap-type').value; })[0];
+    $('ap-min').value = o.minutes || (t ? t.minutes : 30);
+    $('ap-prov').value = o.provider || provFor(t && t.kind);
+    if (!o.time) {  // ค่าเริ่ม: เวลาเริ่มงานของคุณหมอ/ผู้ช่วย หรือช่วงถัดไปของวันนี้
+      var pv = cal.meta.providers.filter(function (x) { return x.code === $('ap-prov').value; })[0], slot = cal.meta.hours.slot;
+      var st = Math.max(hm2m(cal.meta.hours.open), pv && pv.start ? hm2m(pv.start) : 0);
+      if ($('ap-date').value === bkkToday()) { var n = new Date(Date.now() + 7 * 3600e3), nm = n.getUTCHours() * 60 + n.getUTCMinutes(); st = Math.max(st, Math.ceil(nm / slot) * slot); }
+      if (st < hm2m(cal.meta.hours.close)) $('ap-time').value = m2hm(st);
+    }
+    $('ap-note').value = o.note || ''; $('ap-name').value = o.name || ''; $('ap-phone').value = o.phone || '';
+    $('ap-q').value = ''; $('ap-res').innerHTML = ''; $('ap-warn').innerHTML = ''; $('ap-save').textContent = 'บันทึกนัด';
+    if (o.code) { setWho('member'); setMember({ code: o.code, name: o.memberName || o.code }); }
+    else if (o.name) { setWho('guest'); setMember(null); }
+    else { setWho('member'); setMember(null); }
+    showModal('form');
+    if (!o.code && !o.name) setTimeout(function () { $('ap-q').focus(); }, 50);
+  }
+  ['ap-date', 'ap-time', 'ap-type', 'ap-prov', 'ap-min'].forEach(function (id) { $(id).addEventListener('change', function () { $('ap-warn').innerHTML = ''; $('ap-save').textContent = 'บันทึกนัด'; }); });
+  $('ap-save').addEventListener('click', function () {
+    var b = this, confirmIt = b.dataset.confirm === '1';
+    var body = { action: 'staff.apptSave', date: $('ap-date').value, time: $('ap-time').value, minutes: +$('ap-min').value, provider: $('ap-prov').value, type: $('ap-type').value, note: $('ap-note').value.trim() };
+    if (ap.id) body.id = ap.id;
+    if (ap.who === 'member') { if (!ap.member) return toast('เลือกสมาชิกก่อน หรือสลับเป็น "ไม่ใช่สมาชิก"', true); body.code = ap.member.code; }
+    else { body.name = $('ap-name').value.trim(); body.phone = $('ap-phone').value.trim(); }
+    if (confirmIt) body.confirm = true;
+    busy(b, true);
+    api(body).then(function () {
+      busy(b, false, 'บันทึกนัด'); b.dataset.confirm = ''; hideModal(); toast(ap.id ? 'แก้ไขนัดแล้ว' : 'ลงนัดแล้ว');
+      if (document.body.classList.contains('cal-mode')) { cal.date = body.date; loadCal(); }
+      if (cur && body.code === cur.member.code) openMember(cur.member.code);
+    }).catch(function (err) {
+      busy(b, false, 'บันทึกนัด');
+      if (err.code === 'CONFIRM_APPT') {
+        $('ap-warn').innerHTML = '<div class="ap-warn"><b>โปรดตรวจสอบก่อนบันทึก</b>\n' + esc(err.message) + '</div>';
+        b.dataset.confirm = '1'; b.textContent = 'ยืนยันลงนัด';
+        return;
+      }
+      onErr(err);
+    });
+  });
+  ['ap-date', 'ap-time', 'ap-type', 'ap-prov', 'ap-min'].forEach(function (id) { $(id).addEventListener('change', function () { $('ap-save').dataset.confirm = ''; }); });
+
+  /* ----- รายละเอียดนัด ----- */
+  function findAppt(id) {
+    var pools = [(cal.data && cal.data.list) || [], (cur && cur.appointments) || []];
+    for (var i = 0; i < pools.length; i++) { var a = pools[i].filter(function (x) { return x.id === id; })[0]; if (a) return a; }
+    return null;
+  }
+  function openAppt(id) {
+    var a = findAppt(id); if (!a) return;
+    ap.view = a;
+    $('ap-v-title').textContent = a.time + '–' + a.end + ' · ' + dLong(a.date);
+    $('ap-v-body').innerHTML = '<div><span class="k">คนไข้</span>' + esc(a.fullName || a.who) + (a.code ? ' <span class="xs muted">' + esc(a.code) + '</span>' : ' <span class="xs muted">(ไม่ใช่สมาชิก)</span>') + '</div>' +
+      '<div><span class="k">เบอร์โทร</span>' + esc(a.phone || '-') + '</div>' +
+      '<div><span class="k">ประเภทนัด</span>' + esc(a.typeName) + ' · ' + a.minutes + ' นาที</div>' +
+      '<div><span class="k">ผู้ให้บริการ</span>' + esc(a.providerName) + '</div>' +
+      (a.note ? '<div><span class="k">หมายเหตุ</span>' + esc(a.note) + '</div>' : '') +
+      '<div><span class="k">สถานะ</span><span class="pill ' + (a.status === 'นัดแล้ว' || a.status === 'มาแล้ว' ? 'ok' : 'warn') + '">' + esc(a.status) + '</span>' + (a.notified ? ' <span class="xs muted">ส่งยืนยันทาง LINE แล้ว</span>' : '') + '</div>';
+    var acts = '';
+    if (a.status === 'นัดแล้ว') acts += '<button class="btn sm" type="button" data-st="มาแล้ว">มาแล้ว</button><button class="btn ghost sm" type="button" data-st="ไม่มา">ไม่มา</button><button class="btn ghost sm" type="button" data-st="ยกเลิก">ยกเลิกนัด</button>';
+    else acts += '<button class="btn ghost sm" type="button" data-st="นัดแล้ว">กลับเป็น นัดแล้ว</button>';
+    if (a.code) acts += '<button class="btn ghost sm" type="button" id="ap-open-m" style="margin-left:auto">เปิดหน้าสมาชิก</button>';
+    $('ap-v-acts').innerHTML = acts;
+    showModal('view');
+  }
+  $('ap-v-acts').addEventListener('click', function (e) {
+    var a = ap.view; if (!a) return;
+    if (e.target.id === 'ap-open-m') { hideModal(); document.querySelector('#main-tabs button[data-v="members"]').click(); openMember(a.code); return; }
+    var b = e.target.closest('button[data-st]'); if (!b) return;
+    if (b.dataset.st === 'ยกเลิก' && !b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'กดอีกครั้งเพื่อยืนยันยกเลิก'; b.classList.remove('ghost'); return; }
+    busy(b, true);
+    api({ action: 'staff.apptStatus', id: a.id, status: b.dataset.st }).then(function () {
+      hideModal(); toast('เปลี่ยนสถานะเป็น ' + b.dataset.st + ' แล้ว');
+      if (document.body.classList.contains('cal-mode')) loadCal();
+      if (cur && a.code === cur.member.code) openMember(cur.member.code);
+    }).catch(function (err) { busy(b, false); onErr(err); });
+  });
+  $('ap-v-edit').addEventListener('click', function () {
+    var a = ap.view; if (!a) return;
+    bookForm({ id: a.id, date: a.date, time: a.time, minutes: a.minutes, provider: a.provider, type: a.type, note: a.note, code: a.code, memberName: a.fullName, name: a.code ? '' : a.who, phone: a.code ? '' : a.phone });
+  });
+
+  /* ----- นัดในหน้าสมาชิก ----- */
+  function renderMemberAppts(v) {
+    var list = v.appointments;
+    $('m-appts-box').classList.toggle('hidden', !list || !cal.meta);
+    if (!list) return;
+    var today = bkkToday();
+    var up = list.filter(function (a) { return a.date >= today && a.status === 'นัดแล้ว'; }), past = list.filter(function (a) { return !(a.date >= today && a.status === 'นัดแล้ว'); }).slice(-3).reverse();
+    $('m-appts').innerHTML = (up.concat(past)).map(function (a) {
+      return '<div class="m-appt"><span><b>' + d(a.date) + ' ' + a.time + '</b> · ' + esc(a.typeName) + ' <span class="xs muted">' + esc(a.providerName) + '</span></span>' +
+        '<button class="btn ghost sm" type="button" data-id="' + esc(a.id) + '">' + esc(a.status) + '</button></div>';
+    }).join('') || '<p class="small muted" style="margin:6px 0 0">ยังไม่มีนัด</p>';
+  }
+  $('banner').addEventListener('click', function (e) { if (e.target.id === 'book-next') $('m-book').click(); });
+  $('m-appts').addEventListener('click', function (e) { var b = e.target.closest('button[data-id]'); if (b) openAppt(b.dataset.id); });
+  $('m-book').addEventListener('click', function () { if (cur) bookForm({ code: cur.member.code, memberName: cur.member.name + (cur.member.nickname ? ' (' + cur.member.nickname + ')' : '') }); });
 
   /* ---------- tabs ---------- */
   document.querySelectorAll('.seg button').forEach(function (b) {
