@@ -121,6 +121,17 @@
   .consent input { width: 20px; height: 20px; margin-top: 1px; accent-color: var(--blue); flex: none; }
   .consent-box { max-height: 132px; overflow: auto; background: #FAF9F7; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 12px; color: var(--ink-2); margin-bottom: 10px; }
   .demo-flag { position: fixed; bottom: 12px; left: 12px; z-index: 60; }
+
+  /* ---------- การดูแลของคุณ ---------- */
+  .care-plan { padding: 14px 0; }
+  .care-plan + .care-plan { border-top: 1px solid var(--line); }
+  .care-plan h4 { margin: 0 0 2px; font-weight: 500; font-size: 15px; color: var(--blue); }
+  .care-plan.off h4 { color: var(--ink-2); }
+  .care-line { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 4px 0; }
+  .care-line .k { color: var(--ink-2); }
+  .care-next { margin-top: 8px; font-size: 13px; color: var(--blue); }
+  .care-ask { border: 1px solid var(--blue); background: var(--white); }
+  .care-ask p { font-size: 13px; color: var(--ink-2); white-space: pre-line; margin: 6px 0 14px; }
 </style>
 </head>
 <body>
@@ -149,9 +160,11 @@
       <div class="row"><select class="input" name="birthDay" id="bday"><option value="">วันที่</option></select><select class="input" name="birthMonth" id="bmonth"><option value="">เดือน</option></select></div>
     </div>
     <div class="consent-box" id="pdpa-text">
-      คลินิก CHANUN Aesthetic Wellness &amp; Surgery จะเก็บ ชื่อ เบอร์โทร วันเกิด LINE User ID และยอดชำระค่าบริการของท่าน
-      เพื่อใช้บริหารสิทธิ์สมาชิก (คำนวณดาว ระดับ และของรางวัล) และติดต่อท่านเกี่ยวกับสิทธิ์สมาชิกเท่านั้น
-      ระบบสมาชิกไม่เก็บรายละเอียดหัตถการหรือข้อมูลสุขภาพ ข้อมูลจะไม่ถูกเปิดเผยแก่บุคคลภายนอก
+      คลินิก CHANUN Aesthetic Wellness &amp; Surgery จะเก็บ ชื่อ เบอร์โทร วันเกิด LINE User ID ยอดชำระค่าบริการ
+      และโปรแกรมดูแลที่ท่านรับบริการ (ชื่อโปรแกรม วันที่ใช้ จำนวนคงเหลือ และวันนัด)
+      เพื่อใช้บริหารสิทธิ์สมาชิก (คำนวณดาว ระดับ และของรางวัล) แสดงในบัตรสมาชิก และติดต่อท่านทาง LINE
+      เกี่ยวกับสิทธิ์สมาชิกและการดูแลต่อเนื่อง เช่น สอบถามอาการหลังรับบริการ นัดติดตามผล และรอบดูแลถัดไป
+      ข้อความแจ้งเตือนจะไม่ระบุชื่อหัตถการ ระบบสมาชิกไม่เก็บผลตรวจหรือรายละเอียดการรักษา ข้อมูลจะไม่ถูกเปิดเผยแก่บุคคลภายนอก
       และเก็บไว้ตลอดระยะเวลาที่เป็นสมาชิก ท่านขอเข้าถึง แก้ไข ถอนความยินยอม หรือขอลบข้อมูลได้ที่เคาน์เตอร์คลินิกหรือทาง LINE OA
     </div>
     <label class="consent"><input type="checkbox" name="consentPdpa"> <span>ข้าพเจ้าได้อ่านและยินยอมให้เก็บและใช้ข้อมูลตามข้างต้น</span></label>
@@ -190,6 +203,12 @@
     </div>
   </section>
 
+  <section class="section panel care-ask hidden" id="care-ask">
+    <div class="eyebrow">อัปเดตข้อตกลงการใช้ข้อมูล</div>
+    <p id="care-ask-text"></p>
+    <button class="btn block" type="button" id="care-ok">รับทราบและยอมรับ</button>
+  </section>
+
   <section class="section panel">
     <div class="stars">
       <div>
@@ -216,6 +235,11 @@
   <section class="section hidden" id="ready-sec">
     <div class="section-head"><div class="eyebrow">สิทธิ์ของคุณตอนนี้</div></div>
     <div class="ready" id="ready"></div>
+  </section>
+
+  <section class="section hidden" id="care-sec">
+    <div class="section-head"><div class="eyebrow">การดูแลของคุณ</div><div class="xs muted en">Skin Journey</div></div>
+    <div class="panel" id="care-list" style="padding-top:4px;padding-bottom:4px"></div>
   </section>
 
   <section class="section">
@@ -355,8 +379,41 @@
   });
 
   /* ---------------- Member ---------------- */
+  function renderCare(v) {
+    var c = v.care;
+    $('care-ask').classList.toggle('hidden', !(c && c.consentNeeded));
+    if (c && c.consentNeeded) $('care-ask-text').textContent = c.consentText || '';
+    var plans = c && c.plans ? c.plans : [];
+    $('care-sec').classList.toggle('hidden', !plans.length);
+    var month = function (x) { return d(x, { month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }); };
+    $('care-list').innerHTML = plans.map(function (p) {
+      var lines = [];
+      if (p.isPackage) {
+        p.items.forEach(function (it) {
+          lines.push('<div class="care-line"><span class="k">' + esc(it.name) + '</span><span>' +
+            (it.quota !== null && it.quota !== undefined ? 'เหลือ <b class="num">' + fmt(it.remaining) + '</b> จาก ' + fmt(it.quota) + ' ' + esc(it.unit) : 'ไม่จำกัด · มาแล้ว ' + it.visits + ' ครั้ง') + '</span></div>');
+        });
+        if (p.exp) lines.push('<div class="care-line"><span class="k">ใช้ได้ถึง</span><span>' + esc(d(p.exp)) + '</span></div>');
+      } else {
+        lines.push('<div class="care-line"><span class="k">ปีนี้ดูแลแล้ว</span><span><b class="num">' + p.visitsYear + '</b> ครั้ง</span></div>');
+        if (p.lastVisit) lines.push('<div class="care-line"><span class="k">ครั้งล่าสุด</span><span>' + esc(d(p.lastVisit)) + '</span></div>');
+      }
+      var next = p.booked && p.booked >= v.today ? 'นัดครั้งถัดไป ' + d(p.booked)
+        : (p.active && p.nextDue ? (p.nextDue <= v.today ? 'ถึงรอบดูแลแล้ว ทักแชทนัดได้เลย' : 'รอบถัดไปประมาณ ' + month(p.nextDue)) : '');
+      return '<div class="care-plan' + (p.active ? '' : ' off') + '"><h4>' + esc(p.name) + '</h4>' +
+        (p.active ? '' : '<div class="xs muted">' + esc(p.status) + '</div>') + lines.join('') +
+        (next ? '<div class="care-next">' + esc(next) + '</div>' : '') + '</div>';
+    }).join('');
+  }
+  $('care-ok').addEventListener('click', function () {
+    var b = this; b.disabled = true;
+    api({ action: 'careConsent', idToken: idToken }).then(function (res) { renderMember(res.view); toast('บันทึกแล้ว ขอบคุณค่ะ'); })
+      .catch(function (e) { toast(e.message || 'บันทึกไม่สำเร็จ', true); }).then(function () { b.disabled = false; });
+  });
+
   function renderMember(v) {
     current = v;
+    renderCare(v);
     var t = v.tier, light = isLight(t.color);
     var card = $('card');
     card.style.background = t.color || '#182E56';

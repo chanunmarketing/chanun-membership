@@ -42,6 +42,23 @@
   .plus { color: var(--ok); } .minus { color: var(--err); }
   #reader { width: 100%; border-radius: 12px; overflow: hidden; margin-top: 10px; }
   .demo-flag { position: fixed; bottom: 12px; left: 12px; z-index: 60; }
+  .pchips { margin: 2px 0 12px; }
+  .pchip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: 13px; margin: 0 6px 6px 0; background: var(--white); cursor: pointer; }
+  .pchip input { accent-color: var(--blue); margin: 0; }
+  .pchip.on { border-color: var(--blue); background: #F4F6FA; }
+  .pchip select { border: 0; background: transparent; font: inherit; color: var(--blue); padding: 0; }
+  .plan { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; background: var(--white); }
+  .plan.off { opacity: .6; }
+  .plan-h .pill { white-space: nowrap; }
+  .plan-h { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+  .it { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 9px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+  .it:first-of-type { margin-top: 8px; }
+  .act { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .act .input { width: 86px; padding: 7px 10px; }
+  .act .input.wide { width: 150px; }
+  .plan-f { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .due-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; font-size: 14px; }
+  .due-row + .due-row { border-top: 1px solid var(--line); }
 </style>
 </head>
 <body>
@@ -74,6 +91,11 @@
   <div id="reader" class="hidden"></div>
   <div id="results"></div>
 
+  <section id="due" class="hidden" style="margin-top:20px">
+    <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="eyebrow">ครบรอบดูแลภายใน 7 วัน</div><button class="btn ghost sm" type="button" id="due-refresh">รีเฟรช</button></div>
+    <div class="panel" id="due-list" style="padding-top:4px;padding-bottom:4px"></div>
+  </section>
+
   <section id="member" class="hidden" style="margin-top:20px">
     <div class="panel">
       <div class="mhead">
@@ -96,6 +118,7 @@
 
     <div class="seg" role="tablist">
       <button data-p="buy" aria-selected="true">บันทึกยอดซื้อ</button>
+      <button data-p="care" aria-selected="false" id="seg-care" class="hidden">โปรแกรม</button>
       <button data-p="redeem" aria-selected="false">แลกรางวัล</button>
       <button data-p="adjust" aria-selected="false">ปรับดาว</button>
     </div>
@@ -104,10 +127,26 @@
       <label class="field"><span>ยอดชำระจริงหลังส่วนลด (บาท) — คืนเงินใส่ติดลบ</span><input class="input num" id="amount" inputmode="decimal" autocomplete="off" required></label>
       <label class="field"><span>เลขใบเสร็จ (จาก APSX เช่น RE202611190001)</span><input class="input" id="receipt" autocomplete="off" autocapitalize="characters" spellcheck="false" required maxlength="40" style="text-transform:uppercase"></label>
       <label class="field"><span>หมายเหตุ <span class="muted">(ห้ามใส่ชื่อหัตถการ/อาการ)</span></span><input class="input" id="note" maxlength="120"></label>
+      <div id="buy-progs" class="hidden"><label class="field" style="margin-bottom:6px"><span>โปรแกรมดูแลในบิลนี้ (ตั้งเตือนอัตโนมัติ)</span><select class="input" id="buy-prog-add"></select></label><div class="pchips" id="buy-chips"></div></div>
       <div class="preview hidden" id="buy-preview"></div>
       <div id="buy-warn"></div>
       <button class="btn block" type="submit" id="buy-btn">บันทึก</button>
     </form>
+
+    <div id="p-care" class="panel hidden">
+      <div id="care-consent"></div>
+      <div id="care-list"></div>
+      <div class="plan" style="background:var(--paper);border-style:dashed">
+        <div style="font-weight:500;margin-bottom:8px">ลงโปรแกรม (ไม่มียอดชำระในวันนี้)</div>
+        <div class="act">
+          <select class="input wide" id="ca-prog"></select>
+          <select class="input hidden" id="ca-int"></select>
+          <input class="input wide" id="ca-receipt" placeholder="เลขใบเสร็จ (ถ้ามี)" autocomplete="off" style="text-transform:uppercase">
+          <button class="btn sm" type="button" id="ca-btn">ลงโปรแกรม</button>
+        </div>
+        <div class="xs muted" style="margin-top:6px">ซื้อพร้อมบิล ให้ติ๊กในแท็บ บันทึกยอดซื้อ แทน (ได้ดาวและตั้งเตือนในครั้งเดียว)</div>
+      </div>
+    </div>
 
     <div id="p-redeem" class="panel hidden">
       <div id="rw-list"></div>
@@ -169,9 +208,10 @@
       $('who').textContent = STAFF;
       $('v-login').classList.add('hidden'); $('v-main').classList.remove('hidden');
       $('q').focus();
+      loadDue();
     }).catch(function (e) { $('login-err').textContent = e.message; PIN = null; }).then(function () { b.disabled = false; });
   });
-  function logout() { PIN = null; cur = null; stopScan(); $('member').classList.add('hidden'); $('results').innerHTML = ''; $('v-main').classList.add('hidden'); $('v-login').classList.remove('hidden'); }
+  function logout() { PIN = null; cur = null; stopScan(); $('member').classList.add('hidden'); $('due').classList.add('hidden'); $('results').innerHTML = ''; $('v-main').classList.add('hidden'); $('v-login').classList.remove('hidden'); }
   $('logout').addEventListener('click', logout);
 
   /* ---------- search & scan ---------- */
@@ -239,6 +279,7 @@
     $('m-next').textContent = v.next ? ('อีก ' + v.next.starsNeeded + ' ดาว (' + fmt(v.next.bahtNeeded) + ' บาท) ถึง ' + v.next.name + (v.tierUntil ? ' · ประเมินระดับใหม่ ' + d(v.tierUntil) : '')) : 'ระดับสูงสุด';
     $('m-note').textContent = v.member.note || '';
     renderRewards();
+    renderCare();
     $('m-hist').innerHTML = v.history.length ? v.history.map(function (h) {
       return '<div class="hist"><span><span class="xs muted">' + esc(d(h.date)) + '</span> ' + esc(h.label) + (h.amount ? ' · <span class="num">' + fmt(h.amount) + '</span>' : '') + (h.receipt ? ' <span class="xs muted">' + esc(h.receipt) + '</span>' : '') + '</span>' +
         (h.stars ? '<span class="num ' + (h.stars > 0 ? 'plus' : 'minus') + '">' + (h.stars > 0 ? '+' : '') + h.stars + '</span>' : '') + '</div>';
@@ -296,23 +337,25 @@
     var btn = confirmDup ? $('buy-warn').querySelector('[data-x="yes"]') : $('buy-btn');
     busy(btn, true);
     var body = { action: 'staff.purchase', code: cur.member.code, amount: $('amount').value, receipt: normReceipt($('receipt').value), note: $('note').value.trim() };
+    var progs = pickedPrograms();
+    if (progs.length) body.programs = progs;
     if (confirmDup) body.confirmDup = true;
     api(body).then(function (r) {
       $('amount').value = ''; $('receipt').value = ''; $('note').value = ''; clearWarn();
       render(r.view);
       var gained = r.view.stars.balance - r.starsBefore;
-      toast('บันทึกแล้ว ' + (gained >= 0 ? '+' : '') + gained + ' ดาว');
+      toast('บันทึกแล้ว ' + (gained >= 0 ? '+' : '') + gained + ' ดาว' + (progs.length ? ' · ตั้งเตือน ' + progs.length + ' โปรแกรม' : ''));
       if (r.tierUp) $('banner').innerHTML = '<div class="banner"><div class="eyebrow" style="color:#fff;opacity:.8">Tier up</div><div style="font-size:17px;margin-top:4px">เลื่อนเป็น <b>' + esc(r.view.tier.name) + '</b> แล้ว — แจ้งสมาชิกและมอบ Welcome: ' + esc(r.view.tier.welcome) + '</div></div>';
     }).catch(function (err) {
       if (err.code === 'CONFIRM_DUPLICATE' && !confirmDup) {
         $('buy-warn').innerHTML = '<div class="confirm" style="margin:0 0 12px"><div style="font-weight:500">อาจเป็นบิลซ้ำ</div><div class="small" style="margin:4px 0 12px">' + esc(err.message) +
-          '</div><div class="row"><button class="btn ghost" type="button" data-x="no">ยกเลิก</button><button class="btn" type="button" data-x="yes">ยืนยัน เป็นบิลใหม่</button></div></div>';
+          '</div><div class="row"><button class="btn ghost" type="button" data-x="no">ยกเลิก</button><button class="btn" type="button" data-x="yes">ยืนยันบิลใหม่</button></div></div>';
         $('buy-btn').classList.add('hidden');
         $('buy-warn').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
       onErr(err);
-    }).then(function () { if (btn && document.body.contains(btn)) busy(btn, false, confirmDup ? 'ยืนยัน เป็นบิลใหม่' : 'บันทึก'); });
+    }).then(function () { if (btn && document.body.contains(btn)) busy(btn, false, confirmDup ? 'ยืนยันบิลใหม่' : 'บันทึก'); });
   }
   $('p-buy').addEventListener('submit', function (e) { e.preventDefault(); submitPurchase(false); });
   $('buy-warn').addEventListener('click', function (e) {
@@ -330,11 +373,144 @@
     }).catch(onErr).then(function () { busy(btn, false, 'บันทึกการปรับดาว'); });
   });
 
+  /* ---------- care programs ---------- */
+  function intLabel(n) { return n % 7 === 0 ? 'ทุก ' + (n / 7) + ' สัปดาห์' : 'ทุก ' + n + ' วัน'; }
+  function intOptions(list, sel) { return list.map(function (n) { return '<option value="' + n + '"' + (n === sel ? ' selected' : '') + '>' + intLabel(n) + '</option>'; }).join(''); }
+  function progOptions(list, first) {
+    var one = list.filter(function (p) { return !p.isPackage; }), pkg = list.filter(function (p) { return p.isPackage; });
+    var opt = function (p) { return '<option value="' + esc(p.code) + '">' + esc(p.name) + '</option>'; };
+    return '<option value="">' + first + '</option>' + (one.length ? '<optgroup label="ทำครั้งนี้ (เตือนตามรอบ)">' + one.map(opt).join('') + '</optgroup>' : '') +
+      (pkg.length ? '<optgroup label="คอร์ส / แพ็กเกจ (นับครั้ง หมดอายุ)">' + pkg.map(opt).join('') + '</optgroup>' : '');
+  }
+  function renderBuyProgs() {
+    var c = cur && cur.care;
+    $('buy-progs').classList.toggle('hidden', !(c && c.programs && c.programs.length));
+    $('buy-chips').innerHTML = '';
+    if (!c || !c.programs) return;
+    $('buy-prog-add').innerHTML = progOptions(c.programs, '+ เพิ่มโปรแกรม (ถ้ามี)');
+  }
+  $('buy-prog-add').addEventListener('change', function () {
+    var p = progBy(this.value); this.value = ''; if (!p) return;
+    if ($('buy-chips').querySelector('[data-code="' + CSS.escape(p.code) + '"]')) return;
+    $('buy-chips').insertAdjacentHTML('beforeend', '<label class="pchip on" data-code="' + esc(p.code) + '"><input type="checkbox" checked value="' + esc(p.code) + '"> ' + esc(p.name) +
+      (p.intervals.length ? ' <select aria-label="รอบ">' + intOptions(p.intervals, p.intervals[0]) + '</select>' : '') + '</label>');
+  });
+  $('buy-chips').addEventListener('change', function (e) {
+    var chip = e.target.closest('.pchip'); if (!chip || e.target.type !== 'checkbox') return;
+    if (!e.target.checked) chip.remove();
+  });
+  function pickedPrograms() {
+    return Array.prototype.map.call($('buy-chips').querySelectorAll('input:checked'), function (i) {
+      var sel = i.parentNode.querySelector('select');
+      return sel ? { program: i.value, interval: +sel.value } : { program: i.value };
+    });
+  }
+  function itemLine(it, plan) {
+    var a = [];
+    if (it.quota !== null && it.quota !== undefined) a.push('เหลือ <b class="num">' + fmt(it.remaining) + '</b>/' + fmt(it.quota) + ' ' + esc(it.unit));
+    else if (it.unlimited) a.push('ไม่จำกัด · มาแล้ว ' + it.visits + ' ครั้ง');
+    else a.push('มาแล้ว ' + it.visits + ' ครั้ง');
+    if (it.last) a.push('ล่าสุด ' + d(it.last));
+    if (it.nextDue && plan.active) a.push('ถึงรอบ ' + d(it.nextDue));
+    return a.join(' · ');
+  }
+  function renderCare() {
+    var c = cur && cur.care;
+    $('seg-care').classList.toggle('hidden', !c);
+    renderBuyProgs();
+    if (!c) { if (!$('p-care').classList.contains('hidden')) document.querySelector('.seg button[data-p="buy"]').click(); return; }
+    $('care-consent').innerHTML = c.consent ? '' : '<p class="xs" style="color:var(--warn);margin:0 0 10px">สมาชิกยังไม่ได้กดรับทราบข้อตกลงใหม่ในบัตร — ข้อความดูแลยังส่งได้ แต่บัตรยังไม่แสดงโปรแกรม</p>';
+    $('care-list').innerHTML = c.plans.length ? c.plans.map(function (p) {
+      var head = '<div class="plan-h"><div><div style="font-weight:500">' + esc(p.name) + '</div><div class="xs muted">' + esc(p.id) + ' · เริ่ม ' + d(p.start) +
+        (p.exp ? ' · หมดอายุ ' + d(p.exp) : '') + (p.receipt ? ' · ' + esc(p.receipt) : '') + (p.interval ? ' · ' + intLabel(p.interval) : '') + '</div></div>' +
+        '<span class="pill ' + (p.active ? 'ok' : 'warn') + '">' + esc(p.status) + '</span></div>';
+      var items = p.items.map(function (it) {
+        var useQty = it.unit === 'ครั้ง' ? '1' : '';
+        return '<div class="it"><div class="small"><div>' + esc(it.name) + '</div><div class="xs muted">' + itemLine(it, p) + '</div></div>' +
+          (p.active ? '<div class="act"><input class="input num" inputmode="numeric" value="' + useQty + '" placeholder="' + esc(it.unit) + '" data-qty="' + esc(it.name) + '">' +
+            '<button class="btn sm" type="button" data-act="use" data-plan="' + esc(p.id) + '" data-item="' + esc(it.name) + '">ใช้วันนี้</button>' +
+            (it.quota !== null && it.quota !== undefined ? '<button class="btn ghost sm" type="button" data-act="adj-open" data-plan="' + esc(p.id) + '" data-item="' + esc(it.name) + '">ปรับจำนวน</button>' : '') + '</div>' : '') +
+          (p.active && it.quota !== null && it.quota !== undefined ? '<div class="act hidden" data-adj="' + esc(p.id + '|' + it.name) + '" style="width:100%"><input class="input num" inputmode="numeric" placeholder="+100 / -10"><input class="input wide" placeholder="เหตุผล เช่น แถมเพิ่ม" maxlength="120">' +
+          '<button class="btn sm" type="button" data-act="adj" data-plan="' + esc(p.id) + '" data-item="' + esc(it.name) + '">บันทึก</button></div>' : '') + '</div>';
+      }).join('');
+      var foot = p.active ? '<div class="plan-f">' +
+        (p.booked ? '<span class="pill ok">นัดแล้ว ' + d(p.booked) + '</span><button class="btn ghost sm" type="button" data-act="unbook" data-plan="' + esc(p.id) + '">ล้างนัด</button>'
+          : '<input class="input" type="date" data-book="' + esc(p.id) + '" style="width:150px"><button class="btn ghost sm" type="button" data-act="book" data-plan="' + esc(p.id) + '">นัดแล้ว (หยุดเตือน)</button>') +
+        (p.intervals && p.intervals.length && p.isPackage ? '<select class="input" data-int="' + esc(p.id) + '" style="width:130px">' + intOptions(p.intervals, p.interval) + '</select>' : '') +
+        '<button class="btn ghost sm" type="button" data-act="cancel" data-plan="' + esc(p.id) + '" style="margin-left:auto">ยกเลิกแผน</button></div>' : '';
+      return '<div class="plan' + (p.active ? '' : ' off') + '">' + head + items + foot + '</div>';
+    }).join('') : '<p class="small muted" style="margin-top:0">ยังไม่มีโปรแกรมดูแล</p>';
+    var cp = $('ca-prog'), prev = cp.value;
+    cp.innerHTML = progOptions(c.programs, 'เลือกโปรแกรม');
+    cp.value = prev && c.programs.some(function (p) { return p.code === prev; }) ? prev : '';
+    syncAddInterval();
+  }
+  function progBy(code) { return ((cur && cur.care && cur.care.programs) || []).filter(function (p) { return p.code === code; })[0]; }
+  function syncAddInterval() {
+    var p = progBy($('ca-prog').value), s = $('ca-int');
+    s.classList.toggle('hidden', !(p && p.intervals.length));
+    s.innerHTML = p && p.intervals.length ? intOptions(p.intervals, p.intervals[0]) : '';
+  }
+  $('ca-prog').addEventListener('change', syncAddInterval);
+  function careCall(body, btn, okMsg) {
+    body.code = cur.member.code;
+    var isBtn = btn && btn.tagName === 'BUTTON';
+    if (isBtn) busy(btn, true); else if (btn) btn.disabled = true;
+    return api(body).then(function (r) { render(r.view); toast(okMsg); }).catch(function (e) { if (isBtn) busy(btn, false); else if (btn) btn.disabled = false; onErr(e); });
+  }
+  $('ca-btn').addEventListener('click', function () {
+    var p = $('ca-prog').value; if (!p) return toast('กรุณาเลือกโปรแกรม', true);
+    var body = { action: 'staff.careEnroll', program: p, receipt: normReceipt($('ca-receipt').value) };
+    if (!$('ca-int').classList.contains('hidden')) body.interval = +$('ca-int').value;
+    careCall(body, this, 'ลงโปรแกรมแล้ว').then(function () { $('ca-receipt').value = ''; busy($('ca-btn'), false, 'ลงโปรแกรม'); });
+  });
+  $('care-list').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-act]'); if (!b) return;
+    var plan = b.dataset.plan, item = b.dataset.item, act = b.dataset.act, box = b.closest('.plan');
+    if (act === 'use') {
+      var q = box.querySelector('input[data-qty="' + CSS.escape(item) + '"]').value;
+      if (!(+q > 0)) return toast('กรุณาใส่จำนวนที่ใช้', true);
+      careCall({ action: 'staff.careUse', plan: plan, item: item, qty: +q }, b, 'บันทึกการใช้ ' + item + ' ' + q + ' แล้ว');
+    } else if (act === 'adj-open') {
+      box.querySelector('[data-adj="' + CSS.escape(plan + '|' + item) + '"]').classList.toggle('hidden');
+    } else if (act === 'adj') {
+      var row = b.parentNode, ins = row.querySelectorAll('input');
+      careCall({ action: 'staff.careAdjust', plan: plan, item: item, qty: +ins[0].value, note: ins[1].value.trim() }, b, 'ปรับจำนวนแล้ว');
+    } else if (act === 'book') {
+      var dt = box.querySelector('input[data-book]').value;
+      if (!dt) return toast('เลือกวันนัดก่อน', true);
+      careCall({ action: 'staff.carePlan', plan: plan, op: 'booked', date: dt }, b, 'บันทึกวันนัดแล้ว — หยุดเตือนจนถึงวันนัด');
+    } else if (act === 'unbook') {
+      careCall({ action: 'staff.carePlan', plan: plan, op: 'clearBooked' }, b, 'ล้างนัดแล้ว');
+    } else if (act === 'cancel') {
+      if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'กดอีกครั้งเพื่อยืนยันยกเลิก'; b.classList.remove('ghost'); return; }
+      careCall({ action: 'staff.carePlan', plan: plan, op: 'cancel' }, b, 'ยกเลิกแผนแล้ว');
+    }
+  });
+  $('care-list').addEventListener('change', function (e) {
+    var s = e.target.closest('select[data-int]'); if (!s) return;
+    careCall({ action: 'staff.carePlan', plan: s.dataset.int, op: 'interval', interval: +s.value }, s, 'เปลี่ยนรอบเป็น ' + intLabel(+s.value) + ' แล้ว');
+  });
+  function loadDue() {
+    api({ action: 'staff.careDue', days: 7 }).then(function (r) {
+      if (!r.installed) { $('due').classList.add('hidden'); return; }
+      $('due').classList.remove('hidden');
+      $('due-list').innerHTML = r.list.length ? r.list.map(function (x) {
+        return '<div class="due-row"><span><b>' + esc(x.name) + '</b> <span class="xs muted">' + esc(x.code) + ' · xxx-' + esc(x.phoneLast4) + '</span><br>' +
+          '<span class="xs">' + esc(x.program) + (x.item && x.item !== x.program ? ' · ' + esc(x.item) : '') + ' · ' + (x.overdue ? '<span style="color:var(--err)">เลยรอบ ' + d(x.due) + '</span>' : 'ถึงรอบ ' + d(x.due)) +
+          (x.booked ? ' · <span style="color:var(--ok)">นัดแล้ว ' + d(x.booked) + '</span>' : '') + '</span></span>' +
+          '<button class="btn ghost sm" type="button" data-code="' + esc(x.code) + '">เปิด</button></div>';
+      }).join('') : '<p class="small muted">ไม่มีคนไข้ครบรอบในสัปดาห์นี้</p>';
+    }).catch(function () { $('due').classList.add('hidden'); });
+  }
+  $('due-refresh').addEventListener('click', loadDue);
+  $('due-list').addEventListener('click', function (e) { var b = e.target.closest('button[data-code]'); if (b) { openMember(b.dataset.code); $('member').scrollIntoView({ behavior: 'smooth' }); } });
+
   /* ---------- tabs ---------- */
   document.querySelectorAll('.seg button').forEach(function (b) {
     b.addEventListener('click', function () {
       document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
-      ['buy', 'redeem', 'adjust'].forEach(function (k) { $('p-' + k).classList.toggle('hidden', k !== b.dataset.p); });
+      ['buy', 'care', 'redeem', 'adjust'].forEach(function (k) { $('p-' + k).classList.toggle('hidden', k !== b.dataset.p); });
     });
   });
 })();

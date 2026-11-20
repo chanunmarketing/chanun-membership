@@ -22,6 +22,57 @@
   var TERMS = 'สมาชิกภาพเป็นสิทธิ์เฉพาะบุคคล โอนไม่ได้\nดาวคิดจากยอดชำระจริงหลังหักส่วนลด ทุก 5,000 บาท ได้ 1 ดาว เศษยอดสะสมต่อรอบถัดไป\nดาวมีอายุ 24 เดือนนับจากวันที่ได้รับ\nระดับสมาชิกคิดจากยอดชำระ 12 เดือนล่าสุด ได้แล้วคงระดับอย่างน้อย 12 เดือน และต่ออายุเมื่อยอด 12 เดือนถึง 80% ของเกณฑ์\nราคาสมาชิกใช้กับราคาปกติรายครั้ง เลือกราคาสมาชิกหรือราคาโปรอย่างใดอย่างหนึ่ง ไม่ซ้อนกัน ใช้ได้เฉพาะเจ้าของบัตร\nการแลกของรางวัลทำที่เคาน์เตอร์คลินิก ไม่สามารถแลกเป็นเงินสด';
 
   function ymd(offsetDays) { var d = new Date(Date.now() + offsetDays * 864e5); return d.toISOString().slice(0, 10); }
+  function addD(s, n) { var p = s.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]) + n * 864e5).toISOString().slice(0, 10); }
+
+  // โปรแกรมดูแล (ตัวอย่าง) — ตรงกับแท็บ "โปรแกรมดูแล" ตั้งต้น
+  var PROGS = [
+    { code: 'BOTOX', name: 'Program Botulinum Toxin', isPackage: false, days: 0, intervals: [], items: [{ name: 'Botulinum Toxin', unit: 'ครั้ง', qty: null, recall: [90, 120] }] },
+    { code: 'FILLER', name: 'Program Definisse Italy Filler', isPackage: false, days: 0, intervals: [], items: [{ name: 'Filler', unit: 'ครั้ง', qty: null, recall: [330, 420] }] },
+    { code: 'SKINTRIO', name: 'Program Skin Trio', isPackage: false, days: 0, intervals: [], items: [{ name: 'Skin Trio', unit: 'ครั้ง', qty: null, recall: [28, 42] }] },
+    { code: 'HIFU', name: 'Program U-One HIFU', isPackage: false, days: 0, intervals: [], items: [{ name: 'HIFU', unit: 'ครั้ง', qty: null, recall: [90, 120] }] },
+    { code: 'YEAREDIT', name: 'The Year Edit (12 เดือน)', isPackage: true, days: 365, intervals: [7, 14, 28], items: [{ name: 'Mono-RF', unit: 'ครั้ง', qty: null, recall: [], byInt: true }, { name: 'HIFU', unit: 'shots', qty: 500, recall: [90, 120] }] },
+    { code: 'EJAL40-3', name: 'Course Ejal40 3 กล่อง', isPackage: true, days: 365, intervals: [], items: [{ name: 'Ejal40', unit: 'กล่อง', qty: 3, recall: [30, 45] }] },
+    { code: 'PLASMA-4', name: 'Course Plasma 3+1', isPackage: true, days: 365, intervals: [7], items: [{ name: 'Plasma', unit: 'ครั้ง', qty: 4, recall: [], byInt: true }] }
+  ];
+  var care = {
+    consent: params.get('care') !== 'new',
+    plans: [{ id: 'CP00001', start: ymd(-60), program: 'YEAREDIT', exp: addD(ymd(-60), 364), interval: 14, booked: null, status: 'ใช้งาน', receipt: 'RE' + ymd(-60).replace(/-/g, '') + '2101' },
+            { id: 'CP00002', start: ymd(-85), program: 'BOTOX', status: 'ใช้งาน', receipt: '' }],
+    logs: [{ date: ymd(-60), plan: 'CP00001', item: 'HIFU', use: 300 }, { date: ymd(-58), plan: 'CP00001', item: 'HIFU', add: 100 },
+           { date: ymd(-60), plan: 'CP00001', item: 'Mono-RF', use: 1 }, { date: ymd(-45), plan: 'CP00001', item: 'Mono-RF', use: 1 },
+           { date: ymd(-30), plan: 'CP00001', item: 'Mono-RF', use: 1 }, { date: ymd(-85), plan: 'CP00002', item: 'Botulinum Toxin', use: 1 }]
+  };
+  function progBy(c) { return PROGS.filter(function (p) { return p.code === c; })[0]; }
+  function planState(pl) {
+    var pr = progBy(pl.program), today = ymd(0), year = today.slice(0, 4), days = {}, yd = {};
+    var items = pr.items.map(function (it) {
+      var mine = care.logs.filter(function (l) { return l.plan === pl.id && l.item === it.name; });
+      var uses = mine.filter(function (l) { return l.use > 0; }).map(function (l) { return l.date; }).sort();
+      var used = mine.reduce(function (a, l) { return a + (l.use || 0); }, 0), added = mine.reduce(function (a, l) { return a + (l.add || 0); }, 0);
+      var quota = pr.isPackage && it.qty !== null ? it.qty + added : null, last = uses[uses.length - 1] || null;
+      uses.forEach(function (x) { days[x] = 1; if (x.slice(0, 4) === year) yd[x] = 1; });
+      var due = it.byInt ? addD(last || pl.start, pl.interval) : (it.recall.length && (last || pr.isPackage) ? addD(last || pl.start, it.recall[0]) : null);
+      var done = quota !== null && quota - used <= 0;
+      return { name: it.name, unit: it.unit, quota: quota, used: used, remaining: quota === null ? null : quota - used, unlimited: pr.isPackage && it.qty === null, last: last, visits: uses.length, nextDue: done ? null : due, done: done };
+    });
+    var cancelled = pl.status === 'ยกเลิก', expired = pl.exp && today > pl.exp, active = !cancelled && !expired;
+    var ks = Object.keys(days).sort();
+    return { id: pl.id, name: pr.name, isPackage: pr.isPackage, start: pl.start, exp: pl.exp || null, status: cancelled ? 'ยกเลิก' : expired ? 'หมดอายุ' : 'ใช้งาน', active: active,
+      booked: pl.booked, interval: pr.isPackage ? pl.interval : null, intervals: pr.intervals, visitsYear: Object.keys(yd).length, lastVisit: ks[ks.length - 1] || null,
+      nextDue: active ? items.reduce(function (a, i) { return i.nextDue && (!a || i.nextDue < a) ? i.nextDue : a; }, null) : null, items: items, receipt: pl.receipt || '' };
+  }
+  function careView(forStaff) {
+    var plans = care.plans.map(planState);
+    if (!forStaff) return care.consent ? { plans: plans.filter(function (p) { return p.status !== 'ยกเลิก'; }) } : { consentNeeded: true, consentText: 'คลินิกปรับข้อตกลงการใช้ข้อมูลสมาชิก เพื่อดูแลคุณได้ต่อเนื่องขึ้น\nคลินิกจะบันทึกโปรแกรมดูแลที่คุณรับบริการ (ชื่อโปรแกรม วันที่ใช้ จำนวนคงเหลือ และวันนัด) เพื่อแสดงในบัตรสมาชิก และแจ้งเตือนทาง LINE โดยไม่ระบุชื่อหัตถการ' };
+    return { consent: care.consent, plans: plans, programs: PROGS.map(function (p) { return { code: p.code, name: p.name, isPackage: p.isPackage, days: p.days, intervals: p.intervals, items: p.items }; }) };
+  }
+  function enroll(code, receipt, interval) {
+    var pr = progBy(code); if (!pr) fail('VALIDATION', 'ไม่พบโปรแกรม ' + code);
+    var pl = !pr.isPackage && care.plans.filter(function (x) { return x.program === code && x.status !== 'ยกเลิก'; })[0];
+    if (!pl) { pl = { id: 'CP' + ('0000' + (care.plans.length + 1)).slice(-5), start: ymd(0), program: code, exp: pr.isPackage ? addD(ymd(0), pr.days - 1) : null, interval: pr.isPackage ? (interval || pr.intervals[0]) : null, booked: null, status: 'ใช้งาน', receipt: receipt || '' }; care.plans.push(pl); }
+    if (!pr.isPackage) pr.items.forEach(function (it) { care.logs.push({ date: ymd(0), plan: pl.id, item: it.name, use: 1 }); });
+  }
+  function planOf(id) { var pl = care.plans.filter(function (x) { return x.id === id; })[0]; if (!pl) fail('NOT_FOUND', 'ไม่พบแผนดูแลนี้'); return pl; }
   var tierParam = parseInt(params.get('tier') || '1', 10);
   var spendByTier = [18500, 62000, 118000, 168000];
   var state = {
@@ -66,6 +117,7 @@
       tiers: TIERS, history: history.slice(0, 40), terms: TERMS
     };
     if (forStaff) { v.member.phone = state.member.phone; v.member.hn = state.member.hn; v.member.status = 'ใช้งาน'; v.member.note = ''; }
+    v.care = careView(forStaff);
     return v;
   }
   function fail(code, msg) { var e = new Error(msg); e.code = code; throw e; }
@@ -96,6 +148,7 @@
                 if (near && b.confirmDup !== true) fail('CONFIRM_DUPLICATE', 'สมาชิกนี้มียอด ' + amt.toLocaleString('en-US') + ' บาท เมื่อ ' + near.date + ' (ใบเสร็จ ' + near.receipt + ') บันทึกไว้แล้ว ถ้าเป็นบิลใหม่จริงให้กดยืนยัน');
               }
               state.txs.push({ date: ymd(0), amount: amt, receipt: rc });
+              (b.programs || []).forEach(function (x) { enroll(String(x.program).toUpperCase(), rc, x.interval); });
               var after = view(true); return resolve({ view: after, tierUp: after.tier.level > before.tier.level, starsBefore: before.stars.balance });
             case 'staff.redeem':
               before = view(true);
@@ -108,6 +161,30 @@
               if (!b.note) fail('VALIDATION', 'กรุณาระบุเหตุผลการปรับดาว');
               before = view(true); state.adjust += parseInt(b.stars, 10) || 0;
               return resolve({ view: view(true), tierUp: false, starsBefore: before.stars.balance });
+            case 'careConsent': care.consent = true; return resolve({ registered: true, view: view() });
+            case 'staff.careEnroll': enroll(String(b.program || '').toUpperCase(), b.receipt, b.interval); return resolve({ view: view(true) });
+            case 'staff.careUse': {
+              var pl = planOf(b.plan), st = planState(pl), it = st.items.filter(function (i) { return i.name === b.item; })[0];
+              if (!st.active) fail('NOT_AVAILABLE', 'แผนนี้ใช้ไม่ได้แล้ว');
+              if (it.remaining !== null && b.qty > it.remaining) fail('NOT_ENOUGH', it.name + ' เหลือ ' + it.remaining + ' ' + it.unit + ' (ถ้าแถมเพิ่ม ให้กด ปรับจำนวน ก่อน)');
+              care.logs.push({ date: ymd(0), plan: pl.id, item: b.item, use: +b.qty }); return resolve({ view: view(true) });
+            }
+            case 'staff.careAdjust':
+              if (!+b.qty) fail('VALIDATION', 'กรุณาใส่จำนวนเต็ม (ติดลบได้)'); if (!b.note) fail('VALIDATION', 'กรุณาระบุเหตุผล เช่น แถมเพิ่ม หรือแก้ไขลงผิด');
+              care.logs.push({ date: ymd(0), plan: planOf(b.plan).id, item: b.item, add: +b.qty }); return resolve({ view: view(true) });
+            case 'staff.carePlan': {
+              var p2 = planOf(b.plan);
+              if (b.op === 'booked') { if (!b.date || b.date < ymd(0)) fail('VALIDATION', 'กรุณาเลือกวันนัดตั้งแต่วันนี้เป็นต้นไป'); p2.booked = b.date; }
+              else if (b.op === 'clearBooked') p2.booked = null; else if (b.op === 'interval') p2.interval = +b.interval; else if (b.op === 'cancel') p2.status = 'ยกเลิก';
+              return resolve({ view: view(true) });
+            }
+            case 'staff.careDue': {
+              var list = care.plans.map(planState).filter(function (s) { return s.active && s.nextDue && s.nextDue <= ymd(7) && s.nextDue >= ymd(-30); }).map(function (s) {
+                var it = s.items.filter(function (i) { return i.nextDue === s.nextDue; })[0];
+                return { code: 'CH0007', name: state.member.nickname, phoneLast4: '4567', plan: s.id, program: s.name, item: it ? it.name : '', due: s.nextDue, overdue: s.nextDue < ymd(0), booked: s.booked };
+              });
+              return resolve({ list: list, installed: true });
+            }
           }
           fail('BAD_ACTION', 'unknown');
         } catch (e) { reject(e); }
