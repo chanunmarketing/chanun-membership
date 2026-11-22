@@ -991,17 +991,30 @@
       '<div><span class="k">ประเภทนัด</span>' + esc(a.typeName) + ' · ' + a.minutes + ' นาที</div>' +
       '<div><span class="k">ผู้ให้บริการ</span>' + esc(a.providerName) + '</div>' +
       (a.note ? '<div><span class="k">หมายเหตุ</span>' + esc(a.note) + '</div>' : '') +
-      '<div><span class="k">สถานะ</span><span class="pill ' + (a.status === 'นัดแล้ว' || a.status === 'มาแล้ว' ? 'ok' : 'warn') + '">' + esc(a.status) + '</span>' + (a.notified ? ' <span class="xs muted">ส่งยืนยันทาง LINE แล้ว</span>' : '') + '</div>';
+      '<div><span class="k">สถานะ</span><span class="pill ' + (a.status === 'นัดแล้ว' || a.status === 'มาแล้ว' ? 'ok' : 'warn') + '">' + esc(a.status) + '</span>' + (a.notified ? ' <span class="xs muted">ส่งยืนยันทาง LINE แล้ว</span>' : '') + '</div>' +
+      (!a.member && !a.task ? '<div><span class="k">LINE</span>' + (a.lineContact ? '<span class="pill ok">รับแจ้งเตือนนัดแล้ว</span>' : '<span class="xs muted">ยังไม่ได้เชื่อม — ' + (a.hn ? 'ส่งลิงก์เชิญให้คนไข้กดครั้งเดียว' : 'ต้องมี HN ก่อนสร้างลิงก์') + '</span>') + '</div>' : '') +
+      '<div id="ap-inv" class="hidden" style="margin-top:10px"><textarea id="ap-inv-text" class="input" rows="7" readonly style="width:100%;font-size:13px"></textarea>' +
+      '<div style="display:flex;gap:8px;margin-top:6px"><button class="btn sm" type="button" id="ap-inv-copy">คัดลอกข้อความ</button><span class="xs muted" id="ap-inv-exp" style="align-self:center"></span></div></div>';
     var acts = '';
     if (a.status === 'นัดแล้ว') acts += '<button class="btn sm" type="button" data-st="มาแล้ว">มาแล้ว</button><button class="btn ghost sm" type="button" data-st="ไม่มา">ไม่มา</button><button class="btn ghost sm" type="button" data-st="ยกเลิก">ยกเลิกนัด</button>';
     else acts += '<button class="btn ghost sm" type="button" data-st="นัดแล้ว">กลับเป็น นัดแล้ว</button>';
     if (a.code) acts += '<button class="btn ghost sm" type="button" id="ap-open-m" style="margin-left:auto">เปิดหน้าสมาชิก</button>';
+    else if (a.hn && !a.task && !a.member) acts += '<button class="btn ghost sm" type="button" id="ap-inv-btn" style="margin-left:auto">' + (a.lineContact ? 'ส่งลิงก์สมัครสมาชิก' : 'ลิงก์เชิญ LINE') + '</button>';
     $('ap-v-acts').innerHTML = acts;
     showModal('view');
   }
   $('ap-v-acts').addEventListener('click', function (e) {
     var a = ap.view; if (!a) return;
     if (e.target.id === 'ap-open-m') { hideModal(); document.querySelector('#main-tabs button[data-v="members"]').click(); openMember(a.code); return; }
+    if (e.target.id === 'ap-inv-btn') {
+      var ib = e.target; busy(ib, true);
+      api({ action: 'staff.inviteLink', id: a.id }).then(function (r) {
+        busy(ib, false);
+        $('ap-inv-text').value = r.text; $('ap-inv').classList.remove('hidden');
+        $('ap-inv-exp').textContent = 'ใช้ได้ครั้งเดียว ถึง ' + d(r.expires) + ' · วางในแชท LINE OA ของคนไข้คนนี้เท่านั้น';
+      }).catch(function (err) { busy(ib, false); onErr(err); });
+      return;
+    }
     var b = e.target.closest('button[data-st]'); if (!b) return;
     if (b.dataset.st === 'ยกเลิก' && !b.dataset.sure) { b.dataset.sure = '1'; b.textContent = 'กดอีกครั้งเพื่อยืนยันยกเลิก'; b.classList.remove('ghost'); return; }
     busy(b, true);
@@ -1010,6 +1023,13 @@
       if (document.body.classList.contains('cal-mode')) loadCal();
       if (cur && a.code === cur.member.code) openMember(cur.member.code);
     }).catch(function (err) { busy(b, false); onErr(err); });
+  });
+  $('ap-v-body').addEventListener('click', function (e) {
+    if (e.target.id !== 'ap-inv-copy') return;
+    var tx = $('ap-inv-text');
+    var done = function () { toast('คัดลอกแล้ว — วางในแชท LINE OA ของคนไข้'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(tx.value).then(done, function () { tx.select(); document.execCommand('copy'); done(); });
+    else { tx.select(); document.execCommand('copy'); done(); }
   });
   $('ap-v-edit').addEventListener('click', function () {
     var a = ap.view; if (!a) return;

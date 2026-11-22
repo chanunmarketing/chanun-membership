@@ -156,7 +156,9 @@
         try {
           var before;
           switch (b.action) {
-            case 'me': return resolve(state.registered ? { registered: true, view: view() } : { registered: false, profileName: 'Mint', publicInfo: { tiers: TIERS, bahtPerStar: B, terms: TERMS } });
+            case 'me': return resolve(state.registered ? { registered: true, view: view() } : { registered: false, profileName: 'Mint', publicInfo: { tiers: TIERS, bahtPerStar: B, terms: TERMS }, invite: b.inv ? { valid: b.inv.length >= 16 } : null });
+            case 'notifyRegister': if (!b.consent) fail('VALIDATION', 'กรุณากดยินยอมก่อน'); return resolve({ ok: true });
+            case 'staff.inviteLink': { var u = 'https://liff.line.me/demo?inv=DEMO0000000000000000TEST'; return resolve({ url: u, expires: ymd(30), hn: 'HN000000', text: 'สวัสดีค่ะ 😊 กดลิงก์ด้านล่างครั้งเดียว เพื่อรับแจ้งเตือนนัดหมายทาง LINE หรือสมัครสมาชิก CHANUN ฟรี สะสมดาวและรับสิทธิ์สมาชิก ✨\n\nHello 😊 Tap the link below once to get appointment reminders on LINE, or join CHANUN membership for free to collect stars and enjoy member privileges ✨\n\n👉 ' + u }); }
             case 'register': state.registered = true; state.member.name = b.fullName; state.member.nickname = b.nickname; state.txs = []; state.rds = []; return resolve({ registered: true, view: view(), justRegistered: true });
             case 'staff.login': if (b.pin !== '123456') fail('BAD_PIN', 'PIN ไม่ถูกต้อง (โหมดทดลองใช้ 123456)'); return resolve({ ok: true });
             case 'staff.find': return resolve({ results: [{ code: 'CH0007', name: state.member.name, nickname: state.member.nickname, phoneLast4: '4567', status: 'ใช้งาน' }] });

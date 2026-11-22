@@ -150,6 +150,30 @@
     <p class="muted small" id="reg-sub">สะสมดาวทุก 5,000 บาท แลกของรางวัล และรับสิทธิ์ตามระดับสมาชิก</p>
     <div class="tier-strip" id="reg-tiers"></div>
   </div>
+  <!-- ลิงก์เชิญจากคลินิก (?inv=) — เลือกสมัครสมาชิก หรือรับแจ้งเตือนนัดอย่างเดียว -->
+  <div id="inv-box" class="panel hidden">
+    <p style="font-weight:500;margin:0 0 4px">คลินิกเชิญท่านรับการแจ้งเตือนทาง LINE</p>
+    <p class="small muted" style="margin:0 0 14px">เลือกได้ 1 แบบ</p>
+    <div id="inv-choose">
+      <button class="btn block" id="inv-join" type="button">สมัครสมาชิกฟรี</button>
+      <p class="xs muted" style="margin:6px 0 16px">สะสมดาว รับสิทธิ์ตามระดับ และแจ้งเตือนนัดอัตโนมัติ</p>
+      <button class="btn ghost block" id="inv-notify" type="button">รับแจ้งเตือนนัดหมายอย่างเดียว</button>
+    </div>
+    <div id="inv-notify-box" class="hidden">
+      <div class="consent-box">คลินิกจะเก็บ LINE User ID ของท่านคู่กับเลข HN ของคลินิก เพื่อส่งข้อความยืนยันวันและเวลานัดหมายล่วงหน้าเท่านั้น
+        ข้อความไม่ระบุชื่อหัตถการ ข้อมูลไม่ถูกเปิดเผยแก่บุคคลภายนอก ท่านขอยกเลิกได้ทุกเมื่อทาง LINE OA หรือที่เคาน์เตอร์คลินิก</div>
+      <label class="consent"><input type="checkbox" id="inv-consent"> <span>ยินยอมรับข้อความแจ้งเตือนนัดหมายทาง LINE</span></label>
+      <p id="inv-err" class="small" style="color:var(--err);min-height:1em;margin:4px 0 10px"></p>
+      <button class="btn block" id="inv-confirm" type="button">ยืนยัน</button>
+      <button class="btn ghost block" id="inv-back" type="button" style="margin-top:8px">ย้อนกลับ</button>
+    </div>
+    <div id="inv-done" class="hidden">
+      <p style="font-weight:500;margin:0 0 6px">เรียบร้อยแล้ว</p>
+      <p class="small muted" style="margin:0 0 14px">คลินิกจะส่งข้อความยืนยันนัดให้ทาง LINE ก่อนวันนัด 1 วัน หากต้องการสะสมดาวและรับสิทธิ์สมาชิก สมัครได้ทุกเมื่อ</p>
+      <button class="btn ghost block" id="inv-join2" type="button">สมัครสมาชิกฟรี</button>
+    </div>
+  </div>
+  <p id="inv-expired" class="small muted hidden" style="text-align:center;margin:0 0 12px">ลิงก์เชิญนี้หมดอายุหรือใช้ไปแล้ว ท่านยังสมัครสมาชิกได้ตามปกติ หรือขอลิงก์ใหม่จากคลินิก</p>
   <form id="reg-form" class="panel" novalidate>
     <label class="field"><span>ชื่อ-นามสกุล</span><input class="input" name="fullName" autocomplete="name" required maxlength="80"></label>
     <div class="row">
@@ -299,6 +323,15 @@
   var CFG = window.CHANUN_CONFIG || {};
   var DEMO = !!window.CHANUN_DEMO;
   var idToken = null, current = null;
+  // ลิงก์เชิญ (?inv=) — LIFF อาจส่งมาใน liff.state ก่อน init เสร็จ
+  function getInv() {
+    try {
+      var q = new URLSearchParams(location.search), v = q.get('inv');
+      if (!v && q.get('liff.state')) v = new URLSearchParams(q.get('liff.state').replace(/^[^?]*\?/, '')).get('inv');
+      return String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 40);
+    } catch (e) { return ''; }
+  }
+  var INV = getInv();
   var $ = function (id) { return document.getElementById(id); };
   var MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   var STAR = '<svg class="star-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.6 6.6 7 .5-5.4 4.5 1.7 6.9L12 17.3 6.1 21l1.7-6.9L2.4 9.6l7-.5z"/></svg>';
@@ -330,8 +363,9 @@
   }
 
   function load() {
-    api({ action: 'me', idToken: idToken }).then(function (res) {
-      if (res.registered) renderMember(res.view); else renderRegister(res.publicInfo);
+    INV = getInv() || INV;
+    api({ action: 'me', idToken: idToken, inv: INV || undefined }).then(function (res) {
+      if (res.registered) renderMember(res.view); else renderRegister(res.publicInfo, res.invite);
     }).catch(handleErr);
   }
 
@@ -345,7 +379,11 @@
   }
 
   /* ---------------- Register ---------------- */
-  function renderRegister(info) {
+  function renderRegister(info, invite) {
+    var valid = !!(invite && invite.valid);
+    $('inv-box').classList.toggle('hidden', !valid);
+    $('inv-expired').classList.toggle('hidden', !(invite && !invite.valid));
+    $('reg-form').classList.toggle('hidden', valid);
     var strip = $('reg-tiers');
     strip.innerHTML = (info.tiers || []).map(function (t) {
       var light = isLight(t.color);
@@ -367,7 +405,8 @@
       action: 'register', idToken: idToken,
       fullName: f.fullName.value.trim(), nickname: f.nickname.value.trim(), phone: f.phone.value.trim(),
       birthDay: f.birthDay.value, birthMonth: f.birthMonth.value,
-      consentPdpa: f.consentPdpa.checked, consentMarketing: f.consentMarketing.checked
+      consentPdpa: f.consentPdpa.checked, consentMarketing: f.consentMarketing.checked,
+      inv: INV || undefined
     };
     if (!body.fullName) { err.textContent = 'กรุณากรอกชื่อ-นามสกุล'; f.fullName.focus(); return; }
     if (!/^0\d{8,9}$/.test(body.phone.replace(/\D/g, ''))) { err.textContent = 'กรุณากรอกเบอร์โทร 9–10 หลัก'; f.phone.focus(); return; }
@@ -379,6 +418,26 @@
       toast('ยินดีต้อนรับสู่ CHANUN Membership');
     }).catch(function (e) {
       err.textContent = e.message; btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
+      if (e.code === 'AUTH') handleErr(e);
+    });
+  });
+
+  /* ---------------- Invite (สมัครสมาชิก หรือ รับแจ้งเตือนนัดอย่างเดียว) ---------------- */
+  function invJoin() { $('inv-box').classList.add('hidden'); $('reg-form').classList.remove('hidden'); window.scrollTo(0, 0); }
+  $('inv-join').addEventListener('click', invJoin);
+  $('inv-join2').addEventListener('click', invJoin);
+  $('inv-notify').addEventListener('click', function () { $('inv-choose').classList.add('hidden'); $('inv-notify-box').classList.remove('hidden'); });
+  $('inv-back').addEventListener('click', function () { $('inv-notify-box').classList.add('hidden'); $('inv-choose').classList.remove('hidden'); });
+  $('inv-confirm').addEventListener('click', function () {
+    var err = $('inv-err'), btn = $('inv-confirm');
+    if (!$('inv-consent').checked) { err.textContent = 'กรุณากดยินยอมก่อน'; return; }
+    err.textContent = ''; btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+    api({ action: 'notifyRegister', idToken: idToken, inv: INV, consent: true }).then(function (res) {
+      if (res && res.member) { load(); return; }
+      INV = '';
+      $('inv-notify-box').classList.add('hidden'); $('inv-done').classList.remove('hidden');
+    }).catch(function (e) {
+      err.textContent = e.message; btn.disabled = false; btn.textContent = 'ยืนยัน';
       if (e.code === 'AUTH') handleErr(e);
     });
   });
