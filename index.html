@@ -332,6 +332,13 @@
     } catch (e) { return ''; }
   }
   var INV = getInv();
+  var GO = (function () {
+    try {
+      var q = new URLSearchParams(location.search), v = q.get('go');
+      if (!v && q.get('liff.state')) v = new URLSearchParams(q.get('liff.state').replace(/^[^?]*\?/, '')).get('go');
+      return String(v || '').replace(/[^a-z]/g, '').slice(0, 10);
+    } catch (e) { return ''; }
+  })(), goDone = false;
   var $ = function (id) { return document.getElementById(id); };
   var MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
   var STAR = '<svg class="star-ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l2.6 6.6 7 .5-5.4 4.5 1.7 6.9L12 17.3 6.1 21l1.7-6.9L2.4 9.6l7-.5z"/></svg>';
@@ -475,13 +482,29 @@
       .catch(function (e) { toast(e.message || 'บันทึกไม่สำเร็จ', true); }).then(function () { b.disabled = false; });
   });
 
-  function renderNextAppt(v) {
-    var a = (v.appointments || [])[0];
-    $('next-appt').classList.toggle('hidden', !a);
-    if (!a) return;
+  function apptDay(a) {
     var p = a.date.split('-');
-    var day = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' });
-    $('next-appt-text').textContent = day + ' · ' + a.time + ' น.' + (v.appointments.length > 1 ? '  (+' + (v.appointments.length - 1) + ' นัด)' : '');
+    return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'Asia/Bangkok' }) + ' · ' + a.time + ' น.';
+  }
+  function renderNextAppt(v) {
+    var list = v.appointments || [], a = list[0];
+    var show = !!a || GO === 'appt';  // เปิดจากเมนู "นัดหมายของฉัน" → แสดงเสมอ (ไม่มีนัดก็บอก)
+    $('next-appt').classList.toggle('hidden', !show);
+    if (!a) { if (show) $('next-appt-text').textContent = 'ยังไม่มีนัดหมาย · No upcoming appointment'; return; }
+    $('next-appt-text').innerHTML = GO === 'appt' && list.length > 1
+      ? list.slice(0, 5).map(function (x) { return esc(apptDay(x)); }).join('<br>')
+      : esc(apptDay(a)) + (list.length > 1 ? '  (+' + (list.length - 1) + ' นัด)' : '');
+  }
+
+  // เปิดจาก Rich menu: ?go=appt | rewards | save | gift | access (LIFF อาจส่งมาใน liff.state)
+  function applyGo() {
+    if (!GO || goDone) return;
+    goDone = true;
+    var el = null;
+    if (GO === 'appt') el = $('next-appt');
+    else if (GO === 'rewards') el = $('rewards');
+    else if (/^(save|gift|access)$/.test(GO)) { el = document.querySelector('.tab[data-tab="' + GO + '"]'); if (el) el.click(); }
+    if (el) setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200);
   }
 
   function renderMember(v) {
@@ -584,6 +607,7 @@
     $('terms').innerHTML = String(v.terms || '').split('\n').filter(Boolean).map(function (l) { return '<li>' + esc(l) + '</li>'; }).join('');
     $('foot').textContent = v.clinic || 'CHANUN';
     show('member');
+    applyGo();
   }
 
   // tabs
