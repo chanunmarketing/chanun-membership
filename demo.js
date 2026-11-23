@@ -162,6 +162,7 @@
                 days.push({ date: d, closed: cl, reason: cl ? 'ปิดทุกวันอังคาร' : '', weekend: wk, periods: cl ? [] : (wk ? ['noon', 'evening', 'any'] : ['afternoon', 'evening', 'any']) }); }
               return resolve({ days: days, careDue: 1, hasUpcoming: false,
                 cats: { skin: ['ผิวใส ผิวฉ่ำ', 'Skin glow'], lift: ['ยกกระชับ ลดริ้วรอย', 'Lift & firm'], body: ['กระชับสัดส่วน', 'Body contour'], hair: ['กำจัดขน', 'Hair removal'], iv: ['IV Drip เติมพลัง', 'IV & wellness'], consult: ['ยังไม่แน่ใจ ขอคุยกับหมอก่อน', 'Not sure yet'] },
+                numb: { yes: ['ทายาชา', 'With numbing cream'], no: ['ไม่ทายาชา', 'No numbing cream'] }, numbCats: ['skin', 'lift', 'body', 'hair'],
                 periods: { noon: ['เที่ยงถึงบ่าย 12:00–16:00', 'Midday'], afternoon: ['บ่าย 13:00–16:00', 'Afternoon'], evening: ['เย็น 16:00–19:30', 'Evening'], any: ['ช่วงไหนก็สะดวก', 'Any time works'] } });
             }
             case 'bookRequest': if (!b.cats || !b.cats.length) fail('VALIDATION', 'เลือกเรื่องที่สนใจอย่างน้อย 1 อย่างนะคะ'); return resolve({ ok: true, text: 'ขอนัดหมาย (demo)' });

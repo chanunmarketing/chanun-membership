@@ -241,13 +241,18 @@
 <main id="book" class="wrap hidden">
   <div class="top"><button class="btn ghost sm" type="button" id="bk-back" style="padding-left:0">‹ บัตรสมาชิก</button><img src="logo_blue.png" alt="CHANUN"></div>
   <div id="bk-form">
-    <div class="bk-head"><div class="eyebrow">BOOK A VISIT</div><h1>จองนัดใน 30 วินาที</h1><div class="bk-sub">บอกเราว่าสนใจเรื่องไหน สะดวกวันไหน เดี๋ยวน้องๆ ทักกลับไปยืนยันเวลาในแชทค่ะ<br><span class="en-s">Tell us what you’re after and when suits you. We’ll confirm in chat.</span></div></div>
+    <div class="bk-head"><div class="eyebrow">BOOK A VISIT</div><h1>มาเติมความมั่นใจวันไหนดีคะ</h1><div class="bk-sub">บอกเราว่าสนใจเรื่องไหน สะดวกวันไหน เดี๋ยวน้องๆ ทักกลับไปยืนยันเวลาในแชทค่ะ<br><span class="en-s">Tell us what you’re after and when suits you. We’ll confirm in chat.</span></div></div>
     <div id="bk-nudges"></div>
     <div class="bk-q"><b>อยากให้เราดูแลเรื่องไหนดีคะ</b><span>Choose any</span></div>
     <div class="bk-cats" id="bk-cats"></div>
-    <div class="bk-q"><b>สะดวกมาวันไหนคะ</b><span>Pick a day</span></div>
+    <div class="bk-q"><b>เลือกวันที่สะดวก</b><span>Pick a day</span></div>
     <div class="bk-days" id="bk-days"><div class="xs muted">กำลังดูคิวว่าง…</div></div>
     <div class="bk-periods" id="bk-periods"></div>
+    <div id="bk-numb-wrap" class="hidden">
+      <div class="bk-q"><b>ทายาชาก่อนทำไหมคะ</b><span>Numbing cream</span></div>
+      <div class="bk-periods" id="bk-numb" style="margin-top:0"></div>
+      <p id="bk-numb-hint" style="margin:10px 2px 0;font-size:13px;font-weight:500;color:var(--blue)"></p>
+    </div>
     <div class="bk-q"><b>สิทธิ์ที่รอคุณอยู่</b><span>Your perks</span></div>
     <div class="panel bk-perks" id="bk-perks"></div>
     <div class="bk-q"><b>มีอะไรอยากบอกเราไหมคะ</b><span>Notes</span></div>
@@ -258,9 +263,9 @@
   </div>
   <div id="bk-done" class="bk-done hidden">
     <div class="bk-burst" id="bk-burst"></div>
-    <div class="eyebrow">THANK YOU</div>
-    <h1 style="font-size:24px;font-weight:500;color:var(--blue);margin:6px 0 8px">ได้รับแล้วค่ะ</h1>
-    <p class="small muted" id="bk-done-text" style="margin:0 0 22px">เดี๋ยวน้องๆ เช็คคิวแล้วทักไปยืนยันเวลาในแชทนี้นะคะ<br><span class="en-s">We’ll check the schedule and confirm your time here in chat.</span></p>
+    <div class="eyebrow">ALMOST THERE</div>
+    <h1 style="font-size:24px;font-weight:500;color:var(--blue);margin:6px 0 8px">รอแอดมินยืนยันเวลานะคะ</h1>
+    <p class="small muted" id="bk-done-text" style="margin:0 0 22px">น้องแอดมินจะเช็คคิวแล้วทักยืนยันเวลาในแชทนี้<br>นัดจะเรียบร้อยเมื่อได้ข้อความยืนยันนะคะ<br><span class="en-s">Your request is with us. Your visit is booked once we confirm the time in chat.</span></p>
     <button class="btn block" type="button" id="bk-close">กลับไปที่แชท</button>
     <button class="btn ghost block" type="button" id="bk-card" style="margin-top:8px">ดูบัตรสมาชิก</button>
   </div>
@@ -518,7 +523,9 @@
 
 
   /* ---------------- Book: จองนัดใน 30 วินาที ---------------- */
-  var BK = { cats: [], date: '', period: '', info: null };
+  var BK = { cats: [], date: '', period: '', numb: '', info: null };
+  var BK_NUMB = { yes: ['ทายาชา', 'With numbing cream'], no: ['ไม่ทายาชา', 'No numbing cream'] }, BK_NUMB_CATS = ['skin', 'lift', 'body', 'hair'];
+  var BK_NUMB_HINT = 'สะดวกไม่ทายาชา จะจัดคิวให้ได้ง่ายขึ้นค่ะ';
   var BK_ICON = {
     skin: '<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.5L12 15l-1.8-4.5L5.5 9l4.7-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
     lift: '<path d="M6 14l6-6 6 6"/><path d="M6 19l6-6 6 6"/>',
@@ -535,7 +542,7 @@
   function openBook() {
     show('book');
     $('bk-form').classList.remove('hidden'); $('bk-done').classList.add('hidden');
-    BK = { cats: [], date: '', period: '', info: null };
+    BK = { cats: [], date: '', period: '', numb: '', info: null };
     $('bk-note').value = ''; $('bk-err').textContent = '';
     renderBookCats(); renderBookPerks(); renderBookNudges(0);
     $('bk-days').innerHTML = '<div class="xs muted">กำลังดูคิวว่าง…</div>'; $('bk-periods').innerHTML = '';
@@ -560,7 +567,16 @@
   function renderBookPeriods() {
     var day = ((BK.info && BK.info.days) || []).filter(function (d) { return d.date === BK.date; })[0], P = (BK.info && BK.info.periods) || {};
     $('bk-periods').innerHTML = day ? day.periods.map(function (k) { return '<button type="button" class="bk-per' + (BK.period === k ? ' on' : '') + '" data-p="' + k + '">' + esc((P[k] || [k])[0]) + '</button>'; }).join('') : '';
-    $('bk-send').disabled = !(BK.cats.length && BK.date && BK.period);
+    renderBookNumb();
+  }
+  function bookNeedsNumb() { var c = (BK.info && BK.info.numbCats) || BK_NUMB_CATS; return BK.cats.some(function (k) { return c.indexOf(k) >= 0; }); }
+  function renderBookNumb() {
+    var need = bookNeedsNumb(), N = (BK.info && BK.info.numb) || BK_NUMB;
+    if (!need) BK.numb = '';
+    $('bk-numb-wrap').classList.toggle('hidden', !need);
+    $('bk-numb').innerHTML = need ? ['no', 'yes'].map(function (k) { return '<button type="button" class="bk-per' + (BK.numb === k ? ' on' : '') + '" data-n="' + k + '">' + esc(N[k][0]) + '</button>'; }).join('') : '';
+    $('bk-numb-hint').textContent = need ? BK_NUMB_HINT : '';
+    $('bk-send').disabled = !(BK.cats.length && BK.date && BK.period && (!need || BK.numb));
   }
   // สิทธิ์ที่ใช้ได้ในนัดนี้ (จากข้อมูลบัตรของสมาชิกเอง)
   function renderBookPerks() {
@@ -606,13 +622,17 @@
     var b = e.target.closest('.bk-per'); if (!b) return;
     BK.period = b.dataset.p; renderBookPeriods();
   });
+  $('bk-numb').addEventListener('click', function (e) {
+    var b = e.target.closest('.bk-per'); if (!b) return;
+    BK.numb = b.dataset.n; renderBookNumb();
+  });
   $('bk-back').addEventListener('click', function () { show('member'); });
   $('bk-card').addEventListener('click', function () { show('member'); });
   $('bk-close').addEventListener('click', function () { try { if (!DEMO && liff.isInClient()) { liff.closeWindow(); return; } } catch (x) {} show('member'); });
   $('bk-send').addEventListener('click', function () {
     var btn = $('bk-send'), err = $('bk-err');
     err.textContent = ''; btn.disabled = true; btn.textContent = 'กำลังส่ง…';
-    api({ action: 'bookRequest', idToken: idToken, cats: BK.cats, date: BK.date, period: BK.period, note: $('bk-note').value })
+    api({ action: 'bookRequest', idToken: idToken, cats: BK.cats, date: BK.date, period: BK.period, numb: BK.numb, note: $('bk-note').value })
       .then(function (res) {
         var chat = Promise.resolve(false);
         try { if (!DEMO && liff.isInClient() && res.text) chat = liff.sendMessages([{ type: 'text', text: res.text }]).then(function () { return true; }); } catch (x) {}
@@ -625,7 +645,7 @@
     var html = '<svg class="main" viewBox="0 0 24 24">' + STAR6F + '</svg>';
     for (var i = 0; i < 12; i++) { var a = i * 30 * Math.PI / 180, r = 58 + (i % 3) * 10; html += '<i style="--x:' + Math.round(Math.cos(a) * r) + 'px;--y:' + Math.round(Math.sin(a) * r) + 'px;animation-delay:' + (0.12 + (i % 4) * 0.05) + 's"></i>'; }
     $('bk-burst').innerHTML = html;
-    if (!inChat) $('bk-done-text').innerHTML = 'คลินิกได้รับแล้ว เดี๋ยวน้องๆ ทักไปยืนยันเวลาใน LINE นะคะ<br><span class="en-s">Got it. We’ll confirm your time in LINE chat.</span>';
+    if (!inChat) $('bk-done-text').innerHTML = 'น้องแอดมินจะเช็คคิวแล้วทักยืนยันเวลาใน LINE<br>นัดจะเรียบร้อยเมื่อได้ข้อความยืนยันนะคะ<br><span class="en-s">Your visit is booked once we confirm the time in LINE chat.</span>';
     window.scrollTo(0, 0);
     $('bk-send').disabled = false; $('bk-send').textContent = 'ขอนัดเลย';
   }
