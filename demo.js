@@ -157,6 +157,14 @@
           var before;
           switch (b.action) {
             case 'me': return resolve(state.registered ? { registered: true, view: view() } : { registered: false, profileName: 'Mint', publicInfo: { tiers: TIERS, bahtPerStar: B, terms: TERMS }, invite: b.inv ? { valid: b.inv.length >= 16 } : null });
+            case 'bookInfo': {
+              var days = []; for (var i = 0; i < 14; i++) { var d = ymd(i), wd = new Date(d + 'T12:00:00Z').getUTCDay(), cl = wd === 2, wk = wd === 0 || wd === 6;
+                days.push({ date: d, closed: cl, reason: cl ? 'ปิดทุกวันอังคาร' : '', weekend: wk, periods: cl ? [] : (wk ? ['noon', 'evening', 'any'] : ['afternoon', 'evening', 'any']) }); }
+              return resolve({ days: days, careDue: 1, hasUpcoming: false,
+                cats: { skin: ['ผิวใส ผิวฉ่ำ', 'Skin glow'], lift: ['ยกกระชับ ลดริ้วรอย', 'Lift & firm'], body: ['กระชับสัดส่วน', 'Body contour'], hair: ['กำจัดขน', 'Hair removal'], iv: ['IV Drip เติมพลัง', 'IV & wellness'], consult: ['ยังไม่แน่ใจ ขอคุยกับหมอก่อน', 'Not sure yet'] },
+                periods: { noon: ['เที่ยงถึงบ่าย 12:00–16:00', 'Midday'], afternoon: ['บ่าย 13:00–16:00', 'Afternoon'], evening: ['เย็น 16:00–19:30', 'Evening'], any: ['ช่วงไหนก็สะดวก', 'Any time works'] } });
+            }
+            case 'bookRequest': if (!b.cats || !b.cats.length) fail('VALIDATION', 'เลือกเรื่องที่สนใจอย่างน้อย 1 อย่างนะคะ'); return resolve({ ok: true, text: 'ขอนัดหมาย (demo)' });
             case 'notifyRegister': if (!b.consent) fail('VALIDATION', 'กรุณากดยินยอมก่อน'); return resolve({ ok: true });
             case 'staff.inviteLink': { var u = 'https://liff.line.me/demo?inv=DEMO0000000000000000TEST'; return resolve({ url: u, expires: ymd(30), hn: 'HN000000', text: 'สวัสดีค่ะ 😊 กดลิงก์ด้านล่างครั้งเดียว เพื่อรับแจ้งเตือนนัดหมายทาง LINE หรือสมัครสมาชิก CHANUN ฟรี สะสมดาวและรับสิทธิ์สมาชิก ✨\n\nHello 😊 Tap the link below once to get appointment reminders on LINE, or join CHANUN membership for free to collect stars and enjoy member privileges ✨\n\n👉 ' + u }); }
             case 'register': state.registered = true; state.member.name = b.fullName; state.member.nickname = b.nickname; state.txs = []; state.rds = []; return resolve({ registered: true, view: view(), justRegistered: true });

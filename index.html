@@ -7,9 +7,10 @@
 <meta name="theme-color" content="#F6F4F0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="common.css">
 <style>
+  :root { --font: 'Jost', 'Anuphan', system-ui, -apple-system, sans-serif; }
   .top { display: flex; align-items: center; justify-content: space-between; padding: 18px 0 14px; }
   .top img { height: 44px; }
   .top .eyebrow { text-align: right; }
@@ -114,7 +115,7 @@
   /* ---------- Register ---------- */
   .hero { text-align: center; padding: 26px 0 8px; }
   .hero img { width: 120px; }
-  .hero h1 { font-family: 'Jost', 'IBM Plex Sans Thai'; font-weight: 300; font-size: 26px; letter-spacing: .04em; margin: 18px 0 6px; color: var(--blue); }
+  .hero h1 { font-family: 'Jost', 'Anuphan'; font-weight: 300; font-size: 26px; letter-spacing: .04em; margin: 18px 0 6px; color: var(--blue); }
   .tier-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 18px 0 4px; }
   .tier-strip div { border-radius: 10px; aspect-ratio: 1.586; display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; font-family: 'Jost'; font-size: 10px; letter-spacing: .16em; color: #fff; }
   .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--ink-2); margin: 6px 0 12px; }
@@ -132,6 +133,44 @@
   .care-next { margin-top: 8px; font-size: 13px; color: var(--blue); }
   .care-ask { border: 1px solid var(--blue); background: var(--white); }
   .care-ask p { font-size: 13px; color: var(--ink-2); white-space: pre-line; margin: 6px 0 14px; }
+
+  /* ---------- Book (จองนัดใน 30 วินาที) ---------- */
+  .bk-head { padding: 6px 0 14px; }
+  .bk-head h1 { font-size: 26px; font-weight: 500; color: var(--blue); margin: 4px 0 2px; }
+  .bk-sub { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
+  .en-s { display: inline-block; font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
+  .bk-q { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 2px 10px; }
+  .bk-q b { font-weight: 500; font-size: 15.5px; color: var(--ink); flex: 1; min-width: 0; }
+  .bk-q span { flex: none; white-space: nowrap; margin-left: 10px; font-family: 'Jost', sans-serif; font-size: 10.5px; letter-spacing: .18em; color: var(--ink-3); text-transform: uppercase; }
+  .bk-cats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .bk-cat { position: relative; text-align: left; background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 14px 14px 12px; cursor: pointer; transition: all .18s ease; font: inherit; color: inherit; }
+  .bk-cat svg { width: 30px; height: 30px; stroke: var(--blue); fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; display: block; margin-bottom: 8px; }
+  .bk-cat .th { font-size: 14px; font-weight: 500; line-height: 1.3; }
+  .bk-cat .en { font-family: 'Jost', sans-serif; font-size: 10.5px; letter-spacing: .12em; color: var(--ink-3); text-transform: uppercase; margin-top: 2px; }
+  .bk-cat.on { border-color: var(--blue); background: var(--blue); color: #fff; transform: translateY(-1px); box-shadow: 0 10px 22px -14px rgba(24,46,86,.7); }
+  .bk-cat.on svg { stroke: #C9B07A; } .bk-cat.on .en { color: rgba(255,255,255,.7); }
+  .bk-cat.on::after { content: ''; position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: #C9B07A; }
+  .bk-days { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .bk-day { flex: none; width: 58px; scroll-snap-align: start; text-align: center; border: 1px solid var(--line); background: var(--white); border-radius: 14px; padding: 9px 0 8px; font: inherit; color: inherit; cursor: pointer; transition: all .15s; }
+  .bk-day .w { font-size: 11px; color: var(--ink-3); } .bk-day .d { font-family: 'Jost', sans-serif; font-size: 22px; font-weight: 300; line-height: 1.15; } .bk-day .m { font-size: 10.5px; color: var(--ink-3); }
+  .bk-day.on { background: var(--blue); border-color: var(--blue); color: #fff; } .bk-day.on .w, .bk-day.on .m { color: rgba(255,255,255,.75); }
+  .bk-day:disabled { background: transparent; color: #C9C3BB; border-style: dashed; cursor: default; } .bk-day:disabled .w, .bk-day:disabled .m { color: #C9C3BB; }
+  .bk-periods { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .bk-per { border: 1px solid var(--line); background: var(--white); border-radius: 999px; padding: 9px 14px; font: inherit; font-size: 13px; color: inherit; cursor: pointer; }
+  .bk-per.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .bk-nudge { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: linear-gradient(120deg, #182E56, #24406F); color: #fff; margin-bottom: 8px; }
+  .bk-nudge svg { flex: none; width: 22px; height: 22px; fill: #C9B07A; margin-top: 1px; }
+  .bk-nudge .t { font-size: 13.5px; line-height: 1.45; } .bk-nudge .t small { display: block; font-size: 11.5px; opacity: .72; margin-top: 2px; }
+  .bk-perks { padding: 4px 16px; } .bk-perk { display: flex; gap: 10px; padding: 11px 0; font-size: 13.5px; line-height: 1.45; }
+  .bk-perk + .bk-perk { border-top: 1px solid var(--line); } .bk-perk i { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #C9B07A; margin-top: 7px; }
+  .bk-perk small { display: block; color: var(--ink-3); font-size: 11.5px; }
+  .bk-note { width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font: inherit; font-size: 14px; resize: none; background: var(--white); }
+  .bk-done { text-align: center; padding: 56px 8px 24px; }
+  .bk-burst { position: relative; width: 120px; height: 120px; margin: 0 auto 18px; }
+  .bk-burst svg.main { width: 120px; height: 120px; fill: none; stroke: #C9B07A; stroke-width: .9; stroke-linejoin: round; animation: bkpop .7s cubic-bezier(.2,1.4,.4,1) both; }
+  .bk-burst i { position: absolute; left: 50%; top: 50%; width: 8px; height: 8px; margin: -4px; background: #C9B07A; transform: rotate(45deg); opacity: 0; animation: bkfly 1.1s ease-out .15s both; }
+  @keyframes bkpop { from { transform: scale(.2) rotate(-40deg); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes bkfly { 0% { opacity: 1; transform: translate(0,0) rotate(45deg) scale(1); } 100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(45deg) scale(.4); } }
 </style>
 </head>
 <body>
@@ -199,6 +238,34 @@
 </main>
 
 <!-- ================= Member ================= -->
+<main id="book" class="wrap hidden">
+  <div class="top"><button class="btn ghost sm" type="button" id="bk-back" style="padding-left:0">‹ บัตรสมาชิก</button><img src="logo_blue.png" alt="CHANUN"></div>
+  <div id="bk-form">
+    <div class="bk-head"><div class="eyebrow">BOOK A VISIT</div><h1>จองนัดใน 30 วินาที</h1><div class="bk-sub">บอกเราว่าสนใจเรื่องไหน สะดวกวันไหน เดี๋ยวน้องๆ ทักกลับไปยืนยันเวลาในแชทค่ะ<br><span class="en-s">Tell us what you’re after and when suits you. We’ll confirm in chat.</span></div></div>
+    <div id="bk-nudges"></div>
+    <div class="bk-q"><b>อยากให้เราดูแลเรื่องไหนดีคะ</b><span>Choose any</span></div>
+    <div class="bk-cats" id="bk-cats"></div>
+    <div class="bk-q"><b>สะดวกมาวันไหนคะ</b><span>Pick a day</span></div>
+    <div class="bk-days" id="bk-days"><div class="xs muted">กำลังดูคิวว่าง…</div></div>
+    <div class="bk-periods" id="bk-periods"></div>
+    <div class="bk-q"><b>สิทธิ์ที่รอคุณอยู่</b><span>Your perks</span></div>
+    <div class="panel bk-perks" id="bk-perks"></div>
+    <div class="bk-q"><b>มีอะไรอยากบอกเราไหมคะ</b><span>Notes</span></div>
+    <textarea class="bk-note" id="bk-note" rows="2" maxlength="100" placeholder="เช่น จะพาเพื่อนมาด้วยอีกคน"></textarea>
+    <p id="bk-err" class="small" style="color:var(--err);min-height:1em;margin:10px 2px"></p>
+    <button class="btn block" type="button" id="bk-send" disabled>ขอนัดเลย</button>
+    <p class="xs muted" style="text-align:center;margin-top:10px">ยังไม่ใช่นัดที่ยืนยันนะคะ น้องๆ จะเช็คคิวให้ก่อนแล้วทักกลับไป</p>
+  </div>
+  <div id="bk-done" class="bk-done hidden">
+    <div class="bk-burst" id="bk-burst"></div>
+    <div class="eyebrow">THANK YOU</div>
+    <h1 style="font-size:24px;font-weight:500;color:var(--blue);margin:6px 0 8px">ได้รับแล้วค่ะ</h1>
+    <p class="small muted" id="bk-done-text" style="margin:0 0 22px">เดี๋ยวน้องๆ เช็คคิวแล้วทักไปยืนยันเวลาในแชทนี้นะคะ<br><span class="en-s">We’ll check the schedule and confirm your time here in chat.</span></p>
+    <button class="btn block" type="button" id="bk-close">กลับไปที่แชท</button>
+    <button class="btn ghost block" type="button" id="bk-card" style="margin-top:8px">ดูบัตรสมาชิก</button>
+  </div>
+</main>
+
 <main id="member" class="wrap hidden">
   <header class="top">
     <img src="logo_blue.png" alt="CHANUN">
@@ -346,7 +413,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function fmt(n) { return Math.round(Number(n) || 0).toLocaleString('th-TH'); }
   function d(ymd, opt) { if (!ymd) return ''; var p = ymd.split('-'); return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)).toLocaleDateString('th-TH', opt || { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }); }
-  function show(id) { ['loading', 'error', 'register', 'member'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); window.scrollTo(0, 0); }
+  function show(id) { ['loading', 'error', 'register', 'member', 'book'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); window.scrollTo(0, 0); }
   function toast(msg, err) { var t = $('toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(t._h); t._h = setTimeout(function () { t.className = 'toast'; }, 3200); }
   function fatal(msg) { $('error-msg').textContent = msg; show('error'); }
   function isLight(hex) { var h = String(hex || '').replace('#', ''); if (h.length !== 6) return false; var r = parseInt(h.substr(0, 2), 16), g = parseInt(h.substr(2, 2), 16), b = parseInt(h.substr(4, 2), 16); return (0.299 * r + 0.587 * g + 0.114 * b) > 170; }
@@ -372,7 +439,7 @@
   function load() {
     INV = getInv() || INV;
     api({ action: 'me', idToken: idToken, inv: INV || undefined }).then(function (res) {
-      if (res.registered) renderMember(res.view); else renderRegister(res.publicInfo, res.invite);
+      if (res.registered) { renderMember(res.view); if (GO === 'book') openBook(); } else renderRegister(res.publicInfo, res.invite);
     }).catch(handleErr);
   }
 
@@ -449,6 +516,120 @@
     });
   });
 
+
+  /* ---------------- Book: จองนัดใน 30 วินาที ---------------- */
+  var BK = { cats: [], date: '', period: '', info: null };
+  var BK_ICON = {
+    skin: '<path d="M12 3l1.8 4.6L18.5 9l-4.7 1.5L12 15l-1.8-4.5L5.5 9l4.7-1.4z"/><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+    lift: '<path d="M6 14l6-6 6 6"/><path d="M6 19l6-6 6 6"/>',
+    body: '<path d="M8 3c0 4 2 5 2 9s-2 5-2 9"/><path d="M16 3c0 4-2 5-2 9s2 5 2 9"/>',
+    hair: '<path d="M5 19C5 10 11 5 19 5c0 8-5 14-14 14z"/><path d="M5 19l8-8"/>',
+    iv: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/><path d="M9.5 14.5a2.5 2.5 0 0 0 2.5 2.5"/>',
+    consult: '<path d="M4 5h16v10H9l-5 4z"/><path d="M8.5 10h.01M12 10h.01M15.5 10h.01"/>'
+  };
+  var STAR6 = '<path d="M12.00 1.50 L14.20 8.19 L21.09 6.75 L16.40 12.00 L21.09 17.25 L14.20 15.81 L12.00 22.50 L9.80 15.81 L2.91 17.25 L7.60 12.00 L2.91 6.75 L9.80 8.19z"/>';
+  var STAR6F = STAR6 + '<path d="M12 12L12.00 1.50" style="stroke-width:.5;opacity:.8"/><path d="M12 12L21.09 6.75" style="stroke-width:.5;opacity:.8"/><path d="M12 12L21.09 17.25" style="stroke-width:.5;opacity:.8"/><path d="M12 12L12.00 22.50" style="stroke-width:.5;opacity:.8"/><path d="M12 12L2.91 17.25" style="stroke-width:.5;opacity:.8"/><path d="M12 12L2.91 6.75" style="stroke-width:.5;opacity:.8"/>';
+  var TH_W = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'], TH_M = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  function ymdParts(d) { var p = d.split('-'); var dt = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2], 5)); return { w: TH_W[dt.getUTCDay()], d: +p[2], m: TH_M[+p[1] - 1], mon: +p[1] }; }
+
+  function openBook() {
+    show('book');
+    $('bk-form').classList.remove('hidden'); $('bk-done').classList.add('hidden');
+    BK = { cats: [], date: '', period: '', info: null };
+    $('bk-note').value = ''; $('bk-err').textContent = '';
+    renderBookCats(); renderBookPerks(); renderBookNudges(0);
+    $('bk-days').innerHTML = '<div class="xs muted">กำลังดูคิวว่าง…</div>'; $('bk-periods').innerHTML = '';
+    api({ action: 'bookInfo', idToken: idToken }).then(function (info) {
+      BK.info = info; renderBookDays(); renderBookNudges(info.careDue || 0);
+    }).catch(function (e) { $('bk-days').innerHTML = '<div class="xs" style="color:var(--err)">' + esc(e.message || 'ดูคิวว่างไม่สำเร็จ ลองใหม่อีกครั้งนะคะ') + '</div>'; });
+  }
+  function renderBookCats() {
+    var labels = (BK.info && BK.info.cats) || { skin: ['ผิวใส ผิวฉ่ำ', 'Skin glow'], lift: ['ยกกระชับ ลดริ้วรอย', 'Lift & firm'], body: ['กระชับสัดส่วน', 'Body contour'], hair: ['กำจัดขน', 'Hair removal'], iv: ['IV Drip เติมพลัง', 'IV & wellness'], consult: ['ยังไม่แน่ใจ ขอคุยกับหมอก่อน', 'Not sure yet'] };
+    $('bk-cats').innerHTML = Object.keys(BK_ICON).map(function (k) {
+      return '<button type="button" class="bk-cat' + (BK.cats.indexOf(k) >= 0 ? ' on' : '') + '" data-k="' + k + '"><svg viewBox="0 0 24 24">' + BK_ICON[k] + '</svg><div class="th">' + esc(labels[k][0]) + '</div><div class="en">' + esc(labels[k][1]) + '</div></button>';
+    }).join('');
+  }
+  function renderBookDays() {
+    var days = (BK.info && BK.info.days) || [];
+    $('bk-days').innerHTML = days.map(function (d) {
+      var p = ymdParts(d.date);
+      return '<button type="button" class="bk-day' + (BK.date === d.date ? ' on' : '') + '" data-d="' + d.date + '"' + (d.closed ? ' disabled title="' + esc(d.reason) + '"' : '') + '><div class="w">' + p.w + '</div><div class="d">' + p.d + '</div><div class="m">' + (d.closed ? 'ปิด' : p.m) + '</div></button>';
+    }).join('');
+    renderBookPeriods();
+  }
+  function renderBookPeriods() {
+    var day = ((BK.info && BK.info.days) || []).filter(function (d) { return d.date === BK.date; })[0], P = (BK.info && BK.info.periods) || {};
+    $('bk-periods').innerHTML = day ? day.periods.map(function (k) { return '<button type="button" class="bk-per' + (BK.period === k ? ' on' : '') + '" data-p="' + k + '">' + esc((P[k] || [k])[0]) + '</button>'; }).join('') : '';
+    $('bk-send').disabled = !(BK.cats.length && BK.date && BK.period);
+  }
+  // สิทธิ์ที่ใช้ได้ในนัดนี้ (จากข้อมูลบัตรของสมาชิกเอง)
+  function renderBookPerks() {
+    var v = current || {}, items = [];
+    (v.welcome || []).forEach(function (w) { if (!w.locked) items.push(['Welcome ' + esc(w.tierName) + ': ' + esc(w.gift), 'ใช้ได้ถึง ' + esc(thd(w.until)) + (w.cond ? ' · ' + esc(w.cond) : '')]); });
+    var bmon = BK.date ? ymdParts(BK.date).mon : (v.today ? +v.today.slice(5, 7) : 0);
+    if (v.birthday && !v.birthday.usedThisYear && v.birthday.month === bmon) items.push(['ของขวัญเดือนเกิด: ' + esc(v.birthday.gift), esc(v.birthday.cond || 'ใช้ได้ในเดือนเกิด')]);
+    (v.annual || []).forEach(function (a) { if (a.available) items.push(['สิทธิ์ประจำปี: ' + esc(a.gift), 'ปีละ 1 ครั้ง']); });
+    if (v.promoPass && v.promoPass.available) items.push([esc(v.promoPass.name) + ' (เหลือ ' + v.promoPass.remaining + ' ครั้ง)', esc(v.promoPass.desc || '')]);
+    var bal = (v.stars && v.stars.balance) || 0, can = (v.rewards || []).filter(function (r) { return r.canRedeem; }).sort(function (a, b) { return b.stars - a.stars; })[0];
+    if (can) items.push(['ดาว ' + bal + ' ดวง แลกได้: ' + esc(can.name), 'บอกน้องที่เคาน์เตอร์ได้เลยค่ะ']);
+    else if (bal) items.push(['ดาวสะสม ' + bal + ' ดวง', 'อีก ' + fmt((v.stars || {}).toNextStarBaht || 0) + ' บาท ได้ดาวดวงต่อไป']);
+    if (v.tier && v.tier.discount) items.push(['ราคาสมาชิก ' + esc(v.tier.name) + ' ลด ' + Math.round(v.tier.discount * 100) + '%', 'ใช้กับบริการราคาปกติ']);
+    $('bk-perks').innerHTML = items.length ? items.map(function (x) { return '<div class="bk-perk"><i></i><div>' + x[0] + (x[1] ? '<small>' + x[1] + '</small>' : '') + '</div></div>'; }).join('')
+      : '<div class="bk-perk"><i></i><div>ทุก 5,000 บาท รับดาว 1 ดวง<small>สะสมไว้แลกของรางวัลได้</small></div></div>';
+  }
+  // การ์ดชวนนัดตามจังหวะของแต่ละคน
+  function renderBookNudges(careDue) {
+    var v = current || {}, n = [];
+    var duePlans = ((v.care && v.care.plans) || []).filter(function (p) { return p.active && p.nextDue && p.nextDue <= addDaysJs(v.today, 7) && !p.booked; });
+    if (duePlans.length) n.push(['ถึงรอบ ' + esc(duePlans[0].name) + (duePlans.length > 1 ? ' กับอีก ' + (duePlans.length - 1) + ' โปรแกรม' : '') + ' แล้วนะคะ', 'มาตามรอบ ผลลัพธ์จะได้ไม่สะดุด']);
+    else if (careDue) n.push(['ถึงรอบดูแลของคุณแล้วนะคะ', 'มาตามรอบ ผลลัพธ์จะได้ไม่สะดุด']);
+    if (v.birthday && v.birthday.available) n.push(['เดือนนี้เดือนเกิดคุณ มีของขวัญรออยู่ค่ะ', 'มารับได้ถึงสิ้นเดือน']);
+    (v.welcome || []).forEach(function (w) { if (!w.locked && n.length < 3) n.push(['Welcome gift ของคุณยังรออยู่นะคะ', esc(w.gift) + ' ใช้ได้ถึง ' + esc(thd(w.until))]); });
+    if (v.stars && v.stars.expiring && n.length < 3) n.push(['ดาว ' + v.stars.expiring.stars + ' ดวงจะหมดอายุ ' + esc(thd(v.stars.expiring.lastDay)), 'แลกก่อนหมดเขตนะคะ เสียดายแย่']);
+    $('bk-nudges').innerHTML = n.slice(0, 3).map(function (x) { return '<div class="bk-nudge"><svg viewBox="0 0 24 24">' + STAR6 + '</svg><div class="t">' + x[0] + '<small>' + x[1] + '</small></div></div>'; }).join('');
+  }
+  function addDaysJs(ymd, n) { var p = String(ymd || '').split('-'); if (p.length < 3) return ''; var d = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2] + n)); return d.toISOString().slice(0, 10); }
+  function thd(ymd) { if (!ymd) return ''; var p = ymdParts(ymd); return p.d + ' ' + p.m; }
+  function fmt(n) { return Number(n || 0).toLocaleString('en-US'); }
+
+  $('bk-cats').addEventListener('click', function (e) {
+    var b = e.target.closest('.bk-cat'); if (!b) return;
+    var k = b.dataset.k, i = BK.cats.indexOf(k);
+    if (i >= 0) BK.cats.splice(i, 1); else { if (BK.cats.length >= 3) { toast('เลือกได้ไม่เกิน 3 อย่างค่ะ'); return; } BK.cats.push(k); }
+    renderBookCats(); renderBookPeriods();
+  });
+  $('bk-days').addEventListener('click', function (e) {
+    var b = e.target.closest('.bk-day'); if (!b || b.disabled) return;
+    BK.date = b.dataset.d; BK.period = ''; renderBookDays(); renderBookPerks();
+  });
+  $('bk-periods').addEventListener('click', function (e) {
+    var b = e.target.closest('.bk-per'); if (!b) return;
+    BK.period = b.dataset.p; renderBookPeriods();
+  });
+  $('bk-back').addEventListener('click', function () { show('member'); });
+  $('bk-card').addEventListener('click', function () { show('member'); });
+  $('bk-close').addEventListener('click', function () { try { if (!DEMO && liff.isInClient()) { liff.closeWindow(); return; } } catch (x) {} show('member'); });
+  $('bk-send').addEventListener('click', function () {
+    var btn = $('bk-send'), err = $('bk-err');
+    err.textContent = ''; btn.disabled = true; btn.textContent = 'กำลังส่ง…';
+    api({ action: 'bookRequest', idToken: idToken, cats: BK.cats, date: BK.date, period: BK.period, note: $('bk-note').value })
+      .then(function (res) {
+        var chat = Promise.resolve(false);
+        try { if (!DEMO && liff.isInClient() && res.text) chat = liff.sendMessages([{ type: 'text', text: res.text }]).then(function () { return true; }); } catch (x) {}
+        return chat.catch(function () { return false; }).then(function (sent) { bookDone(sent || DEMO); });
+      })
+      .catch(function (e) { err.textContent = e.message || 'ส่งไม่สำเร็จ'; btn.disabled = false; btn.textContent = 'ขอนัดเลย'; if (e.code === 'AUTH') handleErr(e); });
+  });
+  function bookDone(inChat) {
+    $('bk-form').classList.add('hidden'); $('bk-done').classList.remove('hidden');
+    var html = '<svg class="main" viewBox="0 0 24 24">' + STAR6F + '</svg>';
+    for (var i = 0; i < 12; i++) { var a = i * 30 * Math.PI / 180, r = 58 + (i % 3) * 10; html += '<i style="--x:' + Math.round(Math.cos(a) * r) + 'px;--y:' + Math.round(Math.sin(a) * r) + 'px;animation-delay:' + (0.12 + (i % 4) * 0.05) + 's"></i>'; }
+    $('bk-burst').innerHTML = html;
+    if (!inChat) $('bk-done-text').innerHTML = 'คลินิกได้รับแล้ว เดี๋ยวน้องๆ ทักไปยืนยันเวลาใน LINE นะคะ<br><span class="en-s">Got it. We’ll confirm your time in LINE chat.</span>';
+    window.scrollTo(0, 0);
+    $('bk-send').disabled = false; $('bk-send').textContent = 'ขอนัดเลย';
+  }
+
   /* ---------------- Member ---------------- */
   function renderCare(v) {
     var c = v.care;
@@ -498,7 +679,7 @@
 
   // เปิดจาก Rich menu: ?go=appt | rewards | save | gift | access (LIFF อาจส่งมาใน liff.state)
   function applyGo() {
-    if (!GO || goDone) return;
+    if (!GO || goDone || GO === 'book') return;
     goDone = true;
     var el = null;
     if (GO === 'appt') el = $('next-appt');
