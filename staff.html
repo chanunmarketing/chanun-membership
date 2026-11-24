@@ -80,6 +80,19 @@
   #due-booked summary .arrow { display: inline-block; transition: transform .2s; color: var(--ink-3); margin-left: 6px; }
   #due-booked[open] summary .arrow { transform: rotate(90deg); }
   #due-booked .due-row { opacity: .8; }
+  .due-row.sel { background: #eef1f7; box-shadow: inset 3px 0 0 var(--blue); }
+  /* ข้อมูลสมาชิกเปิดเป็นแผงด้านขวา (คอม) / เต็มจอ (มือถือ) — รายการเดิมไม่เลื่อนหาย (24 พ.ย. PP ขอ) */
+  .m-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  body.member-open:not(.cal-mode) #member { position: fixed; z-index: 45; margin: 0 !important; overflow-y: auto; overscroll-behavior: contain; background: var(--paper); }
+  body.member-open:not(.cal-mode) .m-bar { position: sticky; top: 0; z-index: 2; background: var(--paper); padding: 10px 0; margin: -10px 0 6px; }
+  @media (min-width: 1100px) {
+    body.member-open:not(.cal-mode) #v-main { max-width: 680px; margin-left: max(24px, calc(50vw - 680px - 16px)); margin-right: calc(min(620px, 46vw) + 40px); }
+    body.member-open:not(.cal-mode) #member { top: 0; right: 0; bottom: 0; width: min(620px, 46vw); padding: 16px 22px 40px; border-left: 1px solid var(--line); box-shadow: -12px 0 30px rgba(24, 46, 86, .06); }
+  }
+  @media (max-width: 1099px) {
+    body.member-open:not(.cal-mode) { overflow: hidden; }
+    body.member-open:not(.cal-mode) #member { inset: 0; padding: 12px 16px 40px; }
+  }
   @media (max-width: 520px) { .due-name small { display: block; margin: 2px 0 0; } .due-row { padding: 12px 10px; } }
 
   /* ---------- ปฏิทินนัด ---------- */
@@ -243,6 +256,7 @@
   </section>
 
   <section id="member" class="hidden" style="margin-top:20px">
+    <div class="m-bar"><span class="eyebrow">ข้อมูลสมาชิก</span><button class="btn ghost sm" type="button" id="m-close">✕ ปิด</button></div>
     <div class="panel">
       <div class="mhead">
         <div>
@@ -420,7 +434,7 @@
       initCal();
     }).catch(function (e) { $('login-err').textContent = e.message; PIN = null; }).then(function () { b.disabled = false; });
   });
-  function logout() { PIN = null; cur = null; stopScan(); document.body.classList.remove('cal-mode'); $('main-tabs').classList.add('hidden'); $('member').classList.add('hidden'); $('due').classList.add('hidden'); $('results').innerHTML = ''; $('v-main').classList.add('hidden'); $('v-login').classList.remove('hidden'); }
+  function logout() { PIN = null; cur = null; document.body.classList.remove('member-open'); stopScan(); document.body.classList.remove('cal-mode'); $('main-tabs').classList.add('hidden'); $('member').classList.add('hidden'); $('due').classList.add('hidden'); $('results').innerHTML = ''; $('v-main').classList.add('hidden'); $('v-login').classList.remove('hidden'); }
   $('logout').addEventListener('click', logout);
 
   /* ---------- search & scan ---------- */
@@ -463,8 +477,14 @@
     api({ action: 'staff.member', code: code }).then(function (r) { $('banner').innerHTML = ''; clearWarn(); render(r.view); }).catch(onErr);
   }
 
+  function closeMember() { cur = null; $('member').classList.add('hidden'); document.body.classList.remove('member-open'); markDueSel(); }
+  function markDueSel() { [].forEach.call(document.querySelectorAll('.due-row[data-code]'), function (r) { r.classList.toggle('sel', !!(cur && r.dataset.code === cur.member.code)); }); }
   function render(v) {
+    var fresh = !cur || cur.member.code !== v.member.code;
     cur = v;
+    document.body.classList.add('member-open');
+    if (fresh) $('member').scrollTop = 0;
+    setTimeout(markDueSel, 0);
     var t = v.tier;
     $('member').classList.remove('hidden');
     $('m-name').textContent = v.member.name + (v.member.nickname ? ' (' + v.member.nickname + ')' : '');
@@ -749,11 +769,13 @@
     api({ action: 'staff.careDue', days: 7 }).then(function (r) {
       if (!r.installed) { $('due').classList.add('hidden'); return; }
       $('due').classList.remove('hidden');
-      $('due-list').innerHTML = renderDue(r.list);
+      $('due-list').innerHTML = renderDue(r.list); markDueSel();
     }).catch(function () { $('due').classList.add('hidden'); });
   }
   $('due-refresh').addEventListener('click', loadDue);
-  $('due-list').addEventListener('click', function (e) { var b = e.target.closest('.due-row[data-code]'); if (b) { openMember(b.dataset.code); $('member').scrollIntoView({ behavior: 'smooth' }); } });
+  $('due-list').addEventListener('click', function (e) { var b = e.target.closest('.due-row[data-code]'); if (b) openMember(b.dataset.code); });
+  $('m-close').addEventListener('click', closeMember);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('member-open') && !document.querySelector('.modal:not(.hidden), .modal-bg:not(.hidden)')) closeMember(); });
   $('due-list').addEventListener('keydown', function (e) { if (e.key === 'Enter') { var b = e.target.closest('.due-row[data-code]'); if (b) b.click(); } });
 
   /* ---------- ปฏิทินนัด ---------- */
