@@ -57,8 +57,30 @@
   .act .input { width: 86px; padding: 7px 10px; }
   .act .input.wide { width: 150px; }
   .plan-f { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
-  .due-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; font-size: 14px; }
-  .due-row + .due-row { border-top: 1px solid var(--line); }
+  /* ครบรอบดูแล: 1 แถวต่อคน · แยก "ต้องโทรตาม" กับ "นัดแล้ว" (24 พ.ย. PP ขอให้อ่านง่ายขึ้น) */
+  .due-group { display: flex; align-items: baseline; justify-content: space-between; margin: 14px 2px 6px; }
+  .due-group b { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .due-group .n { display: inline-block; min-width: 22px; padding: 1px 8px; margin-left: 6px; border-radius: 999px; background: var(--blue); color: #fff; font-size: 12px; text-align: center; }
+  .due-group.ok .n { background: var(--ok); }
+  .due-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 12px 14px; cursor: pointer; border-radius: 12px; }
+  .due-row:hover { background: #f6f4ef; }
+  .due-row + .due-row { border-top: 1px solid var(--line); border-radius: 0; }
+  .due-name { font-size: 15.5px; font-weight: 600; color: var(--ink); line-height: 1.35; }
+  .due-name small { font-weight: 400; color: var(--ink-3); font-size: 12.5px; margin-left: 6px; white-space: nowrap; }
+  .due-chips { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+  .due-chip { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; background: #f1efe9; color: var(--ink-2); white-space: nowrap; }
+  .due-pill { grid-row: 1 / span 2; grid-column: 2; justify-self: end; text-align: right; font-size: 12.5px; line-height: 1.4; }
+  .due-pill b { display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 600; font-size: 13px; }
+  .due-pill .late { background: #fbe9e7; color: #b23a2e; }
+  .due-pill .soon { background: #fdf3df; color: #94660b; }
+  .due-pill .booked { background: #e6f2ea; color: #2f6b45; }
+  .due-pill div { color: var(--ink-3); margin-top: 3px; }
+  #due-booked summary { list-style: none; cursor: pointer; }
+  #due-booked summary::-webkit-details-marker { display: none; }
+  #due-booked summary .arrow { display: inline-block; transition: transform .2s; color: var(--ink-3); margin-left: 6px; }
+  #due-booked[open] summary .arrow { transform: rotate(90deg); }
+  #due-booked .due-row { opacity: .8; }
+  @media (max-width: 520px) { .due-name small { display: block; margin: 2px 0 0; } .due-row { padding: 12px 10px; } }
 
   /* ---------- ปฏิทินนัด ---------- */
   body.cal-mode .wrap { max-width: 1180px; }
@@ -189,8 +211,8 @@
   <div id="results"></div>
 
   <section id="due" class="hidden" style="margin-top:20px">
-    <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div class="eyebrow">ครบรอบดูแลภายใน 7 วัน</div><button class="btn ghost sm" type="button" id="due-refresh">รีเฟรช</button></div>
-    <div class="panel" id="due-list" style="padding-top:4px;padding-bottom:4px"></div>
+    <div class="section-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><div class="eyebrow">ครบรอบดูแล</div><div class="xs muted" style="margin-top:2px">เลยรอบไม่เกิน 30 วัน และจะถึงรอบใน 7 วัน</div></div><button class="btn ghost sm" type="button" id="due-refresh">รีเฟรช</button></div>
+    <div id="due-list"></div>
   </section>
 
   <section id="v-cal">
@@ -680,20 +702,59 @@
     var s = e.target.closest('select[data-int]'); if (!s) return;
     careCall({ action: 'staff.carePlan', plan: s.dataset.int, op: 'interval', interval: +s.value }, s, 'เปลี่ยนรอบเป็น ' + intLabel(+s.value) + ' แล้ว');
   });
+  function dueToday() { return new Date(Date.now() + 7 * 36e5).toISOString().slice(0, 10); }
+  function dayDiff(a, b) { var p = a.split('-'), q = b.split('-'); return Math.round((Date.UTC(+q[0], +q[1] - 1, +q[2]) - Date.UTC(+p[0], +p[1] - 1, +p[2])) / 864e5); }
+  var TH_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  function dueDate(ymd) { var p = String(ymd || '').split('-'); return p.length < 3 ? '' : (+p[2]) + ' ' + TH_MON[+p[1] - 1]; }
+  function progShort(x) {
+    var p = String(x.program || '').replace(/^Program\s+/i, '').trim(), it = String(x.item || '').trim();
+    return it && p.toLowerCase().indexOf(it.toLowerCase()) < 0 && it.toLowerCase().indexOf(p.toLowerCase()) < 0 ? p + ' · ' + it : p;
+  }
+  /** รวมเป็น 1 แถวต่อคน: ชวนกลับมาดูแล (ยังไม่มีนัด เลยรอบนานสุดขึ้นก่อน) / นัดแล้ว (พับไว้) */
+  function renderDue(list) {
+    if (!list.length) return '<div class="panel"><p class="small muted" style="margin:6px 0">ไม่มีคนไข้ครบรอบในช่วงนี้</p></div>';
+    var today = dueToday(), by = {}, order = [];
+    list.forEach(function (x) {
+      var g = by[x.code]; if (!g) { g = by[x.code] = { code: x.code, name: x.name, last4: x.phoneLast4, items: [], due: x.due, booked: '' }; order.push(g); }
+      g.items.push(x); if (x.due < g.due) g.due = x.due;
+    });
+    order.forEach(function (g) {
+      var open = g.items.filter(function (x) { return !x.booked; });
+      g.todo = open.length > 0;
+      if (g.todo) g.due = open.reduce(function (m, x) { return x.due < m ? x.due : m; }, open[0].due);
+      g.booked = g.items.map(function (x) { return x.booked || ''; }).filter(Boolean).sort()[0] || '';
+    });
+    function row(g) {
+      var late = dayDiff(g.due, today), pill;
+      if (!g.todo) pill = '<b class="booked">นัดแล้ว ' + esc(dueDate(g.booked)) + '</b>';
+      else if (late > 0) pill = '<b class="late">เลยรอบ ' + late + ' วัน</b><div>ครบ ' + esc(dueDate(g.due)) + '</div>';
+      else if (late === 0) pill = '<b class="soon">ครบรอบวันนี้</b>';
+      else pill = '<b class="soon">อีก ' + (-late) + ' วัน</b><div>ครบ ' + esc(dueDate(g.due)) + '</div>';
+      if (g.todo && g.booked) pill += '<div>มีนัด ' + esc(dueDate(g.booked)) + '</div>';
+      var seen = {}, chips = g.items.map(progShort).filter(function (t) { if (seen[t]) return false; seen[t] = 1; return true; });
+      return '<div class="due-row" data-code="' + esc(g.code) + '" role="button" tabindex="0">' +
+        '<div class="due-name">' + esc(g.name) + '<small>' + esc(g.code) + ' · xxx-' + esc(g.last4) + '</small></div>' +
+        '<div class="due-pill">' + pill + '</div>' +
+        '<div class="due-chips">' + chips.map(function (t) { return '<span class="due-chip">' + esc(t) + '</span>'; }).join('') + '</div></div>';
+    }
+    var todo = order.filter(function (g) { return g.todo; }).sort(function (a, b) { return a.due < b.due ? -1 : a.due > b.due ? 1 : 0; });
+    var done = order.filter(function (g) { return !g.todo; }).sort(function (a, b) { return a.booked < b.booked ? -1 : 1; });
+    var html = '<div class="due-group"><span><b>ชวนกลับมาดูแล</b><span class="n">' + todo.length + '</span></span><span class="xs muted">ยังไม่มีนัด · เลยรอบนานสุดอยู่บน</span></div>' +
+      '<div class="panel" style="padding:4px 2px">' + (todo.length ? todo.map(row).join('') : '<p class="small muted" style="margin:10px 12px">ทุกคนมีนัดแล้ว</p>') + '</div>';
+    if (done.length) html += '<details id="due-booked"><summary class="due-group ok"><span><b>นัดแล้ว</b><span class="n">' + done.length + '</span><span class="arrow">›</span></span><span class="xs muted">แตะเพื่อดู</span></summary>' +
+      '<div class="panel" style="padding:4px 2px">' + done.map(row).join('') + '</div></details>';
+    return html;
+  }
   function loadDue() {
     api({ action: 'staff.careDue', days: 7 }).then(function (r) {
       if (!r.installed) { $('due').classList.add('hidden'); return; }
       $('due').classList.remove('hidden');
-      $('due-list').innerHTML = r.list.length ? r.list.map(function (x) {
-        return '<div class="due-row"><span><b>' + esc(x.name) + '</b> <span class="xs muted">' + esc(x.code) + ' · xxx-' + esc(x.phoneLast4) + '</span><br>' +
-          '<span class="xs">' + esc(x.program) + (x.item && x.item !== x.program ? ' · ' + esc(x.item) : '') + ' · ' + (x.overdue ? '<span style="color:var(--err)">เลยรอบ ' + d(x.due) + '</span>' : 'ถึงรอบ ' + d(x.due)) +
-          (x.booked ? ' · <span style="color:var(--ok)">นัดแล้ว ' + d(x.booked) + '</span>' : '') + '</span></span>' +
-          '<button class="btn ghost sm" type="button" data-code="' + esc(x.code) + '">เปิด</button></div>';
-      }).join('') : '<p class="small muted">ไม่มีคนไข้ครบรอบในสัปดาห์นี้</p>';
+      $('due-list').innerHTML = renderDue(r.list);
     }).catch(function () { $('due').classList.add('hidden'); });
   }
   $('due-refresh').addEventListener('click', loadDue);
-  $('due-list').addEventListener('click', function (e) { var b = e.target.closest('button[data-code]'); if (b) { openMember(b.dataset.code); $('member').scrollIntoView({ behavior: 'smooth' }); } });
+  $('due-list').addEventListener('click', function (e) { var b = e.target.closest('.due-row[data-code]'); if (b) { openMember(b.dataset.code); $('member').scrollIntoView({ behavior: 'smooth' }); } });
+  $('due-list').addEventListener('keydown', function (e) { if (e.key === 'Enter') { var b = e.target.closest('.due-row[data-code]'); if (b) b.click(); } });
 
   /* ---------- ปฏิทินนัด ---------- */
   var cal = { mode: 'day', date: null, data: null, meta: null };

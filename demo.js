@@ -255,6 +255,13 @@
                 var it = s.items.filter(function (i) { return i.nextDue === s.nextDue; })[0];
                 return { code: 'CH0007', name: state.member.nickname, phoneLast4: '4567', plan: s.id, program: s.name, item: it ? it.name : '', due: s.nextDue, overdue: s.nextDue < ymd(0), booked: s.booked };
               });
+              // ตัวอย่างหลายคน (ชื่อสมมติ) ให้เห็นการจัดกลุ่มในหน้าพนักงาน
+              [['CH0101', 'สมใจ ใจดี (ใจ)', '2068', [['Program Vera Skin', 'Vera Skin', -30, ymd(2)], ['Program Plasma Prime', 'Plasma', -27, ymd(2)]]],
+               ['CH0102', 'กานดา มีสุข', '7772', [['Program Definisse Italy Hydrobooster', 'Hydrobooster', -29, '']]],
+               ['CH0103', 'อรุณี แสงทอง (นุ่น)', '1462', [['Program IV Drip', 'IV Drip', -27, ''], ['Program Exilis Elite Monopolar-RF', 'Mono-RF', -27, ymd(2)]]],
+               ['CH0104', 'วรเชษฐ์ ทองดี (เชษฐ์)', '4952', [['Program Weight Care', 'Weight Care', -3, '']]],
+               ['CH0105', 'พิมพ์ชนก ศรีงาม (พิม)', '4293', [['Program Skin Booster', 'Skin Booster', 4, '']]]
+              ].forEach(function (r) { r[3].forEach(function (q) { list.push({ code: r[0], name: r[1], phoneLast4: r[2], plan: 'X', program: q[0], item: q[1], due: ymd(q[2]), overdue: q[2] < 0, booked: q[3] }); }); });
               return resolve({ list: list, installed: true });
             }
           }
