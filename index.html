@@ -138,6 +138,7 @@
   .bk-head { padding: 6px 0 14px; }
   .bk-head h1 { font-size: 26px; font-weight: 500; color: var(--blue); margin: 4px 0 2px; }
   .bk-sub { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; }
+  .need-note { white-space: pre-line; display: inline-block; margin: 6px 0 2px; padding: 5px 10px; border-radius: 10px; background: #FDF3DF; color: #7A5208; font-size: 12.5px; font-weight: 500; line-height: 1.45; }
   .en-s { display: inline-block; font-size: 11.5px; color: var(--ink-3); margin-top: 3px; }
   .bk-q { display: flex; justify-content: space-between; align-items: baseline; margin: 22px 2px 10px; }
   .bk-q b { font-weight: 500; font-size: 15.5px; color: var(--ink); flex: 1; min-width: 0; }
@@ -383,6 +384,16 @@
     <button class="btn ghost block" id="qr-close" type="button">ปิด</button>
   </div>
 </div>
+<div id="wel-sheet" class="sheet-bg hidden" role="dialog" aria-modal="true" aria-label="ของขวัญต้อนรับ">
+  <div class="sheet">
+    <div class="eyebrow">WELCOME GIFT</div>
+    <h2 style="font-weight:500;margin:8px 0 6px">ของขวัญต้อนรับรอคุณอยู่ค่ะ</h2>
+    <div class="small" id="wel-gift" style="font-weight:500;margin-bottom:10px"></div>
+    <div class="need-note" style="margin:0 0 8px">รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ<br>โดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกในวันนั้นก่อน</div>
+    <div class="xs muted" id="wel-until" style="margin-bottom:18px"></div>
+    <button class="btn block" id="wel-close" type="button">ตกลงค่ะ</button>
+  </div>
+</div>
 <div id="toast" class="toast"></div>
 
 <script src="config.js"></script>
@@ -444,7 +455,7 @@
   function load() {
     INV = getInv() || INV;
     api({ action: 'me', idToken: idToken, inv: INV || undefined }).then(function (res) {
-      if (res.registered) { renderMember(res.view); if (GO === 'book') openBook(); } else renderRegister(res.publicInfo, res.invite);
+      if (res.registered) { renderMember(res.view); if (GO === 'book') openBook(); else welcomeIntro(res.view); } else renderRegister(res.publicInfo, res.invite);
     }).catch(handleErr);
   }
 
@@ -493,7 +504,7 @@
     err.textContent = '';
     var btn = $('reg-btn'); btn.disabled = true; btn.textContent = 'กำลังสมัคร…';
     api(body).then(function (res) {
-      renderMember(res.view);
+      renderMember(res.view); welcomeIntro(res.view);
       toast('ยินดีต้อนรับสู่ CHANUN Membership');
     }).catch(function (e) {
       err.textContent = e.message; btn.disabled = false; btn.textContent = 'สมัครสมาชิก';
@@ -581,9 +592,9 @@
   // สิทธิ์ที่ใช้ได้ในนัดนี้ (จากข้อมูลบัตรของสมาชิกเอง)
   function renderBookPerks() {
     var v = current || {}, items = [];
-    (v.welcome || []).forEach(function (w) { if (!w.locked) items.push(['Welcome ' + esc(w.tierName) + ': ' + esc(w.gift), 'ใช้ได้ถึง ' + esc(thd(w.until)) + (w.cond ? ' · ' + esc(w.cond) : '')]); });
+    (v.welcome || []).forEach(function (w) { if (!w.locked) items.push(['Welcome ' + esc(w.tierName) + ': ' + esc(w.gift), (welcomeNeed(w) ? esc(welcomeNeed(w).replace('\n', ' · ')) + ' · ' : '') + 'ใช้ได้ถึง ' + esc(thd(w.until))]); });
     var bmon = BK.date ? ymdParts(BK.date).mon : (v.today ? +v.today.slice(5, 7) : 0);
-    if (v.birthday && !v.birthday.usedThisYear && v.birthday.month === bmon) items.push(['ของขวัญเดือนเกิด: ' + esc(v.birthday.gift), esc(v.birthday.cond || 'ใช้ได้ในเดือนเกิด')]);
+    if (v.birthday && !v.birthday.usedThisYear && v.birthday.month === bmon) items.push(['ของขวัญเดือนเกิด: ' + esc(v.birthday.gift), esc(spendNeed(v.birthday.minSpend, v.birthday.cond) || v.birthday.cond || 'ใช้ได้ในเดือนเกิด')]);
     (v.annual || []).forEach(function (a) { if (a.available) items.push(['สิทธิ์ประจำปี: ' + esc(a.gift), 'ปีละ 1 ครั้ง']); });
     if (v.promoPass && v.promoPass.available) items.push([esc(v.promoPass.name) + ' (เหลือ ' + v.promoPass.remaining + ' ครั้ง)', esc(v.promoPass.desc || '')]);
     var bal = (v.stars && v.stars.balance) || 0, can = (v.rewards || []).filter(function (r) { return r.canRedeem; }).sort(function (a, b) { return b.stars - a.stars; })[0];
@@ -594,13 +605,21 @@
       : '<div class="bk-perk"><i></i><div>ทุก 5,000 บาท รับดาว 1 ดวง<small>สะสมไว้แลกของรางวัลได้</small></div></div>';
   }
   // การ์ดชวนนัดตามจังหวะของแต่ละคน
+  /** Welcome ต้องมียอดซื้อ/บริการในวันที่ใช้ (PP 26 พ.ย.) */
+  /** Welcome CLASSIC ใช้คู่กับการซื้อ/บริการวันนั้น ; ระดับอื่นใช้ได้เลย (minSpend 0) — PP 26 พ.ย. */
+  function welcomeNeed(w) {
+    var mn = Number(w.minSpend) || 0; if (!mn) return '';
+    return 'รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ\nโดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกในวันนั้นก่อน' + (mn > 1 ? ' (ตั้งแต่ ' + mn.toLocaleString('en-US') + ' บาท)' : '');
+  }
+  /** ของที่เป็นมูลค่าเงิน (ของขวัญวันเกิด/บัตรกำนัล) ที่ตั้งยอดขั้นต่ำไว้ */
+  function spendNeed(min, cond) { var mn = Number(min) || 0; return mn ? 'ใช้ได้เมื่อมียอดซื้อหรือรับบริการวันนั้นตั้งแต่ ' + mn.toLocaleString('en-US') + ' บาท' + (/ราคาปกติ/.test(cond || '') ? ' (ราคาปกติ)' : '') : ''; }
   function renderBookNudges(careDue) {
     var v = current || {}, n = [];
     var duePlans = ((v.care && v.care.plans) || []).filter(function (p) { return p.active && p.nextDue && p.nextDue <= addDaysJs(v.today, 7) && !p.booked; });
     if (duePlans.length) n.push(['ถึงรอบ ' + esc(duePlans[0].name) + (duePlans.length > 1 ? ' กับอีก ' + (duePlans.length - 1) + ' โปรแกรม' : '') + ' แล้วนะคะ', 'มาตามรอบ ผลลัพธ์จะได้ไม่สะดุด']);
     else if (careDue) n.push(['ถึงรอบดูแลของคุณแล้วนะคะ', 'มาตามรอบ ผลลัพธ์จะได้ไม่สะดุด']);
     if (v.birthday && v.birthday.available) n.push(['เดือนนี้เดือนเกิดคุณ มีของขวัญรออยู่ค่ะ', 'มารับได้ถึงสิ้นเดือน']);
-    (v.welcome || []).forEach(function (w) { if (!w.locked && n.length < 3) n.push(['Welcome gift ของคุณยังรออยู่นะคะ', esc(w.gift) + ' ใช้ได้ถึง ' + esc(thd(w.until))]); });
+    (v.welcome || []).forEach(function (w) { if (!w.locked && n.length < 3) n.push(['Welcome gift ของคุณยังรออยู่นะคะ', esc(w.gift) + (w.minSpend ? ' รับได้ในวันที่คุณมารับบริการหรือทำหัตถการ' : '') + ' ใช้ได้ถึง ' + esc(thd(w.until))]); });
     if (v.stars && v.stars.expiring && n.length < 3) n.push(['ดาว ' + v.stars.expiring.stars + ' ดวงจะหมดอายุ ' + esc(thd(v.stars.expiring.lastDay)), 'แลกก่อนหมดเขตนะคะ เสียดายแย่']);
     $('bk-nudges').innerHTML = n.slice(0, 3).map(function (x) { return '<div class="bk-nudge"><svg viewBox="0 0 24 24">' + STAR6 + '</svg><div class="t">' + x[0] + '<small>' + x[1] + '</small></div></div>'; }).join('');
   }
@@ -708,6 +727,16 @@
     if (el) setTimeout(function () { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200);
   }
 
+  /** ครั้งแรกที่เห็น Welcome CLASSIC → ป๊อปอัปบอกเงื่อนไขแบบน่ารัก (จำในเครื่องว่าเห็นแล้ว) */
+  function welcomeIntro(v) {
+    var w = (v.welcome || []).filter(function (x) { return x.minSpend > 0; })[0]; if (!w) return;
+    var key = 'chanun_wel_seen_' + (v.member && v.member.code) + '_' + w.code, seen = false;
+    try { seen = !!localStorage.getItem(key); } catch (e) {}
+    if (seen) return;
+    $('wel-gift').textContent = w.gift; $('wel-until').textContent = 'ใช้ได้ถึง ' + d(w.until);
+    $('wel-sheet').classList.remove('hidden');
+    $('wel-close').onclick = function () { $('wel-sheet').classList.add('hidden'); try { localStorage.setItem(key, '1'); } catch (e) {} };
+  }
   function renderMember(v) {
     current = v;
     renderCare(v);
@@ -756,12 +785,12 @@
 
     // ready now
     var ready = [];
-    (v.welcome || []).forEach(function (w) { ready.push({ t: 'Welcome ' + w.tierName, g: w.gift, c: w.cond, s: w.locked ? w.lockReason + ' · ภายใน ' + d(w.until) : 'ใช้ได้ถึง ' + d(w.until), lock: w.locked }); });
-    if (v.birthday && v.birthday.available) ready.push({ t: 'ของขวัญเดือนเกิด', g: v.birthday.gift, c: v.birthday.cond, s: 'ใช้ได้ภายในเดือนนี้' });
+    (v.welcome || []).forEach(function (w) { ready.push({ t: 'Welcome ' + w.tierName, g: w.gift, c: w.cond, need: welcomeNeed(w), s: w.locked ? w.lockReason + ' · ภายใน ' + d(w.until) : 'ใช้ได้ถึง ' + d(w.until), lock: w.locked }); });
+    if (v.birthday && v.birthday.available) ready.push({ t: 'ของขวัญเดือนเกิด', g: v.birthday.gift, c: v.birthday.cond, need: spendNeed(v.birthday.minSpend, v.birthday.cond), s: 'ใช้ได้ภายในเดือนนี้' });
     (v.annual || []).forEach(function (a) { if (a.available) ready.push({ t: 'สิทธิ์ประจำปี', g: a.gift, s: 'ใช้ได้ 1 ครั้งภายในปีนี้' }); });
     $('ready-sec').classList.toggle('hidden', !ready.length);
     $('ready').innerHTML = ready.map(function (r) {
-      return '<div class="ready-item"><span class="ready-mark"></span><div><div style="font-weight:500">' + esc(r.t) + '</div><div class="small">' + esc(r.g) + '</div>' + (r.c ? '<div class="xs muted" style="white-space:pre-line">' + esc(r.c) + '</div>' : '') + '<div class="xs muted">' + esc(r.s) + (r.lock ? '' : ' · แจ้งพนักงานพร้อมแสดง QR') + '</div></div></div>';
+      return '<div class="ready-item"><span class="ready-mark"></span><div><div style="font-weight:500">' + esc(r.t) + '</div><div class="small">' + esc(r.g) + '</div>' + (r.need ? '<div class="need-note">' + esc(r.need) + '</div>' : '') + (r.c && !r.need ? '<div class="xs muted" style="white-space:pre-line">' + esc(r.c) + '</div>' : '')  + '<div class="xs muted">' + esc(r.s) + (r.lock ? '' : ' · แจ้งพนักงานพร้อมแสดง QR') + '</div></div></div>';
     }).join('');
 
     // benefits
@@ -775,7 +804,7 @@
         : '<div>สะสมดาวเพื่อแลกของรางวัล</div><div class="xs muted">ราคาสมาชิกเริ่มที่ระดับ ' + esc((tiers[1] || {}).name || '') + '</div>') + '</div></div>' +
       '<div class="benefit"><div class="k">ดาว</div><div class="v">ทุก ' + fmt(v.bahtPerStar) + ' บาท ได้ 1 ดาว</div></div>';
     $('tab-gift').innerHTML =
-      (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div>' + (t.welcomeCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.welcomeCond) + '</div>' : '') + '</div></div>' : '') +
+      (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div>' + (t.level === 0 ? '<div class="need-note" style="margin-top:6px">รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ\nโดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกในวันนั้นก่อน</div>' : '') + (t.welcomeCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.welcomeCond) + '</div>' : '') + '</div></div>' : '') +
       (t.birthday ? '<div class="benefit"><div class="k">เดือนเกิด</div><div class="v">' + esc(t.birthday) + (v.member.birthMonth ? '<div class="xs muted">เดือน' + esc(MONTHS[v.member.birthMonth - 1]) + '</div>' : '<div class="xs muted">แจ้งวันเกิดที่คลินิกเพื่อรับสิทธิ์</div>') + (t.birthdayCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.birthdayCond) + '</div>' : '') + '</div></div>' : '') +
       (t.annual || []).map(function (a) { return '<div class="benefit"><div class="k">ประจำปี</div><div class="v">' + esc(a) + '<div class="xs muted">ปีละ 1 ครั้ง</div></div></div>'; }).join('') +
       (pp ? '<div class="benefit"><div class="k">ประจำปี</div><div class="v">' + esc(pp.name || 'ตรวจสุขภาพฟรี') + ' ปีละ ' + pp.quota + ' ครั้ง' + (pp.desc ? '<div class="xs muted" style="white-space:pre-line">' + esc(pp.desc) + '</div>' : '') + '<div class="xs muted">ใช้ได้อีก ' + pp.remaining + ' จาก ' + pp.quota + ' ครั้งในปีนี้</div></div></div>' : '');

@@ -121,7 +121,7 @@
     TIERS.forEach(function (t, i) { if (s12 >= t.minStars) level = i; });
     var t = TIERS[level], next = TIERS[level + 1];
     var claimed = state.rds.map(function (r) { return r.code; });
-    var welcome = claimed.indexOf('WELCOME-' + t.name) < 0 && level > 0 ? [{ code: 'WELCOME-' + t.name, tierName: t.name, gift: t.welcome, until: ymd(60), cond: t.welcomeCond || '', locked: false }] : [];
+    var welcome = claimed.indexOf('WELCOME-' + t.name) < 0 ? [{ code: 'WELCOME-' + t.name, tierName: t.name, gift: t.welcome, until: ymd(60), cond: t.welcomeCond || '', locked: false, minSpend: level === 0 ? 1 : 0 }] : [];
     var history = [];
     state.txs.forEach(function (x) { history.push({ date: x.date, kind: x.amount > 0 ? 'purchase' : 'refund', label: x.amount > 0 ? 'ใช้บริการ' : 'คืนเงิน', amount: x.amount, stars: x.earned, receipt: x.receipt }); });
     state.rds.forEach(function (r) { history.push({ date: r.date, kind: 'redeem', label: r.name, amount: null, stars: -r.stars }); });
@@ -139,7 +139,7 @@
       birthday: { month: state.member.birthMonth, gift: t.birthday, cond: t.birthdayCond || '', available: claimed.indexOf('BIRTHDAY') < 0, usedThisYear: claimed.indexOf('BIRTHDAY') >= 0 },
       promoPass: t.promoPass ? { quota: t.promoPass, used: claimed.filter(function (c) { return c === 'PROMOPASS'; }).length, remaining: Math.max(0, t.promoPass - claimed.filter(function (c) { return c === 'PROMOPASS'; }).length), available: claimed.filter(function (c) { return c === 'PROMOPASS'; }).length < t.promoPass, name: 'ตรวจสุขภาพฟรี 18 รายการ', desc: 'นำผลตรวจมาแลกซื้อ IV Drip สูตรใดก็ได้ รับส่วนลดเพิ่มเติม' } : null,
       annual: (t.annual || []).map(function (g, i) { var c = 'ANNUAL-' + (i + 1); return { code: c, slot: i + 1, gift: g, available: claimed.indexOf(c) < 0, usedThisYear: claimed.indexOf(c) >= 0 }; }),
-      rewards: REWARDS.map(function (r) { return { code: r[0], name: r[1], type: r[2], stars: r[3], minTier: r[4] ? TIERS[r[4]].name : null, tierOk: r[4] <= level, canRedeem: r[4] <= level && balance >= r[3] }; }),
+      rewards: REWARDS.map(function (r) { return { code: r[0], name: r[1], type: r[2], stars: r[3], minTier: r[4] ? TIERS[r[4]].name : null, tierOk: r[4] <= level, canRedeem: r[4] <= level && balance >= r[3], minSpend: r[2] === 'บัตรกำนัล' ? Number((r[1].match(/ขั้นต่ำ\s*([\d,]+)/) || [0, '0'])[1].replace(/,/g, '')) : 0 }; }),
       tiers: TIERS, history: history.slice(0, 40), terms: TERMS
     };
     if (forStaff) { v.member.phone = state.member.phone; v.member.hn = state.member.hn; v.member.status = 'ใช้งาน'; v.member.note = ''; }
