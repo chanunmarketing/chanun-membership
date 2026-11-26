@@ -498,7 +498,7 @@
     $('m-bal').textContent = fmt(v.stars.balance);
     $('m-roll').textContent = fmt(v.rolling.baht);
     var av = [];
-    (v.welcome || []).forEach(function (w) { av.push('<span class="pill ' + (w.locked ? 'warn' : 'ok') + '">Welcome ' + esc(w.tierName) + ': ' + esc(w.gift) + (w.locked ? ' (' + esc(w.lockReason) + ')' : w.minSpend ? ' · ใช้คู่กับยอดวันนี้' : '') + '</span>'); });
+    (v.welcome || []).forEach(function (w) { av.push('<span class="pill ' + (w.locked ? 'warn' : 'ok') + '">Welcome ' + esc(w.tierName) + ': ' + esc(w.gift) + (w.locked ? ' (' + esc(w.lockReason) + ')' : w.minSpend ? ' · ต้องมีใบเสร็จของเจ้าของบัตร' : '') + '</span>'); });
     if (v.birthday && v.birthday.available) av.push('<span class="pill ok">เดือนเกิด: ' + esc(v.birthday.gift) + '</span>');
     (v.annual || []).forEach(function (a) { if (a.available) av.push('<span class="pill ok">ประจำปี: ' + esc(a.gift) + '</span>'); });
     if (v.promoPass && v.promoPass.available) av.push('<span class="pill ok">' + esc(v.promoPass.name || 'ตรวจสุขภาพฟรี') + ' เหลือ ' + v.promoPass.remaining + ' ครั้ง</span>');
@@ -533,14 +533,15 @@
   $('rw-list').addEventListener('click', function (e) {
     var b = e.target.closest('button[data-r]'); if (!b) return;
     var s = +b.dataset.s;
-    if (b.dataset.min) {  // สิทธิ์ที่ต้องมียอดวันนี้ (Welcome CLASSIC / ของขวัญวันเกิด / บัตรกำนัล ที่ตั้งขั้นต่ำ) — ใส่ใบเสร็จ + ติ๊กยืนยัน (PP 26 พ.ย.)
-      var mn = +b.dataset.min;
+    if (b.dataset.min) {  // สิทธิ์ที่ต้องมียอดซื้อ (Welcome CLASSIC: ใบเสร็จวันไหนก็ได้ / ของขวัญวันเกิด, บัตรกำนัล ที่ตั้งขั้นต่ำ: บิลวันนี้) — ใส่ใบเสร็จ + ติ๊กยืนยัน (PP 26 พ.ย.)
+      var mn = +b.dataset.min, anyDay = /^WELCOME-/.test(b.dataset.r);  // Welcome: ใบเสร็จวันไหนก็ได้ (PP 26 พ.ย.)
+      var when = anyDay ? '' : 'วันนี้';
       $('rw-confirm').innerHTML = '<div class="confirm"><div style="font-weight:500">ยืนยันใช้สิทธิ์</div><div class="small" style="margin:4px 0 10px">' + esc(b.dataset.n) + (s ? '<br>ใช้ ' + s + ' ดาว · คงเหลือ ' + (cur.stars.balance - s) + ' ดาว' : '') + '</div>' +
-        '<div class="small" style="background:#FDF3DF;color:#7A5208;border-radius:10px;padding:10px 12px;margin-bottom:12px"><b>ใช้ได้เมื่อเจ้าของบัตรมียอดซื้อบริการหรือหัตถการวันนี้' + (mn > 1 ? ' ขั้นต่ำ ' + fmt(mn) + ' บาท' : '') + '</b><br>กรอกเลขใบเสร็จ APSX ของวันนี้ ถ้ายังไม่ได้บันทึกยอดใบนี้ ให้ใส่ยอดด้วย ระบบจะลงดาวให้พร้อมกัน</div>' +
-        '<label class="field"><span>เลขใบเสร็จวันนี้</span><input class="input" id="wl-rc" placeholder="RE2026..." autocomplete="off"></label>' +
+        '<div class="small" style="background:#FDF3DF;color:#7A5208;border-radius:10px;padding:10px 12px;margin-bottom:12px"><b>ใช้ได้เมื่อเจ้าของบัตรมียอดซื้อบริการหรือหัตถการ' + (anyDay ? 'กับคลินิก (ใบเสร็จวันไหนก็ได้)' : 'วันนี้') + (mn > 1 ? ' ขั้นต่ำ ' + fmt(mn) + ' บาท' : '') + '</b><br>กรอกเลขใบเสร็จ APSX' + (anyDay ? '' : 'ของวันนี้') + ' ถ้ายังไม่ได้บันทึกยอดใบนี้ ให้ใส่ยอดด้วย ระบบจะลงดาวให้พร้อมกัน</div>' +
+        '<label class="field"><span>เลขใบเสร็จ' + (anyDay ? '' : 'วันนี้') + '</span><input class="input" id="wl-rc" placeholder="RE2026..." autocomplete="off"></label>' +
         '<label class="field"><span>ยอดชำระของใบเสร็จนี้ (บาท) — เว้นได้ถ้าบันทึกยอดไปแล้ว</span><input class="input num" id="wl-amt" inputmode="decimal" autocomplete="off"></label>' +
-        '<label class="small" style="display:flex;gap:8px;align-items:flex-start;margin:4px 0 12px"><input type="checkbox" id="wl-ok" style="margin-top:4px"> <span>ยืนยันว่า<b>เจ้าของบัตรเอง</b>ชำระค่าบริการ/หัตถการวันนี้แล้ว (ไม่ใช่ยอดของเพื่อนที่มาด้วย)' + (mn > 1 ? ' ยอดตั้งแต่ ' + fmt(mn) + ' บาท จากราคาปกติ ไม่ร่วมโปรโมชั่นอื่น' : '') + '</span></label>' +
-        '<div class="row"><button class="btn ghost" data-x="no">ยกเลิก</button><button class="btn" data-x="yes" data-w="1" data-r="' + esc(b.dataset.r) + '">ยืนยันใช้สิทธิ์</button></div></div>';
+        '<label class="small" style="display:flex;gap:8px;align-items:flex-start;margin:4px 0 12px"><input type="checkbox" id="wl-ok" style="margin-top:4px"> <span>ยืนยันว่า<b>เจ้าของบัตรเอง</b>ชำระค่าบริการ/หัตถการ' + when + 'แล้ว (ไม่ใช่ยอดของเพื่อนที่มาด้วย)' + (mn > 1 ? ' ยอดตั้งแต่ ' + fmt(mn) + ' บาท จากราคาปกติ ไม่ร่วมโปรโมชั่นอื่น' : '') + '</span></label>' +
+        '<div class="row"><button class="btn ghost" data-x="no">ยกเลิก</button><button class="btn" data-x="yes" data-w="' + (anyDay ? 'any' : 'today') + '" data-r="' + esc(b.dataset.r) + '">ยืนยันใช้สิทธิ์</button></div></div>';
       $('rw-confirm').scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -554,8 +555,9 @@
     var req = { action: 'staff.redeem', code: cur.member.code, rewardCode: b.dataset.r };
     if (b.dataset.w) {
       req.receipt = normReceipt($('wl-rc').value); req.amount = $('wl-amt').value; req.confirmSpend = $('wl-ok').checked;
-      if (!req.receipt) { toast('กรอกเลขใบเสร็จของวันนี้ก่อน', true); $('wl-rc').focus(); return; }
-      if (!req.confirmSpend) { toast('ติ๊กยืนยันว่าคนไข้ชำระเงินวันนี้แล้ว', true); return; }
+      var td = b.dataset.w === 'any' ? '' : 'วันนี้';
+      if (!req.receipt) { toast('กรอกเลขใบเสร็จ' + (td ? 'ของวันนี้' : '') + 'ก่อน', true); $('wl-rc').focus(); return; }
+      if (!req.confirmSpend) { toast('ติ๊กยืนยันว่าเจ้าของบัตรชำระเงิน' + td + 'แล้ว', true); return; }
     }
     busy(b, true);
     api(req).then(function (r) {

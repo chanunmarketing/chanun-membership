@@ -389,7 +389,7 @@
     <div class="eyebrow">WELCOME GIFT</div>
     <h2 style="font-weight:500;margin:8px 0 6px">ของขวัญต้อนรับรอคุณอยู่ค่ะ</h2>
     <div class="small" id="wel-gift" style="font-weight:500;margin-bottom:10px"></div>
-    <div class="need-note" style="margin:0 0 8px">รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ<br>โดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกในวันนั้นก่อน</div>
+    <div class="need-note" style="margin:0 0 8px">รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ<br>โดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกก่อน</div>
     <div class="xs muted" id="wel-until" style="margin-bottom:18px"></div>
     <button class="btn block" id="wel-close" type="button">ตกลงค่ะ</button>
   </div>
@@ -606,10 +606,10 @@
   }
   // การ์ดชวนนัดตามจังหวะของแต่ละคน
   /** Welcome ต้องมียอดซื้อ/บริการในวันที่ใช้ (PP 26 พ.ย.) */
-  /** Welcome CLASSIC ใช้คู่กับการซื้อ/บริการวันนั้น ; ระดับอื่นใช้ได้เลย (minSpend 0) — PP 26 พ.ย. */
+  /** Welcome CLASSIC ต้องมียอดซื้อของตัวเองกับคลินิก (ใบเสร็จวันไหนก็ได้) ; ระดับอื่นใช้ได้เลย (minSpend 0) — PP 26 พ.ย. */
   function welcomeNeed(w) {
     var mn = Number(w.minSpend) || 0; if (!mn) return '';
-    return 'รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ\nโดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกในวันนั้นก่อน' + (mn > 1 ? ' (ตั้งแต่ ' + mn.toLocaleString('en-US') + ' บาท)' : '');
+    return 'รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ\nโดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกก่อน' + (mn > 1 ? ' (ตั้งแต่ ' + mn.toLocaleString('en-US') + ' บาท)' : '');
   }
   /** ของที่เป็นมูลค่าเงิน (ของขวัญวันเกิด/บัตรกำนัล) ที่ตั้งยอดขั้นต่ำไว้ */
   function spendNeed(min, cond) { var mn = Number(min) || 0; return mn ? 'ใช้ได้เมื่อมียอดซื้อหรือรับบริการวันนั้นตั้งแต่ ' + mn.toLocaleString('en-US') + ' บาท' + (/ราคาปกติ/.test(cond || '') ? ' (ราคาปกติ)' : '') : ''; }
@@ -619,7 +619,7 @@
     if (duePlans.length) n.push(['ถึงรอบ ' + esc(duePlans[0].name) + (duePlans.length > 1 ? ' กับอีก ' + (duePlans.length - 1) + ' โปรแกรม' : '') + ' แล้วนะคะ', 'มาตามรอบ ผลลัพธ์จะได้ไม่สะดุด']);
     else if (careDue) n.push(['ถึงรอบดูแลของคุณแล้วนะคะ', 'มาตามรอบ ผลลัพธ์จะได้ไม่สะดุด']);
     if (v.birthday && v.birthday.available) n.push(['เดือนนี้เดือนเกิดคุณ มีของขวัญรออยู่ค่ะ', 'มารับได้ถึงสิ้นเดือน']);
-    (v.welcome || []).forEach(function (w) { if (!w.locked && n.length < 3) n.push(['Welcome gift ของคุณยังรออยู่นะคะ', esc(w.gift) + (w.minSpend ? ' รับได้ในวันที่คุณมารับบริการหรือทำหัตถการ' : '') + ' ใช้ได้ถึง ' + esc(thd(w.until))]); });
+    (v.welcome || []).forEach(function (w) { if (!w.locked && n.length < 3) n.push(['Welcome gift ของคุณยังรออยู่นะคะ', esc(w.gift) + (w.minSpend ? ' รับได้เมื่อคุณมียอดซื้อบริการหรือหัตถการกับคลินิก' : '') + ' ใช้ได้ถึง ' + esc(thd(w.until))]); });
     if (v.stars && v.stars.expiring && n.length < 3) n.push(['ดาว ' + v.stars.expiring.stars + ' ดวงจะหมดอายุ ' + esc(thd(v.stars.expiring.lastDay)), 'แลกก่อนหมดเขตนะคะ เสียดายแย่']);
     $('bk-nudges').innerHTML = n.slice(0, 3).map(function (x) { return '<div class="bk-nudge"><svg viewBox="0 0 24 24">' + STAR6 + '</svg><div class="t">' + x[0] + '<small>' + x[1] + '</small></div></div>'; }).join('');
   }
@@ -804,7 +804,7 @@
         : '<div>สะสมดาวเพื่อแลกของรางวัล</div><div class="xs muted">ราคาสมาชิกเริ่มที่ระดับ ' + esc((tiers[1] || {}).name || '') + '</div>') + '</div></div>' +
       '<div class="benefit"><div class="k">ดาว</div><div class="v">ทุก ' + fmt(v.bahtPerStar) + ' บาท ได้ 1 ดาว</div></div>';
     $('tab-gift').innerHTML =
-      (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div>' + (t.level === 0 ? '<div class="need-note" style="margin-top:6px">รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ\nโดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกในวันนั้นก่อน</div>' : '') + (t.welcomeCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.welcomeCond) + '</div>' : '') + '</div></div>' : '') +
+      (t.welcome ? '<div class="benefit"><div class="k">Welcome</div><div class="v">' + esc(t.welcome) + '<div class="xs muted">ครั้งแรกที่ถึงระดับ ' + esc(t.name) + '</div>' + (t.level === 0 ? '<div class="need-note" style="margin-top:6px">รับได้ในวันที่คุณมาดูแลตัวเองที่คลินิกนะคะ\nโดยตัวคุณเองต้องมียอดซื้อบริการหรือหัตถการกับคลินิกก่อน</div>' : '') + (t.welcomeCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.welcomeCond) + '</div>' : '') + '</div></div>' : '') +
       (t.birthday ? '<div class="benefit"><div class="k">เดือนเกิด</div><div class="v">' + esc(t.birthday) + (v.member.birthMonth ? '<div class="xs muted">เดือน' + esc(MONTHS[v.member.birthMonth - 1]) + '</div>' : '<div class="xs muted">แจ้งวันเกิดที่คลินิกเพื่อรับสิทธิ์</div>') + (t.birthdayCond ? '<div class="xs muted" style="white-space:pre-line">' + esc(t.birthdayCond) + '</div>' : '') + '</div></div>' : '') +
       (t.annual || []).map(function (a) { return '<div class="benefit"><div class="k">ประจำปี</div><div class="v">' + esc(a) + '<div class="xs muted">ปีละ 1 ครั้ง</div></div></div>'; }).join('') +
       (pp ? '<div class="benefit"><div class="k">ประจำปี</div><div class="v">' + esc(pp.name || 'ตรวจสุขภาพฟรี') + ' ปีละ ' + pp.quota + ' ครั้ง' + (pp.desc ? '<div class="xs muted" style="white-space:pre-line">' + esc(pp.desc) + '</div>' : '') + '<div class="xs muted">ใช้ได้อีก ' + pp.remaining + ' จาก ' + pp.quota + ' ครั้งในปีนี้</div></div></div>' : '');
